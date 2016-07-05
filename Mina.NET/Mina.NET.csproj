@@ -98,7 +98,7 @@
     <Compile Include="Core\Session\IOEventType.cs" />
     <Compile Include="Core\Session\IOSessionAttributeMap.cs" />
     <Compile Include="Core\Session\IOSessionDataStructureFactory.cs" />
-    <Compile Include="Core\Session\IoSessionRecycler.cs" />
+    <Compile Include="Core\Session\IOSessionRecycler.cs" />
     <Compile Include="Core\Session\UnknownMessageTypeException.cs" />
     <Compile Include="Core\Write\DefaultWriteRequestQueue.cs" />
     <Compile Include="Core\Write\IWriteRequestQueue.cs" />
