@@ -28,20 +28,20 @@ namespace Mina.Filter.Statistic
         private TimerWorker _sessionClosedTimerWorker;
 
         /// <summary>
-        /// Creates a profiler on event <see cref="IoEventType.MessageReceived"/>
-        /// and <see cref="IoEventType.MessageSent"/> in milliseconds.
+        /// Creates a profiler on event <see cref="IOEventType.MessageReceived"/>
+        /// and <see cref="IOEventType.MessageSent"/> in milliseconds.
         /// </summary>
         public ProfilerTimerFilter()
-            : this(TimeUnit.Milliseconds, IoEventType.MessageReceived | IoEventType.MessageSent)
+            : this(TimeUnit.Milliseconds, IOEventType.MessageReceived | IOEventType.MessageSent)
         { }
 
         /// <summary>
-        /// Creates a profiler on event <see cref="IoEventType.MessageReceived"/>
-        /// and <see cref="IoEventType.MessageSent"/>.
+        /// Creates a profiler on event <see cref="IOEventType.MessageReceived"/>
+        /// and <see cref="IOEventType.MessageSent"/>.
         /// </summary>
         /// <param name="timeUnit">the time unit being used</param>
         public ProfilerTimerFilter(TimeUnit timeUnit)
-            : this(timeUnit, IoEventType.MessageReceived | IoEventType.MessageSent)
+            : this(timeUnit, IOEventType.MessageReceived | IOEventType.MessageSent)
         { }
 
         /// <summary>
@@ -49,7 +49,7 @@ namespace Mina.Filter.Statistic
         /// </summary>
         /// <param name="timeUnit">the time unit being used</param>
         /// <param name="eventTypes">the event types to profile</param>
-        public ProfilerTimerFilter(TimeUnit timeUnit, IoEventType eventTypes)
+        public ProfilerTimerFilter(TimeUnit timeUnit, IOEventType eventTypes)
         {
             _timeUnit = timeUnit;
             SetProfilers(eventTypes);
@@ -65,26 +65,26 @@ namespace Mina.Filter.Statistic
         }
 
         /// <summary>
-        /// Gets or sets the <see cref="IoEventType"/>s to profile.
+        /// Gets or sets the <see cref="IOEventType"/>s to profile.
         /// </summary>
-        public IoEventType EventsToProfile
+        public IOEventType EventsToProfile
         {
             get
             {
-                var et = default(IoEventType);
+                var et = default(IOEventType);
                 
                 if (_profileMessageReceived)
-                    et |= IoEventType.MessageReceived;
+                    et |= IOEventType.MessageReceived;
                 if (_profileMessageSent)
-                    et |= IoEventType.MessageSent;
+                    et |= IOEventType.MessageSent;
                 if (_profileSessionCreated)
-                    et |= IoEventType.SessionCreated;
+                    et |= IOEventType.SessionCreated;
                 if (_profileSessionOpened)
-                    et |= IoEventType.SessionOpened;
+                    et |= IOEventType.SessionOpened;
                 if (_profileSessionIdle)
-                    et |= IoEventType.SessionIdle;
+                    et |= IOEventType.SessionIdle;
                 if (_profileSessionClosed)
-                    et |= IoEventType.SessionClosed;
+                    et |= IOEventType.SessionClosed;
 
                 return et;
             }
@@ -92,18 +92,18 @@ namespace Mina.Filter.Statistic
         }
 
         /// <summary>
-        /// Get the average time for the specified method represented by the <see cref="IoEventType"/>.
+        /// Get the average time for the specified method represented by the <see cref="IOEventType"/>.
         /// </summary>
-        public double GetAverageTime(IoEventType type)
+        public double GetAverageTime(IOEventType type)
         {
             return GetTimerWorker(type).Average;
         }
 
         /// <summary>
         /// Gets the total number of times the method has been called that is represented
-        /// by the <see cref="IoEventType"/>.
+        /// by the <see cref="IOEventType"/>.
         /// </summary>
-        public long GetTotalCalls(IoEventType type)
+        public long GetTotalCalls(IOEventType type)
         {
             return GetTimerWorker(type).CallsNumber;
         }
@@ -111,23 +111,23 @@ namespace Mina.Filter.Statistic
         /// <summary>
         /// Gets the total time this method has been executing.
         /// </summary>
-        public long GetTotalTime(IoEventType type)
+        public long GetTotalTime(IOEventType type)
         {
             return GetTimerWorker(type).Total;
         }
 
         /// <summary>
-        /// Gets minimum time the method represented by <see cref="IoEventType"/> has executed.
+        /// Gets minimum time the method represented by <see cref="IOEventType"/> has executed.
         /// </summary>
-        public long GetMinimumTime(IoEventType type)
+        public long GetMinimumTime(IOEventType type)
         {
             return GetTimerWorker(type).Minimum;
         }
 
         /// <summary>
-        /// Gets maximum time the method represented by <see cref="IoEventType"/> has executed.
+        /// Gets maximum time the method represented by <see cref="IOEventType"/> has executed.
         /// </summary>
-        public long GetMaximumTime(IoEventType type)
+        public long GetMaximumTime(IOEventType type)
         {
             return GetTimerWorker(type).Maximum;
         }
@@ -183,31 +183,31 @@ namespace Mina.Filter.Statistic
             }
         }
 
-        private TimerWorker GetTimerWorker(IoEventType type)
+        private TimerWorker GetTimerWorker(IOEventType type)
         {
             switch (type)
             {
-                case IoEventType.MessageReceived:
+                case IOEventType.MessageReceived:
                     if (_profileMessageReceived)
                         return _messageReceivedTimerWorker;
                     break;
-                case IoEventType.MessageSent:
+                case IOEventType.MessageSent:
                     if (_profileMessageSent)
                         return _messageSentTimerWorker;
                     break;
-                case IoEventType.SessionCreated:
+                case IOEventType.SessionCreated:
                     if (_profileSessionCreated)
                         return _sessionCreatedTimerWorker;
                     break;
-                case IoEventType.SessionOpened:
+                case IOEventType.SessionOpened:
                     if (_profileSessionOpened)
                         return _sessionOpenedTimerWorker;
                     break;
-                case IoEventType.SessionIdle:
+                case IOEventType.SessionIdle:
                     if (_profileSessionIdle)
                         return _sessionIdleTimerWorker;
                     break;
-                case IoEventType.SessionClosed:
+                case IOEventType.SessionClosed:
                     if (_profileSessionClosed)
                         return _sessionClosedTimerWorker;
                     break;
@@ -218,34 +218,34 @@ namespace Mina.Filter.Statistic
             throw new ArgumentException("You are not monitoring this event. Please add this event first.");
         }
 
-        private void SetProfilers(IoEventType eventTypes)
+        private void SetProfilers(IOEventType eventTypes)
         {
-            if ((eventTypes & IoEventType.MessageReceived) == IoEventType.MessageReceived)
+            if ((eventTypes & IOEventType.MessageReceived) == IOEventType.MessageReceived)
             {
                 _messageReceivedTimerWorker = new TimerWorker();
                 _profileMessageReceived = true;
             }
-            if ((eventTypes & IoEventType.MessageSent) == IoEventType.MessageSent)
+            if ((eventTypes & IOEventType.MessageSent) == IOEventType.MessageSent)
             {
                 _messageSentTimerWorker = new TimerWorker();
                 _profileMessageSent = true;
             }
-            if ((eventTypes & IoEventType.SessionCreated) == IoEventType.SessionCreated)
+            if ((eventTypes & IOEventType.SessionCreated) == IOEventType.SessionCreated)
             {
                 _sessionCreatedTimerWorker = new TimerWorker();
                 _profileSessionCreated = true;
             }
-            if ((eventTypes & IoEventType.SessionOpened) == IoEventType.SessionOpened)
+            if ((eventTypes & IOEventType.SessionOpened) == IOEventType.SessionOpened)
             {
                 _sessionOpenedTimerWorker = new TimerWorker();
                 _profileSessionOpened = true;
             }
-            if ((eventTypes & IoEventType.SessionIdle) == IoEventType.SessionIdle)
+            if ((eventTypes & IOEventType.SessionIdle) == IOEventType.SessionIdle)
             {
                 _sessionIdleTimerWorker = new TimerWorker();
                 _profileSessionIdle = true;
             }
-            if ((eventTypes & IoEventType.SessionClosed) == IoEventType.SessionClosed)
+            if ((eventTypes & IOEventType.SessionClosed) == IOEventType.SessionClosed)
             {
                 _sessionClosedTimerWorker = new TimerWorker();
                 _profileSessionClosed = true;

@@ -6,7 +6,7 @@ using Mina.Core.Write;
 namespace Mina.Filter.KeepAlive
 {
     /// <summary>
-    /// An <see cref="IOFilter"/> that sends a keep-alive request on <see cref="IoEventType.SessionIdle"/>
+    /// An <see cref="IOFilter"/> that sends a keep-alive request on <see cref="IOEventType.SessionIdle"/>
     /// and sends back the response for the sent keep-alive request. 
     /// </summary>
     public class KeepAliveFilter : IOFilterAdapter
@@ -133,7 +133,7 @@ namespace Mina.Filter.KeepAlive
 
         /// <summary>
         /// Gets or sets a value indicating whether this filter forwards
-        /// an <see cref="IoEventType.SessionIdle"/> event to the next filter.
+        /// an <see cref="IOEventType.SessionIdle"/> event to the next filter.
         /// The default value is <code>false</code>.
         /// </summary>
         public bool ForwardEvent

@@ -633,7 +633,7 @@ namespace Mina.Core.Session
         #endregion
 
         /// <summary>
-        /// Fires a <see cref="IoEventType.SessionIdle"/> event to any applicable sessions in the specified collection.
+        /// Fires a <see cref="IOEventType.SessionIdle"/> event to any applicable sessions in the specified collection.
         /// </summary>
         /// <param name="sessions"></param>
         /// <param name="currentTime"></param>
@@ -646,7 +646,7 @@ namespace Mina.Core.Session
         }
 
         /// <summary>
-        /// Fires a <see cref="IoEventType.SessionIdle"/> event if applicable for the
+        /// Fires a <see cref="IOEventType.SessionIdle"/> event if applicable for the
         /// specified <see cref="IOSession"/>.
         /// </summary>
         public static void NotifyIdleSession(IOSession session, DateTime currentTime)

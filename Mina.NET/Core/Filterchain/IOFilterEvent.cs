@@ -15,7 +15,7 @@ namespace Mina.Core.Filterchain
 
         /// <summary>
         /// </summary>
-        public IOFilterEvent(INextFilter nextFilter, IoEventType eventType, IOSession session, object parameter)
+        public IOFilterEvent(INextFilter nextFilter, IOEventType eventType, IOSession session, object parameter)
             : base(eventType, session, parameter)
         {
             if (nextFilter == null)
@@ -36,31 +36,31 @@ namespace Mina.Core.Filterchain
 
             switch (EventType)
             {
-                case IoEventType.MessageReceived:
+                case IOEventType.MessageReceived:
                     NextFilter.MessageReceived(Session, Parameter);
                     break;
-                case IoEventType.MessageSent:
+                case IOEventType.MessageSent:
                     NextFilter.MessageSent(Session, (IWriteRequest)Parameter);
                     break;
-                case IoEventType.Write:
+                case IOEventType.Write:
                     NextFilter.FilterWrite(Session, (IWriteRequest)Parameter);
                     break;
-                case IoEventType.Close:
+                case IOEventType.Close:
                     NextFilter.FilterClose(Session);
                     break;
-                case IoEventType.ExceptionCaught:
+                case IOEventType.ExceptionCaught:
                     NextFilter.ExceptionCaught(Session, (Exception)Parameter);
                     break;
-                case IoEventType.SessionIdle:
+                case IOEventType.SessionIdle:
                     NextFilter.SessionIdle(Session, (IdleStatus)Parameter);
                     break;
-                case IoEventType.SessionCreated:
+                case IOEventType.SessionCreated:
                     NextFilter.SessionCreated(Session);
                     break;
-                case IoEventType.SessionOpened:
+                case IOEventType.SessionOpened:
                     NextFilter.SessionOpened(Session);
                     break;
-                case IoEventType.SessionClosed:
+                case IOEventType.SessionClosed:
                     NextFilter.SessionClosed(Session);
                     break;
                 default:

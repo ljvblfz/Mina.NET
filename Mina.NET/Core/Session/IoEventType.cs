@@ -7,7 +7,7 @@ namespace Mina.Core.Session
     /// It is usually used by internal components to store I/O events.
     /// </summary>
     [Flags]
-    public enum IoEventType
+    public enum IOEventType
     {
         None = 0,
         SessionCreated = 0x1,

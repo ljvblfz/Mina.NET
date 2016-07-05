@@ -11,7 +11,7 @@ namespace Mina.Core.Session
     {
         /// <summary>
         /// </summary>
-        public IOEvent(IoEventType eventType, IOSession session, object parameter)
+        public IOEvent(IOEventType eventType, IOSession session, object parameter)
         {
             if (session == null)
                 throw new ArgumentNullException(nameof(session));
@@ -21,9 +21,9 @@ namespace Mina.Core.Session
         }
 
         /// <summary>
-        /// Gets the <see cref="IoEventType"/> of this event.
+        /// Gets the <see cref="IOEventType"/> of this event.
         /// </summary>
-        public IoEventType EventType { get; }
+        public IOEventType EventType { get; }
 
         /// <summary>
         /// Gets the <see cref="IOSession"/> of this event.
@@ -42,31 +42,31 @@ namespace Mina.Core.Session
         {
             switch (EventType)
             {
-                case IoEventType.MessageReceived:
+                case IOEventType.MessageReceived:
                     Session.FilterChain.FireMessageReceived(Parameter);
                     break;
-                case IoEventType.MessageSent:
+                case IOEventType.MessageSent:
                     Session.FilterChain.FireMessageSent((IWriteRequest)Parameter);
                     break;
-                case IoEventType.Write:
+                case IOEventType.Write:
                     Session.FilterChain.FireFilterWrite((IWriteRequest)Parameter);
                     break;
-                case IoEventType.Close:
+                case IOEventType.Close:
                     Session.FilterChain.FireFilterClose();
                     break;
-                case IoEventType.ExceptionCaught:
+                case IOEventType.ExceptionCaught:
                     Session.FilterChain.FireExceptionCaught((Exception)Parameter);
                     break;
-                case IoEventType.SessionIdle:
+                case IOEventType.SessionIdle:
                     Session.FilterChain.FireSessionIdle((IdleStatus)Parameter);
                     break;
-                case IoEventType.SessionCreated:
+                case IOEventType.SessionCreated:
                     Session.FilterChain.FireSessionCreated();
                     break;
-                case IoEventType.SessionOpened:
+                case IOEventType.SessionOpened:
                     Session.FilterChain.FireSessionOpened();
                     break;
-                case IoEventType.SessionClosed:
+                case IOEventType.SessionClosed:
                     Session.FilterChain.FireSessionClosed();
                     break;
                 default:

@@ -424,7 +424,7 @@ namespace Mina.Filter.Ssl
                 if (_session.Connected)
                 {
                     // Handshake not complete yet.
-                    _preHandshakeEventQueue.Enqueue(new IOFilterEvent(nextFilter, IoEventType.Write, _session, writeRequest));
+                    _preHandshakeEventQueue.Enqueue(new IOFilterEvent(nextFilter, IOEventType.Write, _session, writeRequest));
                 }
                 return;
             }

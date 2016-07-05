@@ -60,7 +60,7 @@ namespace Mina.Transport.Loopback
             var data = e.Parameter;
             switch (e.EventType)
             {
-                case IoEventType.MessageReceived:
+                case IOEventType.MessageReceived:
                     if (_sessionOpened && (!session.ReadSuspended) && Monitor.TryEnter(session.Lock))
                     {
                         try
@@ -84,16 +84,16 @@ namespace Mina.Transport.Loopback
                         session.ReceivedMessageQueue.Enqueue(data);
                     }
                     break;
-                case IoEventType.Write:
+                case IOEventType.Write:
                     base.FireFilterWrite((IWriteRequest)data);
                     break;
-                case IoEventType.MessageSent:
+                case IOEventType.MessageSent:
                     base.FireMessageSent((IWriteRequest)data);
                     break;
-                case IoEventType.ExceptionCaught:
+                case IOEventType.ExceptionCaught:
                     base.FireExceptionCaught((Exception)data);
                     break;
-                case IoEventType.SessionCreated:
+                case IOEventType.SessionCreated:
                     Monitor.Enter(session.Lock);
                     try
                     {
@@ -104,18 +104,18 @@ namespace Mina.Transport.Loopback
                         Monitor.Exit(session.Lock);
                     }
                     break;
-                case IoEventType.SessionOpened:
+                case IOEventType.SessionOpened:
                     base.FireSessionOpened();
                     _sessionOpened = true;
                     break;
-                case IoEventType.SessionIdle:
+                case IOEventType.SessionIdle:
                     base.FireSessionIdle((IdleStatus)data);
                     break;
-                case IoEventType.SessionClosed:
+                case IOEventType.SessionClosed:
                     FlushPendingDataQueues(session);
                     base.FireSessionClosed();
                     break;
-                case IoEventType.Close:
+                case IOEventType.Close:
                     base.FireFilterClose();
                     break;
                 default:
@@ -131,47 +131,47 @@ namespace Mina.Transport.Loopback
 
         public override void FireSessionCreated()
         {
-            PushEvent(new IOEvent(IoEventType.SessionCreated, Session, null));
+            PushEvent(new IOEvent(IOEventType.SessionCreated, Session, null));
         }
 
         public override void FireSessionOpened()
         {
-            PushEvent(new IOEvent(IoEventType.SessionOpened, Session, null));
+            PushEvent(new IOEvent(IOEventType.SessionOpened, Session, null));
         }
 
         public override void FireSessionClosed()
         {
-            PushEvent(new IOEvent(IoEventType.SessionClosed, Session, null));
+            PushEvent(new IOEvent(IOEventType.SessionClosed, Session, null));
         }
 
         public override void FireSessionIdle(IdleStatus status)
         {
-            PushEvent(new IOEvent(IoEventType.SessionIdle, Session, status));
+            PushEvent(new IOEvent(IOEventType.SessionIdle, Session, status));
         }
 
         public override void FireMessageReceived(object message)
         {
-            PushEvent(new IOEvent(IoEventType.MessageReceived, Session, message));
+            PushEvent(new IOEvent(IOEventType.MessageReceived, Session, message));
         }
 
         public override void FireMessageSent(IWriteRequest request)
         {
-            PushEvent(new IOEvent(IoEventType.MessageSent, Session, request));
+            PushEvent(new IOEvent(IOEventType.MessageSent, Session, request));
         }
 
         public override void FireExceptionCaught(Exception cause)
         {
-            PushEvent(new IOEvent(IoEventType.ExceptionCaught, Session, cause));
+            PushEvent(new IOEvent(IOEventType.ExceptionCaught, Session, cause));
         }
 
         public override void FireFilterWrite(IWriteRequest writeRequest)
         {
-            PushEvent(new IOEvent(IoEventType.Write, Session, writeRequest));
+            PushEvent(new IOEvent(IOEventType.Write, Session, writeRequest));
         }
 
         public override void FireFilterClose()
         {
-            PushEvent(new IOEvent(IoEventType.Close, Session, null));
+            PushEvent(new IOEvent(IOEventType.Close, Session, null));
         }
 
         class LoopbackIoProcessor : IIoProcessor<LoopbackSession>
@@ -215,7 +215,7 @@ namespace Mina.Transport.Loopback
                             while ((req = queue.Poll(session)) != null)
                             {
                                 var m = req.Message;
-                                _chain.PushEvent(new IOEvent(IoEventType.MessageSent, session, req), false);
+                                _chain.PushEvent(new IOEvent(IOEventType.MessageSent, session, req), false);
                                 session.RemoteSession.FilterChain.FireMessageReceived(GetMessageCopy(m));
                                 var buf = m as IOBuffer;
                                 if (buf != null)
