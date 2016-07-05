@@ -91,7 +91,7 @@
     <Compile Include="Core\Service\ITransportMetadata.cs" />
     <Compile Include="Core\Session\AttributeKey.cs" />
     <Compile Include="Core\Session\DefaultIOSessionAttributeMap.cs" />
-    <Compile Include="Core\Session\DefaultIoSessionDataStructureFactory.cs" />
+    <Compile Include="Core\Session\DefaultIOSessionDataStructureFactory.cs" />
     <Compile Include="Core\Session\ExpiringSessionRecycler.cs" />
     <Compile Include="Core\Session\IdleStatusChecker.cs" />
     <Compile Include="Core\Session\IoEvent.cs" />

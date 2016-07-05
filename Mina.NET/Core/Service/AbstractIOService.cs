@@ -18,7 +18,7 @@ namespace Mina.Core.Service
         private int _active;
         private IOHandler _handler;
         private bool _hasHandler;
-        private IOSessionDataStructureFactory _sessionDataStructureFactory = new DefaultIoSessionDataStructureFactory();
+        private IOSessionDataStructureFactory _sessionDataStructureFactory = new DefaultIOSessionDataStructureFactory();
 
         private ConcurrentDictionary<long, IOSession> _managedSessions = new ConcurrentDictionary<long, IOSession>();
 

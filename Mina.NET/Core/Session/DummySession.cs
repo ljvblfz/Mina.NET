@@ -29,7 +29,7 @@ namespace Mina.Core.Session
             _processor = new DummyProcessor();
             FilterChain = new DefaultIOFilterChain(this);
 
-            IOSessionDataStructureFactory factory = new DefaultIoSessionDataStructureFactory();
+            IOSessionDataStructureFactory factory = new DefaultIOSessionDataStructureFactory();
             AttributeMap = factory.GetAttributeMap(this);
             SetWriteRequestQueue(factory.GetWriteRequestQueue(this));
         }

@@ -2,7 +2,7 @@
 
 namespace Mina.Core.Session
 {
-    class DefaultIoSessionDataStructureFactory : IOSessionDataStructureFactory
+    class DefaultIOSessionDataStructureFactory : IOSessionDataStructureFactory
     {
         public IOSessionAttributeMap GetAttributeMap(IOSession session)
         {
