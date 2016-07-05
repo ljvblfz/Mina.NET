@@ -24,11 +24,11 @@ namespace Mina.Filter.Executor
         void Polled(object source, IOEvent ioe);
     }
 
-    class NoopIoEventQueueHandler : IOEventQueueHandler
+    class NoopIOEventQueueHandler : IOEventQueueHandler
     {
-        public static readonly NoopIoEventQueueHandler Instance = new NoopIoEventQueueHandler();
+        public static readonly NoopIOEventQueueHandler Instance = new NoopIOEventQueueHandler();
 
-        private NoopIoEventQueueHandler()
+        private NoopIOEventQueueHandler()
         { }
 
         public bool Accept(object source, IOEvent ioe)

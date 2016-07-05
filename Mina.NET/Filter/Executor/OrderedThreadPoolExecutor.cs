@@ -32,7 +32,7 @@ namespace Mina.Filter.Executor
         /// <param name="queueHandler">the handler</param>
         public OrderedThreadPoolExecutor(IOEventQueueHandler queueHandler)
         {
-            QueueHandler = queueHandler == null ? NoopIoEventQueueHandler.Instance : queueHandler;
+            QueueHandler = queueHandler == null ? NoopIOEventQueueHandler.Instance : queueHandler;
         }
 
         /// <summary>
