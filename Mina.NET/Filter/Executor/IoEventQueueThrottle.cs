@@ -8,9 +8,9 @@ namespace Mina.Filter.Executor
     /// <summary>
     /// Throttles incoming or outgoing events.
     /// </summary>
-    public class IoEventQueueThrottle : IOEventQueueHandler
+    public class IOEventQueueThrottle : IOEventQueueHandler
     {
-        static readonly ILog Log = LogManager.GetLogger(typeof(IoEventQueueThrottle));
+        static readonly ILog Log = LogManager.GetLogger(typeof(IOEventQueueThrottle));
 
         private volatile int _threshold;
         private readonly IOEventSizeEstimator _sizeEstimator;
@@ -18,15 +18,15 @@ namespace Mina.Filter.Executor
         private int _counter;
         private int _waiters;
 
-        public IoEventQueueThrottle()
+        public IOEventQueueThrottle()
             : this(new DefaultIoEventSizeEstimator(), 65536)
         { }
 
-        public IoEventQueueThrottle(int threshold)
+        public IOEventQueueThrottle(int threshold)
             : this(new DefaultIoEventSizeEstimator(), threshold)
         { }
 
-        public IoEventQueueThrottle(IOEventSizeEstimator sizeEstimator, int threshold)
+        public IOEventQueueThrottle(IOEventSizeEstimator sizeEstimator, int threshold)
         {
             if (sizeEstimator == null)
                 throw new ArgumentNullException(nameof(sizeEstimator));

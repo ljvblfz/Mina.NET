@@ -15,7 +15,7 @@ namespace Mina.Filter.Executor
         /// Instantiates with an <see cref="IoEventQueueThrottle"/>.
         /// </summary>
         public WriteRequestFilter()
-            : this(new IoEventQueueThrottle())
+            : this(new IOEventQueueThrottle())
         { }
 
         /// <summary>
