@@ -10,7 +10,7 @@ using Mina.Core.Write;
 
 namespace Mina.Transport.Loopback
 {
-    class LoopbackFilterChain : VirtualDefaultIoFilterChain
+    class LoopbackFilterChain : VirtualDefaultIOFilterChain
     {
         private readonly ConcurrentQueue<IoEvent> _eventQueue = new ConcurrentQueue<IoEvent>();
         private volatile bool _flushEnabled;

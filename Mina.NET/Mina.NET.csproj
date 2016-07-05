@@ -74,7 +74,7 @@
     <Compile Include="Core\Filterchain\IOFilterChainBuilder.cs" />
     <Compile Include="Core\Filterchain\IOFilterEvent.cs" />
     <Compile Include="Core\Filterchain\IOFilterLifeCycleException.cs" />
-    <Compile Include="Core\Filterchain\VirtualDefaultIoFilterChain.cs" />
+    <Compile Include="Core\Filterchain\VirtualDefaultIOFilterChain.cs" />
     <Compile Include="Core\Future\CompositeIoFuture.cs" />
     <Compile Include="Core\Future\DefaultCloseFuture.cs" />
     <Compile Include="Core\Future\ICloseFuture.cs" />

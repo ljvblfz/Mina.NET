@@ -12,7 +12,7 @@ namespace Mina.Core.Filterchain
     /// all operations for developers who want to implement their own
     /// transport layer once used with <see cref="AbstractIoSession"/>.
     /// </summary>
-    public class VirtualDefaultIoFilterChain : Chain<VirtualDefaultIoFilterChain, IOFilter, INextFilter>, IOFilterChain
+    public class VirtualDefaultIOFilterChain : Chain<VirtualDefaultIOFilterChain, IOFilter, INextFilter>, IOFilterChain
     {
         private readonly static ILog Log = LogManager.GetLogger(typeof(DefaultIOFilterChain));
 
@@ -20,7 +20,7 @@ namespace Mina.Core.Filterchain
 
         /// <summary>
         /// </summary>
-        public VirtualDefaultIoFilterChain(AbstractIoSession session)
+        public VirtualDefaultIOFilterChain(AbstractIoSession session)
             : base(
             e => new NextFilter(e),
             () => new HeadFilter(), () => new TailFilter()
@@ -470,7 +470,7 @@ namespace Mina.Core.Filterchain
 
         class NextFilter : INextFilter
         {
-            readonly VirtualDefaultIoFilterChain _chain;
+            readonly VirtualDefaultIOFilterChain _chain;
             readonly Entry _entry;
 
             public NextFilter(Entry entry)
