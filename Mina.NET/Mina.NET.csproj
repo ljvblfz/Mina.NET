@@ -94,7 +94,7 @@
     <Compile Include="Core\Session\DefaultIOSessionDataStructureFactory.cs" />
     <Compile Include="Core\Session\ExpiringSessionRecycler.cs" />
     <Compile Include="Core\Session\IdleStatusChecker.cs" />
-    <Compile Include="Core\Session\IoEvent.cs" />
+    <Compile Include="Core\Session\IOEvent.cs" />
     <Compile Include="Core\Session\IoEventType.cs" />
     <Compile Include="Core\Session\IoSessionAttributeMap.cs" />
     <Compile Include="Core\Session\IoSessionDataStructureFactory.cs" />

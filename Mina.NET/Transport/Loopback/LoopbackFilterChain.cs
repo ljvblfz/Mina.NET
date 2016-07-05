@@ -12,7 +12,7 @@ namespace Mina.Transport.Loopback
 {
     class LoopbackFilterChain : VirtualDefaultIOFilterChain
     {
-        private readonly ConcurrentQueue<IoEvent> _eventQueue = new ConcurrentQueue<IoEvent>();
+        private readonly ConcurrentQueue<IOEvent> _eventQueue = new ConcurrentQueue<IOEvent>();
         private volatile bool _flushEnabled;
         private volatile bool _sessionOpened;
 
@@ -33,12 +33,12 @@ namespace Mina.Transport.Loopback
 
         internal IIoProcessor<LoopbackSession> Processor { get; }
 
-        private void PushEvent(IoEvent e)
+        private void PushEvent(IOEvent e)
         {
             PushEvent(e, _flushEnabled);
         }
 
-        private void PushEvent(IoEvent e, bool flushNow)
+        private void PushEvent(IOEvent e, bool flushNow)
         {
             _eventQueue.Enqueue(e);
             if (flushNow)
@@ -47,14 +47,14 @@ namespace Mina.Transport.Loopback
 
         private void FlushEvents()
         {
-            IoEvent e;
+            IOEvent e;
             while (_eventQueue.TryDequeue(out e))
             {
                 FireEvent(e);
             }
         }
 
-        private void FireEvent(IoEvent e)
+        private void FireEvent(IOEvent e)
         {
             var session = (LoopbackSession)Session;
             var data = e.Parameter;
@@ -131,47 +131,47 @@ namespace Mina.Transport.Loopback
 
         public override void FireSessionCreated()
         {
-            PushEvent(new IoEvent(IoEventType.SessionCreated, Session, null));
+            PushEvent(new IOEvent(IoEventType.SessionCreated, Session, null));
         }
 
         public override void FireSessionOpened()
         {
-            PushEvent(new IoEvent(IoEventType.SessionOpened, Session, null));
+            PushEvent(new IOEvent(IoEventType.SessionOpened, Session, null));
         }
 
         public override void FireSessionClosed()
         {
-            PushEvent(new IoEvent(IoEventType.SessionClosed, Session, null));
+            PushEvent(new IOEvent(IoEventType.SessionClosed, Session, null));
         }
 
         public override void FireSessionIdle(IdleStatus status)
         {
-            PushEvent(new IoEvent(IoEventType.SessionIdle, Session, status));
+            PushEvent(new IOEvent(IoEventType.SessionIdle, Session, status));
         }
 
         public override void FireMessageReceived(object message)
         {
-            PushEvent(new IoEvent(IoEventType.MessageReceived, Session, message));
+            PushEvent(new IOEvent(IoEventType.MessageReceived, Session, message));
         }
 
         public override void FireMessageSent(IWriteRequest request)
         {
-            PushEvent(new IoEvent(IoEventType.MessageSent, Session, request));
+            PushEvent(new IOEvent(IoEventType.MessageSent, Session, request));
         }
 
         public override void FireExceptionCaught(Exception cause)
         {
-            PushEvent(new IoEvent(IoEventType.ExceptionCaught, Session, cause));
+            PushEvent(new IOEvent(IoEventType.ExceptionCaught, Session, cause));
         }
 
         public override void FireFilterWrite(IWriteRequest writeRequest)
         {
-            PushEvent(new IoEvent(IoEventType.Write, Session, writeRequest));
+            PushEvent(new IOEvent(IoEventType.Write, Session, writeRequest));
         }
 
         public override void FireFilterClose()
         {
-            PushEvent(new IoEvent(IoEventType.Close, Session, null));
+            PushEvent(new IOEvent(IoEventType.Close, Session, null));
         }
 
         class LoopbackIoProcessor : IIoProcessor<LoopbackSession>
@@ -215,7 +215,7 @@ namespace Mina.Transport.Loopback
                             while ((req = queue.Poll(session)) != null)
                             {
                                 var m = req.Message;
-                                _chain.PushEvent(new IoEvent(IoEventType.MessageSent, session, req), false);
+                                _chain.PushEvent(new IOEvent(IoEventType.MessageSent, session, req), false);
                                 session.RemoteSession.FilterChain.FireMessageReceived(GetMessageCopy(m));
                                 var buf = m as IOBuffer;
                                 if (buf != null)

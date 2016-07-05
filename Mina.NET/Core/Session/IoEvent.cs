@@ -7,11 +7,11 @@ namespace Mina.Core.Session
     /// An I/O event or an I/O request that MINA provides.
     /// It is usually used by internal components to store I/O events.
     /// </summary>
-    public class IoEvent
+    public class IOEvent
     {
         /// <summary>
         /// </summary>
-        public IoEvent(IoEventType eventType, IOSession session, object parameter)
+        public IOEvent(IoEventType eventType, IOSession session, object parameter)
         {
             if (session == null)
                 throw new ArgumentNullException(nameof(session));

@@ -3,7 +3,7 @@
 namespace Mina.Filter.Executor
 {
     /// <summary>
-    /// A <see cref="IOEventExecutor"/> that does not maintain the order of <see cref="IoEvent"/>s.
+    /// A <see cref="IOEventExecutor"/> that does not maintain the order of <see cref="IOEvent"/>s.
     /// This means more than one event handler methods can be invoked at the same time with mixed order.
     /// If you need to maintain the order of events per session, please use
     /// <see cref="OrderedThreadPoolExecutor"/>.
@@ -32,7 +32,7 @@ namespace Mina.Filter.Executor
         public IOEventQueueHandler QueueHandler { get; }
 
         /// <inheritdoc/>
-        public void Execute(IoEvent ioe)
+        public void Execute(IOEvent ioe)
         {
             var offeredEvent = QueueHandler.Accept(this, ioe);
             if (offeredEvent)

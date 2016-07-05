@@ -13,15 +13,15 @@ namespace Mina.Filter.Executor
         /// allowed to be offered to the event queue.  The <tt>event</tt> is dropped
         /// if <tt>false</tt> is returned.
         /// </summary>
-        bool Accept(object source, IoEvent ioe);
+        bool Accept(object source, IOEvent ioe);
         /// <summary>
         /// Invoked after the specified <paramref name="ioe"/> has been offered to the event queue.
         /// </summary>
-        void Offered(object source, IoEvent ioe);
+        void Offered(object source, IOEvent ioe);
         /// <summary>
         /// Invoked after the specified <paramref name="ioe"/> has been polled to the event queue.
         /// </summary>
-        void Polled(object source, IoEvent ioe);
+        void Polled(object source, IOEvent ioe);
     }
 
     class NoopIoEventQueueHandler : IOEventQueueHandler
@@ -31,17 +31,17 @@ namespace Mina.Filter.Executor
         private NoopIoEventQueueHandler()
         { }
 
-        public bool Accept(object source, IoEvent ioe)
+        public bool Accept(object source, IOEvent ioe)
         {
             return true;
         }
 
-        public void Offered(object source, IoEvent ioe)
+        public void Offered(object source, IOEvent ioe)
         {
             // NOOP
         }
 
-        public void Polled(object source, IoEvent ioe)
+        public void Polled(object source, IOEvent ioe)
         {
             // NOOP
         }

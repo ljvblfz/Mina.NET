@@ -9,7 +9,7 @@ using Mina.Core.Write;
 namespace Mina.Filter.Executor
 {
     /// <summary>
-    /// Estimates the amount of memory that the specified <see cref="IoEvent"/> occupies.
+    /// Estimates the amount of memory that the specified <see cref="IOEvent"/> occupies.
     /// </summary>
     public interface IOEventSizeEstimator
     {
@@ -18,7 +18,7 @@ namespace Mina.Filter.Executor
         /// </summary>
         /// <param name="ioe">the event we want to estimate the size of</param>
         /// <returns>the estimated size of this event</returns>
-        int EstimateSize(IoEvent ioe);
+        int EstimateSize(IOEvent ioe);
     }
 
     class DefaultIoEventSizeEstimator : IOEventSizeEstimator
@@ -38,7 +38,7 @@ namespace Mina.Filter.Executor
             Type2Size[typeof(bool)] = sizeof(bool);
         }
 
-        public int EstimateSize(IoEvent ioe)
+        public int EstimateSize(IOEvent ioe)
         {
             return EstimateSize((object)ioe) + EstimateSize(ioe.Parameter);
         }

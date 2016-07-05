@@ -46,13 +46,13 @@ namespace Mina.Filter.Executor
         }
 
         /// <inheritdoc/>
-        public bool Accept(object source, IoEvent ioe)
+        public bool Accept(object source, IOEvent ioe)
         {
             return true;
         }
 
         /// <inheritdoc/>
-        public void Offered(object source, IoEvent ioe)
+        public void Offered(object source, IOEvent ioe)
         {
             var eventSize = EstimateSize(ioe);
             var currentCounter = Interlocked.Add(ref _counter, eventSize);
@@ -65,7 +65,7 @@ namespace Mina.Filter.Executor
         }
 
         /// <inheritdoc/>
-        public void Polled(object source, IoEvent ioe)
+        public void Polled(object source, IOEvent ioe)
         {
             var eventSize = EstimateSize(ioe);
             var currentCounter = Interlocked.Add(ref _counter, -eventSize);
@@ -117,7 +117,7 @@ namespace Mina.Filter.Executor
             }
         }
 
-        private int EstimateSize(IoEvent ioe)
+        private int EstimateSize(IOEvent ioe)
         {
             var size = _sizeEstimator.EstimateSize(ioe);
             if (size < 0)

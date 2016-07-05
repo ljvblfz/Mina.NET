@@ -6,7 +6,7 @@ using Mina.Core.Session;
 namespace Mina.Filter.Executor
 {
     /// <summary>
-    /// A <see cref="IOEventExecutor"/> that maintains the order of <see cref="IoEvent"/>s.
+    /// A <see cref="IOEventExecutor"/> that maintains the order of <see cref="IOEvent"/>s.
     /// If you don't need to maintain the order of events per session, please use
     /// <see cref="UnorderedThreadPoolExecutor"/>.
     /// </summary>
@@ -41,7 +41,7 @@ namespace Mina.Filter.Executor
         public IOEventQueueHandler QueueHandler { get; }
 
         /// <inheritdoc/>
-        public void Execute(IoEvent ioe)
+        public void Execute(IOEvent ioe)
         {
             var session = ioe.Session;
             var sessionTasksQueue = GetSessionTasksQueue(session);
@@ -101,7 +101,7 @@ namespace Mina.Filter.Executor
 
         private void RunTasks(SessionTasksQueue sessionTasksQueue)
         {
-            IoEvent ioe;
+            IOEvent ioe;
             while (true)
             {
                 lock (sessionTasksQueue.SyncRoot)
@@ -118,7 +118,7 @@ namespace Mina.Filter.Executor
             }
         }
 
-        private void Print(ConcurrentQueue<IoEvent> queue, IoEvent ioe)
+        private void Print(ConcurrentQueue<IOEvent> queue, IOEvent ioe)
         {
             var sb = new StringBuilder();
             sb.Append("Adding event ")
@@ -150,7 +150,7 @@ namespace Mina.Filter.Executor
             /// <summary>
             /// A queue of ordered event waiting to be processed
             /// </summary>
-            public readonly ConcurrentQueue<IoEvent> TasksQueue = new ConcurrentQueue<IoEvent>();
+            public readonly ConcurrentQueue<IOEvent> TasksQueue = new ConcurrentQueue<IOEvent>();
             /// <summary>
             /// The current task state
             /// </summary>

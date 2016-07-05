@@ -37,7 +37,7 @@ namespace Mina.Filter.Executor
         /// <inheritdoc/>
         public override void FilterWrite(INextFilter nextFilter, IOSession session, IWriteRequest writeRequest)
         {
-            var ioe = new IoEvent(IoEventType.Write, session, writeRequest);
+            var ioe = new IOEvent(IoEventType.Write, session, writeRequest);
             if (QueueHandler.Accept(this, ioe))
             {
                 nextFilter.FilterWrite(session, writeRequest);
