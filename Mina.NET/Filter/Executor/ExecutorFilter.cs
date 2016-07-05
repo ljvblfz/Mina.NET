@@ -73,7 +73,7 @@ namespace Mina.Filter.Executor
         {
             if ((_eventTypes & IoEventType.SessionOpened) == IoEventType.SessionOpened)
             {
-                var ioe = new IoFilterEvent(nextFilter, IoEventType.SessionOpened, session, null);
+                var ioe = new IOFilterEvent(nextFilter, IoEventType.SessionOpened, session, null);
                 FireEvent(ioe);
             }
             else
@@ -87,7 +87,7 @@ namespace Mina.Filter.Executor
         {
             if ((_eventTypes & IoEventType.SessionClosed) == IoEventType.SessionClosed)
             {
-                var ioe = new IoFilterEvent(nextFilter, IoEventType.SessionClosed, session, null);
+                var ioe = new IOFilterEvent(nextFilter, IoEventType.SessionClosed, session, null);
                 FireEvent(ioe);
             }
             else
@@ -101,7 +101,7 @@ namespace Mina.Filter.Executor
         {
             if ((_eventTypes & IoEventType.SessionIdle) == IoEventType.SessionIdle)
             {
-                var ioe = new IoFilterEvent(nextFilter, IoEventType.SessionIdle, session, status);
+                var ioe = new IOFilterEvent(nextFilter, IoEventType.SessionIdle, session, status);
                 FireEvent(ioe);
             }
             else
@@ -115,7 +115,7 @@ namespace Mina.Filter.Executor
         {
             if ((_eventTypes & IoEventType.ExceptionCaught) == IoEventType.ExceptionCaught)
             {
-                var ioe = new IoFilterEvent(nextFilter, IoEventType.ExceptionCaught, session, cause);
+                var ioe = new IOFilterEvent(nextFilter, IoEventType.ExceptionCaught, session, cause);
                 FireEvent(ioe);
             }
             else
@@ -129,7 +129,7 @@ namespace Mina.Filter.Executor
         {
             if ((_eventTypes & IoEventType.MessageReceived) == IoEventType.MessageReceived)
             {
-                var ioe = new IoFilterEvent(nextFilter, IoEventType.MessageReceived, session, message);
+                var ioe = new IOFilterEvent(nextFilter, IoEventType.MessageReceived, session, message);
                 FireEvent(ioe);
             }
             else
@@ -143,7 +143,7 @@ namespace Mina.Filter.Executor
         {
             if ((_eventTypes & IoEventType.MessageSent) == IoEventType.MessageSent)
             {
-                var ioe = new IoFilterEvent(nextFilter, IoEventType.MessageSent, session, writeRequest);
+                var ioe = new IOFilterEvent(nextFilter, IoEventType.MessageSent, session, writeRequest);
                 FireEvent(ioe);
             }
             else
@@ -157,7 +157,7 @@ namespace Mina.Filter.Executor
         {
             if ((_eventTypes & IoEventType.Write) == IoEventType.Write)
             {
-                var ioe = new IoFilterEvent(nextFilter, IoEventType.Write, session, writeRequest);
+                var ioe = new IOFilterEvent(nextFilter, IoEventType.Write, session, writeRequest);
                 FireEvent(ioe);
             }
             else
@@ -171,7 +171,7 @@ namespace Mina.Filter.Executor
         {
             if ((_eventTypes & IoEventType.Close) == IoEventType.Close)
             {
-                var ioe = new IoFilterEvent(nextFilter, IoEventType.Close, session, null);
+                var ioe = new IOFilterEvent(nextFilter, IoEventType.Close, session, null);
                 FireEvent(ioe);
             }
             else
@@ -184,7 +184,7 @@ namespace Mina.Filter.Executor
         /// Fires an event.
         /// </summary>
         /// <param name="ioe"></param>
-        protected void FireEvent(IoFilterEvent ioe)
+        protected void FireEvent(IOFilterEvent ioe)
         {
             Executor.Execute(ioe);
         }

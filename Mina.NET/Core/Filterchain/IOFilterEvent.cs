@@ -9,13 +9,13 @@ namespace Mina.Core.Filterchain
     /// An I/O event or an I/O request that MINA provides for <see cref="IOFilter"/>s.
     /// It is usually used by internal components to store I/O events.
     /// </summary>
-    public class IoFilterEvent : IoEvent
+    public class IOFilterEvent : IoEvent
     {
-        static readonly ILog Log = LogManager.GetLogger(typeof(IoFilterEvent));
+        static readonly ILog Log = LogManager.GetLogger(typeof(IOFilterEvent));
 
         /// <summary>
         /// </summary>
-        public IoFilterEvent(INextFilter nextFilter, IoEventType eventType, IOSession session, object parameter)
+        public IOFilterEvent(INextFilter nextFilter, IoEventType eventType, IOSession session, object parameter)
             : base(eventType, session, parameter)
         {
             if (nextFilter == null)

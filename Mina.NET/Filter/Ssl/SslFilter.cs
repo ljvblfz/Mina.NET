@@ -307,7 +307,7 @@ namespace Mina.Filter.Ssl
         private readonly IoSessionStream _sessionStream;
         private readonly SslStream _sslStream;
         private volatile bool _authenticated;
-        private readonly ConcurrentQueue<IoFilterEvent> _preHandshakeEventQueue = new ConcurrentQueue<IoFilterEvent>();
+        private readonly ConcurrentQueue<IOFilterEvent> _preHandshakeEventQueue = new ConcurrentQueue<IOFilterEvent>();
         private INextFilter _currentNextFilter;
         private IWriteRequest _currentWriteRequest;
 
@@ -424,7 +424,7 @@ namespace Mina.Filter.Ssl
                 if (_session.Connected)
                 {
                     // Handshake not complete yet.
-                    _preHandshakeEventQueue.Enqueue(new IoFilterEvent(nextFilter, IoEventType.Write, _session, writeRequest));
+                    _preHandshakeEventQueue.Enqueue(new IOFilterEvent(nextFilter, IoEventType.Write, _session, writeRequest));
                 }
                 return;
             }
@@ -460,7 +460,7 @@ namespace Mina.Filter.Ssl
         public void Destroy()
         {
             _sslStream.Close();
-            IoFilterEvent scheduledWrite;
+            IOFilterEvent scheduledWrite;
             while (_preHandshakeEventQueue.TryDequeue(out scheduledWrite))
             { }
         }
@@ -469,7 +469,7 @@ namespace Mina.Filter.Ssl
         {
             lock (this)
             {
-                IoFilterEvent scheduledWrite;
+                IOFilterEvent scheduledWrite;
                 while (_preHandshakeEventQueue.TryDequeue(out scheduledWrite))
                 {
                     SslFilter.FilterWrite(scheduledWrite.NextFilter, scheduledWrite.Session, (IWriteRequest)scheduledWrite.Parameter);
