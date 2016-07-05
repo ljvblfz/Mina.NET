@@ -188,7 +188,7 @@
     <Compile Include="Filter\Util\NoopFilter.cs" />
     <Compile Include="Core\Future\DefaultIOFuture.cs" />
     <Compile Include="Core\Future\DefaultWriteFuture.cs" />
-    <Compile Include="Core\Future\IoFuture.cs" />
+    <Compile Include="Core\Future\IOFuture.cs" />
     <Compile Include="Core\Future\IWriteFuture.cs" />
     <Compile Include="Core\Service\AbstractIOAcceptor.cs" />
     <Compile Include="Core\Service\AbstractIOService.cs" />
