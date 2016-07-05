@@ -11,7 +11,7 @@ namespace Mina.Filter.Firewall
     /// A <see cref="IOFilter"/> which blocks connections from connecting
     /// at a rate faster than the specified interval.
     /// </summary>
-    public class ConnectionThrottleFilter : IoFilterAdapter
+    public class ConnectionThrottleFilter : IOFilterAdapter
     {
         static readonly long DefaultTime = 1000L;
         static readonly ILog Log = LogManager.GetLogger(typeof(ConnectionThrottleFilter));

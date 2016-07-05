@@ -9,7 +9,7 @@ namespace Mina.Filter.Util
     /// Extend this class when you want to create a filter that
     /// wraps the same logic around all 9 IoEvents
     /// </summary>
-    public abstract class CommonEventFilter : IoFilterAdapter
+    public abstract class CommonEventFilter : IOFilterAdapter
     {
         /// <inheritdoc/>
         public override void SessionCreated(INextFilter nextFilter, IOSession session)

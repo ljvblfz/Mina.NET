@@ -7,7 +7,7 @@ using Mina.Core.Write;
 
 namespace Mina.Filter.Stream
 {
-    public abstract class AbstractStreamWriteFilter<T> : IoFilterAdapter
+    public abstract class AbstractStreamWriteFilter<T> : IOFilterAdapter
         where T : class
     {
         /// <summary>

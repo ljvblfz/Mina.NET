@@ -214,7 +214,7 @@ namespace Mina.Core
             }
         }
 
-        class EventOrderTestFilter : IoFilterAdapter
+        class EventOrderTestFilter : IOFilterAdapter
         {
             private readonly char _id;
             private readonly IoFilterChainTest _test;
@@ -279,7 +279,7 @@ namespace Mina.Core
             }
         }
 
-        private class AddRemoveTestFilter : IoFilterAdapter
+        private class AddRemoveTestFilter : IOFilterAdapter
         {
             private readonly IoFilterChainTest _test;
 

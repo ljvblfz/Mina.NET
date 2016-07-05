@@ -10,7 +10,7 @@ namespace Mina.Filter.Statistic
     /// This class will measure the time it takes for a
     /// method in the <see cref="IOFilter"/> class to execute.
     /// </summary>
-    public class ProfilerTimerFilter : IoFilterAdapter
+    public class ProfilerTimerFilter : IOFilterAdapter
     {
         private volatile TimeUnit _timeUnit;
 

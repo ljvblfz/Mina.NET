@@ -26,7 +26,7 @@ namespace Mina.Filter.ErrorGenerating
     /// <code>egf.ManipulateReads = true;
     /// egf.ManipulateWrites = true;</code>
     /// </summary>
-    public class ErrorGeneratingFilter : IoFilterAdapter
+    public class ErrorGeneratingFilter : IOFilterAdapter
     {
         static readonly ILog Log = LogManager.GetLogger(typeof(ErrorGeneratingFilter));
 

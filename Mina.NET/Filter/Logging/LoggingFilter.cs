@@ -9,7 +9,7 @@ namespace Mina.Filter.Logging
     /// <summary>
     /// Logs all MINA protocol events.
     /// </summary>
-    public class LoggingFilter : IoFilterAdapter
+    public class LoggingFilter : IOFilterAdapter
     {
         private readonly ILog _log;
 

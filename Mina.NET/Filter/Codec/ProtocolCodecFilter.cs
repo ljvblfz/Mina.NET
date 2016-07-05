@@ -14,7 +14,7 @@ namespace Mina.Filter.Codec
     /// message objects and vice versa using <see cref="IProtocolCodecFactory"/>,
     /// <see cref="IProtocolEncoder"/>, or <see cref="IProtocolDecoder"/>.
     /// </summary>
-    public class ProtocolCodecFilter : IoFilterAdapter
+    public class ProtocolCodecFilter : IOFilterAdapter
     {
         private static readonly ILog Log = LogManager.GetLogger(typeof(ProtocolCodecFilter));
         private static readonly IOBuffer EmptyBuffer = IOBuffer.Wrap(new byte[0]);

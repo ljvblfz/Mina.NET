@@ -18,7 +18,7 @@ namespace Mina.Filter.Buffer
     /// as it only handles <see cref="IWriteRequest"/>s carrying <see cref="IOBuffer"/> objects.
     /// </remarks>
     /// </summary>
-    public class BufferedWriteFilter : IoFilterAdapter
+    public class BufferedWriteFilter : IOFilterAdapter
     {
         /// <summary>
         /// Default buffer size value in bytes.

@@ -9,7 +9,7 @@ namespace Mina.Filter.KeepAlive
     /// An <see cref="IOFilter"/> that sends a keep-alive request on <see cref="IoEventType.SessionIdle"/>
     /// and sends back the response for the sent keep-alive request. 
     /// </summary>
-    public class KeepAliveFilter : IoFilterAdapter
+    public class KeepAliveFilter : IOFilterAdapter
     {
         private readonly AttributeKey _waitingForResponse;
         private readonly AttributeKey _ignoreReaderIdleOnce;

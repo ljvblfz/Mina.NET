@@ -9,7 +9,7 @@ namespace Mina.Filter.Util
     /// An <see cref="IOFilter"/> wrapper that keeps track of the number of usages of this filter and will call init/destroy
     /// when the filter is not in use.
     /// </summary>
-    public class ReferenceCountingFilter : IoFilterAdapter
+    public class ReferenceCountingFilter : IOFilterAdapter
     {
         private readonly IOFilter _filter;
         private int _count;

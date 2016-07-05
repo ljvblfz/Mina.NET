@@ -18,7 +18,7 @@ namespace Mina.Filter.Ssl
     /// An SSL filter that encrypts and decrypts the data exchanged in the session.
     /// Adding this filter triggers SSL handshake procedure immediately.
     /// </summary>
-    public class SslFilter : IoFilterAdapter
+    public class SslFilter : IOFilterAdapter
     {
         static readonly ILog Log = LogManager.GetLogger(typeof(SslFilter));
 

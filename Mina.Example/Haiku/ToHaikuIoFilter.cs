@@ -4,7 +4,7 @@ using Mina.Core.Session;
 
 namespace Mina.Example.Haiku
 {
-    class ToHaikuIoFilter : IoFilterAdapter
+    class ToHaikuIoFilter : IOFilterAdapter
     {
         public override void MessageReceived(INextFilter nextFilter, IOSession session, object message)
         {

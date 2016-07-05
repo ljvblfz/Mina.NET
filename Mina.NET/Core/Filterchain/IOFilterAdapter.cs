@@ -9,7 +9,7 @@ namespace Mina.Core.Filterchain
     /// this class and selectively override required event filter methods only.  All
     /// methods forwards events to the next filter by default.
     /// </summary>
-    public abstract class IoFilterAdapter : IOFilter
+    public abstract class IOFilterAdapter : IOFilter
     {
         /// <inheritdoc/>
         public virtual void Init()

@@ -9,7 +9,7 @@ namespace Mina.Filter.Executor
     /// Attaches an <see cref="IOEventQueueHandler"/> to an <see cref="IOSession"/>'s
     /// <see cref="IWriteRequest"/> queue to provide accurate write queue status tracking.
     /// </summary>
-    public class WriteRequestFilter : IoFilterAdapter
+    public class WriteRequestFilter : IOFilterAdapter
     {
         /// <summary>
         /// Instantiates with an <see cref="IoEventQueueThrottle"/>.

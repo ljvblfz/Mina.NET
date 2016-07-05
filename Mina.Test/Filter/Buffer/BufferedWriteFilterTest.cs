@@ -53,7 +53,7 @@ namespace Mina.Filter.Buffer
             sess.Close(true);
         }
 
-        class DummyFilter : IoFilterAdapter
+        class DummyFilter : IOFilterAdapter
         {
             private int _counter;
 

@@ -12,7 +12,7 @@ namespace Mina.Filter.Firewall
     /// <summary>
     /// A {@link IoFilter} which blocks connections from blacklisted remote address.
     /// </summary>
-    public class BlacklistFilter : IoFilterAdapter
+    public class BlacklistFilter : IOFilterAdapter
     {
         static readonly ILog Log = LogManager.GetLogger(typeof(BlacklistFilter));
 

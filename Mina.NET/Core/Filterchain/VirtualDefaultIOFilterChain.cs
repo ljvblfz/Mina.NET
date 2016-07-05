@@ -325,7 +325,7 @@ namespace Mina.Core.Filterchain
             }
         }
 
-        class HeadFilter : IoFilterAdapter
+        class HeadFilter : IOFilterAdapter
         {
             public override void FilterWrite(INextFilter nextFilter, IOSession session, IWriteRequest writeRequest)
             {
@@ -375,7 +375,7 @@ namespace Mina.Core.Filterchain
             }
         }
 
-        class TailFilter : IoFilterAdapter
+        class TailFilter : IOFilterAdapter
         {
             public override void SessionCreated(INextFilter nextFilter, IOSession session)
             {

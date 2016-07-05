@@ -11,7 +11,7 @@ namespace Mina.Filter.Executor
     /// simultaneously. You can apply various thread model by inserting this filter
     /// to a <see cref="IOFilterChain"/>.
     /// </summary>
-    public class ExecutorFilter : IoFilterAdapter
+    public class ExecutorFilter : IOFilterAdapter
     {
         private const IoEventType DefaultEventSet = IoEventType.ExceptionCaught |
             IoEventType.MessageReceived | IoEventType.MessageSent | IoEventType.SessionClosed |

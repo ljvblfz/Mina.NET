@@ -11,7 +11,7 @@ namespace Mina.Filter.Util
     /// the pre-configured attributes available after this filter executes the
     /// <tt>SessionCreated</tt> event.
     /// </summary>
-    public class SessionAttributeInitializingFilter : IoFilterAdapter
+    public class SessionAttributeInitializingFilter : IOFilterAdapter
     {
         private readonly Dictionary<string, object> _attributes = new Dictionary<string, object>();
 

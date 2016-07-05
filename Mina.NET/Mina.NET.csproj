@@ -69,7 +69,7 @@
     <Compile Include="Core\Filterchain\INextFilter.cs" />
     <Compile Include="Core\Filterchain\Chain.cs" />
     <Compile Include="Core\Filterchain\IOFilter.cs" />
-    <Compile Include="Core\Filterchain\IoFilterAdapter.cs" />
+    <Compile Include="Core\Filterchain\IOFilterAdapter.cs" />
     <Compile Include="Core\Filterchain\IoFilterChain.cs" />
     <Compile Include="Core\Filterchain\IoFilterChainBuilder.cs" />
     <Compile Include="Core\Filterchain\IoFilterEvent.cs" />

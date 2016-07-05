@@ -77,7 +77,7 @@ namespace Mina.Transport.Socket
             }
         }
 
-        class MockFilter : IoFilterAdapter
+        class MockFilter : IOFilterAdapter
         {
             public override void MessageReceived(INextFilter nextFilter, IOSession session, object message)
             {
