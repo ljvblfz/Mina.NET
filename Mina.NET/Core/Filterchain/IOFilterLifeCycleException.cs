@@ -7,28 +7,28 @@ namespace Mina.Core.Filterchain
     /// <see cref="IOFilter.OnPostAdd(IOFilterChain, string, INextFilter)"/> failed.
     /// </summary>
     [Serializable]
-    public class IoFilterLifeCycleException : Exception
+    public class IOFilterLifeCycleException : Exception
     {
         /// <summary>
         /// </summary>
-        public IoFilterLifeCycleException()
+        public IOFilterLifeCycleException()
         { }
 
         /// <summary>
         /// </summary>
-        public IoFilterLifeCycleException(string message)
+        public IOFilterLifeCycleException(string message)
             : base(message)
         { }
 
         /// <summary>
         /// </summary>
-        public IoFilterLifeCycleException(string message, Exception innerException)
+        public IOFilterLifeCycleException(string message, Exception innerException)
             : base(message, innerException)
         { }
 
         /// <summary>
         /// </summary>
-        protected IoFilterLifeCycleException(
+        protected IOFilterLifeCycleException(
           System.Runtime.Serialization.SerializationInfo info,
           System.Runtime.Serialization.StreamingContext context)
             : base(info, context) { }

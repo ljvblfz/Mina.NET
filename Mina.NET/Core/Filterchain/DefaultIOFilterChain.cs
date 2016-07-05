@@ -251,7 +251,7 @@ namespace Mina.Core.Filterchain
             }
             catch (Exception e)
             {
-                throw new IoFilterLifeCycleException("Clear(): in " + Session, e);
+                throw new IOFilterLifeCycleException("Clear(): in " + Session, e);
                 //throw new IoFilterLifeCycleException("Clear(): " + entry.Name + " in " + Session, e);
             }
         }
@@ -265,7 +265,7 @@ namespace Mina.Core.Filterchain
             }
             catch (Exception e)
             {
-                throw new IoFilterLifeCycleException(
+                throw new IOFilterLifeCycleException(
                     "OnPreAdd(): " + entry.Name + ':' + entry.Filter + " in " + Session, e);
             }
         }
@@ -280,7 +280,7 @@ namespace Mina.Core.Filterchain
             catch (Exception e)
             {
                 Deregister0(entry);
-                throw new IoFilterLifeCycleException(
+                throw new IOFilterLifeCycleException(
                     "OnPostAdd(): " + entry.Name + ':' + entry.Filter + " in " + Session, e);
             }
         }
@@ -294,7 +294,7 @@ namespace Mina.Core.Filterchain
             }
             catch (Exception e)
             {
-                throw new IoFilterLifeCycleException("OnPreRemove(): " + entry.Name + ':' + entry.Filter + " in "
+                throw new IOFilterLifeCycleException("OnPreRemove(): " + entry.Name + ':' + entry.Filter + " in "
                                                      + Session, e);
             }
         }
@@ -308,7 +308,7 @@ namespace Mina.Core.Filterchain
             }
             catch (Exception e)
             {
-                throw new IoFilterLifeCycleException("OnPostRemove(): " + entry.Name + ':' + entry.Filter + " in "
+                throw new IOFilterLifeCycleException("OnPostRemove(): " + entry.Name + ':' + entry.Filter + " in "
                                                      + Session, e);
             }
         }
@@ -323,7 +323,7 @@ namespace Mina.Core.Filterchain
             }
             catch (Exception e)
             {
-                throw new IoFilterLifeCycleException("OnPreAdd(): " + entry.Name + ':' + newFilter + " in " + Session, e);
+                throw new IOFilterLifeCycleException("OnPreAdd(): " + entry.Name + ':' + newFilter + " in " + Session, e);
             }
         }
 
@@ -337,7 +337,7 @@ namespace Mina.Core.Filterchain
             }
             catch (Exception e)
             {
-                throw new IoFilterLifeCycleException("OnPostAdd(): " + entry.Name + ':' + newFilter + " in " + Session,
+                throw new IOFilterLifeCycleException("OnPostAdd(): " + entry.Name + ':' + newFilter + " in " + Session,
                     e);
             }
         }
