@@ -161,7 +161,7 @@
     <Compile Include="Filter\ErrorGenerating\ErrorGeneratingFilter.cs" />
     <Compile Include="Filter\Executor\ExecutorFilter.cs" />
     <Compile Include="Filter\Executor\IExecutor.cs" />
-    <Compile Include="Filter\Executor\IoEventExecutor.cs" />
+    <Compile Include="Filter\Executor\IOEventExecutor.cs" />
     <Compile Include="Filter\Executor\IoEventQueueHandler.cs" />
     <Compile Include="Filter\Executor\IoEventQueueThrottle.cs" />
     <Compile Include="Filter\Executor\IoEventSizeEstimator.cs" />
