@@ -8,51 +8,46 @@ namespace Mina.Transport.Loopback
     /// </summary>
     public class LoopbackEndPoint : EndPoint, IComparable<LoopbackEndPoint>
     {
-        private readonly Int32 _port;
-
         /// <summary>
         /// Creates a new instance with the specifid port number.
         /// </summary>
-        public LoopbackEndPoint(Int32 port)
+        public LoopbackEndPoint(int port)
         {
-            _port = port;
+            Port = port;
         }
 
         /// <summary>
         /// Gets the port number.
         /// </summary>
-        public Int32 Port
+        public int Port { get; }
+
+        /// <inheritdoc/>
+        public int CompareTo(LoopbackEndPoint other)
         {
-            get { return _port; }
+            return Port.CompareTo(other.Port);
         }
 
         /// <inheritdoc/>
-        public Int32 CompareTo(LoopbackEndPoint other)
+        public override int GetHashCode()
         {
-            return this._port.CompareTo(other._port);
+            return Port.GetHashCode();
         }
 
         /// <inheritdoc/>
-        public override Int32 GetHashCode()
-        {
-            return _port.GetHashCode();
-        }
-
-        /// <inheritdoc/>
-        public override Boolean Equals(Object obj)
+        public override bool Equals(object obj)
         {
             if (obj == null)
                 return false;
-            if (Object.ReferenceEquals(this, obj))
+            if (ReferenceEquals(this, obj))
                 return true;
-            LoopbackEndPoint other = obj as LoopbackEndPoint;
-            return obj != null && this._port == other._port;
+            var other = obj as LoopbackEndPoint;
+            return obj != null && Port == other.Port;
         }
 
         /// <inheritdoc/>
-        public override String ToString()
+        public override string ToString()
         {
-            return _port >= 0 ? ("vm:server:" + _port) : ("vm:client:" + -_port);
+            return Port >= 0 ? ("vm:server:" + Port) : ("vm:client:" + -Port);
         }
     }
 }

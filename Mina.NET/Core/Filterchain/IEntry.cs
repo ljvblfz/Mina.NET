@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace Mina.Core.Filterchain
+﻿namespace Mina.Core.Filterchain
 {
     /// <summary>
     /// Represents a name-filter pair that an <see cref="IChain&lt;TFilter, TNextFilter&gt;"/> contains.
@@ -10,7 +8,7 @@ namespace Mina.Core.Filterchain
         /// <summary>
         /// Gets the name of the filter.
         /// </summary>
-        String Name { get; }
+        string Name { get; }
         /// <summary>
         /// Gets the filter.
         /// </summary>
@@ -22,11 +20,11 @@ namespace Mina.Core.Filterchain
         /// <summary>
         /// Adds the specified filter with the specified name just before this entry.
         /// </summary>
-        void AddBefore(String name, TFilter filter);
+        void AddBefore(string name, TFilter filter);
         /// <summary>
         /// Adds the specified filter with the specified name just after this entry.
         /// </summary>
-        void AddAfter(String name, TFilter filter);
+        void AddAfter(string name, TFilter filter);
         /// <summary>
         /// Replace the filter of this entry with the specified new filter.
         /// </summary>

@@ -11,18 +11,18 @@ namespace Mina.Filter.Codec.Demux
     /// </summary>
     public class DemuxingProtocolEncoder : IProtocolEncoder
     {
-        private readonly AttributeKey STATE;
-        private readonly Dictionary<Type, IMessageEncoderFactory> _type2encoderFactory
+        private readonly AttributeKey _state;
+        private readonly Dictionary<Type, IMessageEncoderFactory> _type2EncoderFactory
              = new Dictionary<Type, IMessageEncoderFactory>();
 
         public DemuxingProtocolEncoder()
         {
-            STATE = new AttributeKey(GetType(), "state");
+            _state = new AttributeKey(GetType(), "state");
         }
 
         public void AddMessageEncoder<TMessage, TEncoder>() where TEncoder : IMessageEncoder
         {
-            Type encoderType = typeof(TEncoder);
+            var encoderType = typeof(TEncoder);
 
             if (encoderType.GetConstructor(DemuxingProtocolCodecFactory.EmptyParams) == null)
                 throw new ArgumentException("The specified class doesn't have a public default constructor.");
@@ -38,40 +38,39 @@ namespace Mina.Filter.Codec.Demux
         public void AddMessageEncoder<TMessage>(IMessageEncoderFactory<TMessage> factory)
         {
             if (factory == null)
-                throw new ArgumentNullException("factory");
+                throw new ArgumentNullException(nameof(factory));
 
-            Type messageType = typeof(TMessage);
-            lock (_type2encoderFactory)
+            var messageType = typeof(TMessage);
+            lock (_type2EncoderFactory)
             {
-                if (_type2encoderFactory.ContainsKey(messageType))
+                if (_type2EncoderFactory.ContainsKey(messageType))
                     throw new InvalidOperationException("The specified message type (" + messageType.Name
                         + ") is registered already.");
-                _type2encoderFactory[messageType] = factory;
+                _type2EncoderFactory[messageType] = factory;
             }
         }
 
-        public void Encode(IoSession session, Object message, IProtocolEncoderOutput output)
+        public void Encode(IOSession session, object message, IProtocolEncoderOutput output)
         {
-            State state = GetState(session);
-            IMessageEncoder encoder = FindEncoder(state, message.GetType());
+            var state = GetState(session);
+            var encoder = FindEncoder(state, message.GetType());
             if (encoder == null)
                 throw new UnknownMessageTypeException("No message encoder found for message: " + message);
-            else
-                encoder.Encode(session, message, output);
+            encoder.Encode(session, message, output);
         }
 
-        public void Dispose(IoSession session)
+        public void Dispose(IOSession session)
         {
-            session.RemoveAttribute(STATE);
+            session.RemoveAttribute(_state);
         }
 
-        private State GetState(IoSession session)
+        private State GetState(IOSession session)
         {
-            State state = session.GetAttribute<State>(STATE);
+            var state = session.GetAttribute<State>(_state);
             if (state == null)
             {
-                state = new State(_type2encoderFactory);
-                State oldState = (State)session.SetAttributeIfAbsent(STATE, state);
+                state = new State(_type2EncoderFactory);
+                var oldState = (State)session.SetAttributeIfAbsent(_state, state);
                 if (oldState != null)
                 {
                     state = oldState;
@@ -93,11 +92,11 @@ namespace Mina.Filter.Codec.Demux
                 return null;
 
             // Try the cache first.
-            if (state.findEncoderCache.TryGetValue(type, out encoder))
+            if (state.FindEncoderCache.TryGetValue(type, out encoder))
                 return encoder;
 
             // Try the registered encoders for an immediate match.
-            state.type2encoder.TryGetValue(type, out encoder);
+            state.Type2Encoder.TryGetValue(type, out encoder);
 
             if (encoder == null)
             {
@@ -106,7 +105,7 @@ namespace Mina.Filter.Codec.Demux
                     triedClasses = new HashSet<Type>();
                 triedClasses.Add(type);
 
-                foreach (Type ifc in type.GetInterfaces())
+                foreach (var ifc in type.GetInterfaces())
                 {
                     encoder = FindEncoder(state, ifc, triedClasses);
                     if (encoder != null)
@@ -117,7 +116,7 @@ namespace Mina.Filter.Codec.Demux
             if (encoder == null)
             {
                 // No match in type's interfaces could be found. Search the superclass.
-                Type baseType = type.BaseType;
+                var baseType = type.BaseType;
                 if (baseType != null)
                     encoder = FindEncoder(state, baseType);
             }
@@ -129,7 +128,7 @@ namespace Mina.Filter.Codec.Demux
              */
             if (encoder != null)
             {
-                encoder = state.findEncoderCache.GetOrAdd(type, encoder);
+                encoder = state.FindEncoderCache.GetOrAdd(type, encoder);
             }
 
             return encoder;
@@ -137,54 +136,54 @@ namespace Mina.Filter.Codec.Demux
 
         class State
         {
-            public readonly ConcurrentDictionary<Type, IMessageEncoder> findEncoderCache
+            public readonly ConcurrentDictionary<Type, IMessageEncoder> FindEncoderCache
                 = new ConcurrentDictionary<Type, IMessageEncoder>();
-            public ConcurrentDictionary<Type, IMessageEncoder> type2encoder
+            public ConcurrentDictionary<Type, IMessageEncoder> Type2Encoder
                 = new ConcurrentDictionary<Type, IMessageEncoder>();
 
-            public State(IDictionary<Type, IMessageEncoderFactory> type2encoderFactory)
+            public State(IDictionary<Type, IMessageEncoderFactory> type2EncoderFactory)
             {
-                foreach (KeyValuePair<Type, IMessageEncoderFactory> pair in type2encoderFactory)
+                foreach (var pair in type2EncoderFactory)
                 {
-                    type2encoder[pair.Key] = pair.Value.GetEncoder();
+                    Type2Encoder[pair.Key] = pair.Value.GetEncoder();
                 }
             }
         }
 
         class SingletonMessageEncoderFactory<T> : IMessageEncoderFactory<T>
         {
-            private readonly IMessageEncoder<T> encoder;
+            private readonly IMessageEncoder<T> _encoder;
 
             public SingletonMessageEncoderFactory(IMessageEncoder<T> encoder)
             {
                 if (encoder == null)
-                    throw new ArgumentNullException("encoder");
-                this.encoder = encoder;
+                    throw new ArgumentNullException(nameof(encoder));
+                this._encoder = encoder;
             }
 
             public IMessageEncoder<T> GetEncoder()
             {
-                return encoder;
+                return _encoder;
             }
 
             IMessageEncoder IMessageEncoderFactory.GetEncoder()
             {
-                return encoder;
+                return _encoder;
             }
         }
 
         class DefaultConstructorMessageEncoderFactory<T> : IMessageEncoderFactory<T>
         {
-            private readonly Type encoderType;
+            private readonly Type _encoderType;
 
             public DefaultConstructorMessageEncoderFactory(Type encoderType)
             {
-                this.encoderType = encoderType;
+                this._encoderType = encoderType;
             }
 
             public IMessageEncoder<T> GetEncoder()
             {
-                return (IMessageEncoder<T>)Activator.CreateInstance(encoderType);
+                return (IMessageEncoder<T>)Activator.CreateInstance(_encoderType);
             }
 
             IMessageEncoder IMessageEncoderFactory.GetEncoder()

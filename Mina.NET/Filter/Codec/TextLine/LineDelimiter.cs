@@ -20,12 +20,12 @@ namespace Mina.Filter.Codec.TextLine
         /// <see cref="TextLineDecoder"/> will consider both  <tt>'\r'</tt> and
         /// <tt>'\n'</tt> as a delimiter.
         /// </summary>
-        public static readonly LineDelimiter Auto = new LineDelimiter(String.Empty);
+        public static readonly LineDelimiter Auto = new LineDelimiter(string.Empty);
 
         /// <summary>
         /// The CRLF line delimiter constant (<tt>"\r\n"</tt>)
         /// </summary>
-        public static readonly LineDelimiter CRLF = new LineDelimiter("\r\n");
+        public static readonly LineDelimiter Crlf = new LineDelimiter("\r\n");
 
         /// <summary>
         /// The line delimiter constant of UNIX (<tt>"\n"</tt>)
@@ -35,7 +35,7 @@ namespace Mina.Filter.Codec.TextLine
         /// <summary>
         /// The line delimiter constant of MS Windows/DOS (<tt>"\r\n"</tt>)
         /// </summary>
-        public static readonly LineDelimiter Windows = CRLF;
+        public static readonly LineDelimiter Windows = Crlf;
 
         /// <summary>
         /// The line delimiter constant of Mac OS (<tt>"\r"</tt>)
@@ -46,61 +46,52 @@ namespace Mina.Filter.Codec.TextLine
         /// The line delimiter constant for NUL-terminated text protocols
         /// such as Flash XML socket (<tt>"\0"</tt>)
         /// </summary>
-        public static readonly LineDelimiter NUL = new LineDelimiter("\0");
-
-        private readonly String _value;
+        public static readonly LineDelimiter Nul = new LineDelimiter("\0");
 
         /// <summary>
         /// Creates a new line delimiter with the specified <tt>delimiter</tt>.
         /// </summary>
-        public LineDelimiter(String value)
+        public LineDelimiter(string value)
         {
             if (value == null)
-                throw new ArgumentNullException("value");
-            _value = value;
+                throw new ArgumentNullException(nameof(value));
+            Value = value;
         }
 
         /// <summary>
         /// Gets the delimiter string.
         /// </summary>
-        public String Value
+        public string Value { get; }
+
+        public override int GetHashCode()
         {
-            get { return _value; }
+            return Value.GetHashCode();
         }
 
-        public override Int32 GetHashCode()
+        public override bool Equals(object obj)
         {
-            return _value.GetHashCode();
-        }
-
-        public override Boolean Equals(Object obj)
-        {
-            if (Object.ReferenceEquals(this, obj))
+            if (ReferenceEquals(this, obj))
                 return true;
-            LineDelimiter that = obj as LineDelimiter;
+            var that = obj as LineDelimiter;
             if (that == null)
                 return false;
-            else
-                return this._value.Equals(that._value);
+            return Value.Equals(that.Value);
         }
 
-        public override String ToString()
+        public override string ToString()
         {
-            if (_value.Length == 0)
+            if (Value.Length == 0)
                 return "delimiter: auto";
-            else
+            var buf = new StringBuilder();
+            buf.Append("delimiter:");
+
+            for (var i = 0; i < Value.Length; i++)
             {
-                StringBuilder buf = new StringBuilder();
-                buf.Append("delimiter:");
-
-                for (Int32 i = 0; i < _value.Length; i++)
-                {
-                    buf.Append(" 0x");
-                    buf.AppendFormat("{0:X}", _value[i]);
-                }
-
-                return buf.ToString();
+                buf.Append(" 0x");
+                buf.AppendFormat("{0:X}", Value[i]);
             }
+
+            return buf.ToString();
         }
     }
 }

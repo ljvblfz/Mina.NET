@@ -1,11 +1,9 @@
-﻿using System;
-#if !NETFX_CORE
+﻿#if !NETFX_CORE
 using NUnit.Framework;
 using TestClass = NUnit.Framework.TestFixtureAttribute;
 #else
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 #endif
-using Mina.Core.Future;
 using Mina.Core.Service;
 
 namespace Mina.Transport.Loopback
@@ -13,17 +11,17 @@ namespace Mina.Transport.Loopback
     [TestClass]
     public class LoopbackConnectorTest : AbstractConnectorTest
     {
-        protected override IoAcceptor CreateAcceptor()
+        protected override IOAcceptor CreateAcceptor()
         {
             return new LoopbackAcceptor();
         }
 
-        protected override IoConnector CreateConnector()
+        protected override IOConnector CreateConnector()
         {
             return new LoopbackConnector();
         }
 
-        protected override System.Net.EndPoint CreateEndPoint(Int32 port)
+        protected override System.Net.EndPoint CreateEndPoint(int port)
         {
             return new LoopbackEndPoint(port);
         }

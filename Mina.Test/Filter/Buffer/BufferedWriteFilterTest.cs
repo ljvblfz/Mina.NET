@@ -1,5 +1,4 @@
-﻿using System;
-#if !NETFX_CORE
+﻿#if !NETFX_CORE
 using NUnit.Framework;
 using TestClass = NUnit.Framework.TestFixtureAttribute;
 using TestMethod = NUnit.Framework.TestAttribute;
@@ -21,20 +20,20 @@ namespace Mina.Filter.Buffer
         [TestMethod]
         public void TestNonExpandableBuffer()
         {
-            IoBuffer dest = IoBuffer.Allocate(1);
+            var dest = IOBuffer.Allocate(1);
             Assert.AreEqual(false, dest.AutoExpand);
         }
 
         [TestMethod]
         public void TestBasicBuffering()
         {
-            DummySession sess = new DummySession();
+            var sess = new DummySession();
             sess.FilterChain.AddFirst("peer", new DummyFilter());
             sess.FilterChain.AddFirst("logger", new LoggingFilter());
-            BufferedWriteFilter bFilter = new BufferedWriteFilter(10);
+            var bFilter = new BufferedWriteFilter(10);
             sess.FilterChain.AddLast("buffer", bFilter);
 
-            IoBuffer data = IoBuffer.Allocate(1);
+            var data = IOBuffer.Allocate(1);
             for (byte i = 0; i < 20; i++)
             {
                 data.Put((byte)(0x30 + i));
@@ -44,7 +43,7 @@ namespace Mina.Filter.Buffer
             }
 
             // Add one more byte to overflow the final buffer
-            data.Put((byte)0);
+            data.Put(0);
             data.Flip();
             sess.Write(data);
 
@@ -56,18 +55,18 @@ namespace Mina.Filter.Buffer
 
         class DummyFilter : IoFilterAdapter
         {
-            private Int32 _counter;
+            private int _counter;
 
-            public override void FilterClose(INextFilter nextFilter, IoSession session)
+            public override void FilterClose(INextFilter nextFilter, IOSession session)
             {
                 Assert.AreEqual(3, _counter);
             }
 
-            public override void FilterWrite(INextFilter nextFilter, IoSession session, IWriteRequest writeRequest)
+            public override void FilterWrite(INextFilter nextFilter, IOSession session, IWriteRequest writeRequest)
             {
                 _counter++;
 
-                IoBuffer buf = writeRequest.Message as IoBuffer;
+                var buf = writeRequest.Message as IOBuffer;
                 if (buf == null)
                     throw new AssertFailedException("Wrong message type");
                 if (_counter == 3)

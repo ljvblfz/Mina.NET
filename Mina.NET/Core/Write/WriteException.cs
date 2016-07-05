@@ -27,15 +27,9 @@ namespace Mina.Core.Write
           System.Runtime.Serialization.StreamingContext context)
             : base(info, context) { }
 
-        public IWriteRequest Request
-        {
-            get { return _requests[0]; }
-        }
+        public IWriteRequest Request => _requests[0];
 
-        public IEnumerable<IWriteRequest> Requests
-        {
-            get { return _requests; }
-        }
+        public IEnumerable<IWriteRequest> Requests => _requests;
 
         /// <inheritdoc/>
         public override void GetObjectData(
@@ -48,8 +42,8 @@ namespace Mina.Core.Write
         private static IList<IWriteRequest> AsRequestList(IWriteRequest request)
         {
             if (request == null)
-                throw new ArgumentNullException("request");
-            List<IWriteRequest> requests = new List<IWriteRequest>(1);
+                throw new ArgumentNullException(nameof(request));
+            var requests = new List<IWriteRequest>(1);
             requests.Add(request);
             return requests.AsReadOnly();
         }
@@ -57,8 +51,8 @@ namespace Mina.Core.Write
         private static IList<IWriteRequest> AsRequestList(IEnumerable<IWriteRequest> requests)
         {
             if (requests == null)
-                throw new ArgumentNullException("requests");
-            List<IWriteRequest> newRequests = new List<IWriteRequest>(requests);
+                throw new ArgumentNullException(nameof(requests));
+            var newRequests = new List<IWriteRequest>(requests);
             return newRequests.AsReadOnly();
         }
     }

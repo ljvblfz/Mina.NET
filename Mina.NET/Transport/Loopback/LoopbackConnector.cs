@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Net;
-using Mina.Core.Filterchain;
 using Mina.Core.Future;
 using Mina.Core.Service;
 using Mina.Core.Session;
@@ -11,13 +10,13 @@ using Mina.Util;
 namespace Mina.Transport.Loopback
 {
     /// <summary>
-    /// Connects to <see cref="IoHandler"/>s which is bound on the specified
+    /// Connects to <see cref="IOHandler"/>s which is bound on the specified
     /// <see cref="LoopbackEndPoint"/>.
     /// </summary>
-    public class LoopbackConnector : AbstractIoConnector
+    public class LoopbackConnector : AbstractIOConnector
     {
-        static readonly HashSet<LoopbackEndPoint> takenLocalEPs = new HashSet<LoopbackEndPoint>();
-        static Int32 nextLocalPort = -1;
+        static readonly HashSet<LoopbackEndPoint> TakenLocalEPs = new HashSet<LoopbackEndPoint>();
+        static int _nextLocalPort = -1;
         private IdleStatusChecker _idleStatusChecker;
 
         /// <summary>
@@ -30,46 +29,43 @@ namespace Mina.Transport.Loopback
         }
 
         /// <inheritdoc/>
-        public override ITransportMetadata TransportMetadata
-        {
-            get { return LoopbackSession.Metadata; }
-        }
+        public override ITransportMetadata TransportMetadata => LoopbackSession.Metadata;
 
         /// <inheritdoc/>
-        protected override IConnectFuture Connect0(EndPoint remoteEP, EndPoint localEP, Action<IoSession, IConnectFuture> sessionInitializer)
+        protected override IConnectFuture Connect0(EndPoint remoteEp, EndPoint localEp, Action<IOSession, IConnectFuture> sessionInitializer)
         {
             LoopbackPipe entry;
-            if (!LoopbackAcceptor.BoundHandlers.TryGetValue(remoteEP, out entry))
-                return DefaultConnectFuture.NewFailedFuture(new IOException("Endpoint unavailable: " + remoteEP));
+            if (!LoopbackAcceptor.BoundHandlers.TryGetValue(remoteEp, out entry))
+                return DefaultConnectFuture.NewFailedFuture(new IOException("Endpoint unavailable: " + remoteEp));
 
-            DefaultConnectFuture future = new DefaultConnectFuture();
+            var future = new DefaultConnectFuture();
 
             // Assign the local end point dynamically,
-            LoopbackEndPoint actualLocalEP;
+            LoopbackEndPoint actualLocalEp;
             try
             {
-                actualLocalEP = NextLocalEP();
+                actualLocalEp = NextLocalEp();
             }
             catch (IOException e)
             {
                 return DefaultConnectFuture.NewFailedFuture(e);
             }
 
-            LoopbackSession localSession = new LoopbackSession(this, actualLocalEP, Handler, entry);
+            var localSession = new LoopbackSession(this, actualLocalEp, Handler, entry);
 
             InitSession(localSession, future, sessionInitializer);
 
             // and reclaim the local end point when the connection is closed.
-            localSession.CloseFuture.Complete += ReclaimLocalEP;
+            localSession.CloseFuture.Complete += ReclaimLocalEp;
 
             // initialize connector session
             try
             {
-                IoFilterChain filterChain = localSession.FilterChain;
-                this.FilterChainBuilder.BuildFilterChain(filterChain);
+                var filterChain = localSession.FilterChain;
+                FilterChainBuilder.BuildFilterChain(filterChain);
 
                 // The following sentences don't throw any exceptions.
-                IoServiceSupport serviceSupport = this as IoServiceSupport;
+                var serviceSupport = this as IOServiceSupport;
                 if (serviceSupport != null)
                     serviceSupport.FireSessionCreated(localSession);
             }
@@ -80,15 +76,15 @@ namespace Mina.Transport.Loopback
             }
 
             // initialize acceptor session
-            LoopbackSession remoteSession = localSession.RemoteSession;
+            var remoteSession = localSession.RemoteSession;
             ((LoopbackAcceptor)remoteSession.Service).DoFinishSessionInitialization(remoteSession, null);
             try
             {
-                IoFilterChain filterChain = remoteSession.FilterChain;
+                var filterChain = remoteSession.FilterChain;
                 entry.Acceptor.FilterChainBuilder.BuildFilterChain(filterChain);
 
                 // The following sentences don't throw any exceptions.
-                IoServiceSupport serviceSupport = entry.Acceptor as IoServiceSupport;
+                var serviceSupport = entry.Acceptor as IOServiceSupport;
                 if (serviceSupport != null)
                     serviceSupport.FireSessionCreated(remoteSession);
             }
@@ -107,7 +103,7 @@ namespace Mina.Transport.Loopback
         }
 
         /// <inheritdoc/>
-        protected override void Dispose(Boolean disposing)
+        protected override void Dispose(bool disposing)
         {
             if (disposing)
             {
@@ -116,18 +112,18 @@ namespace Mina.Transport.Loopback
             base.Dispose(disposing);
         }
 
-        private static LoopbackEndPoint NextLocalEP()
+        private static LoopbackEndPoint NextLocalEp()
         {
-            lock (takenLocalEPs)
+            lock (TakenLocalEPs)
             {
-                if (nextLocalPort >= 0)
-                    nextLocalPort = -1;
-                for (Int32 i = 0; i < Int32.MaxValue; i++)
+                if (_nextLocalPort >= 0)
+                    _nextLocalPort = -1;
+                for (var i = 0; i < int.MaxValue; i++)
                 {
-                    LoopbackEndPoint answer = new LoopbackEndPoint(nextLocalPort--);
-                    if (!takenLocalEPs.Contains(answer))
+                    var answer = new LoopbackEndPoint(_nextLocalPort--);
+                    if (!TakenLocalEPs.Contains(answer))
                     {
-                        takenLocalEPs.Add(answer);
+                        TakenLocalEPs.Add(answer);
                         return answer;
                     }
                 }
@@ -136,11 +132,11 @@ namespace Mina.Transport.Loopback
             throw new IOException("Can't assign a Loopback port.");
         }
 
-        private static void ReclaimLocalEP(Object sender, IoFutureEventArgs e)
+        private static void ReclaimLocalEp(object sender, IoFutureEventArgs e)
         {
-            lock (takenLocalEPs)
+            lock (TakenLocalEPs)
             {
-                takenLocalEPs.Remove((LoopbackEndPoint)e.Future.Session.LocalEndPoint);
+                TakenLocalEPs.Remove((LoopbackEndPoint)e.Future.Session.LocalEndPoint);
             }
         }
     }

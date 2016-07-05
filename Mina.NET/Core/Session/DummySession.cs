@@ -8,17 +8,16 @@ using Mina.Core.Write;
 namespace Mina.Core.Session
 {
     /// <summary>
-    /// A dummy <see cref="IoSession"/> for unit-testing or non-network-use of
-    /// the classes that depends on <see cref="IoSession"/>.
+    /// A dummy <see cref="IOSession"/> for unit-testing or non-network-use of
+    /// the classes that depends on <see cref="IOSession"/>.
     /// </summary>
     public class DummySession : AbstractIoSession
     {
         private static readonly ITransportMetadata Metadata
             = new DefaultTransportMetadata("mina", "dummy", false, false, typeof(IPEndPoint));
 
-        private volatile IoHandler _handler = new IoHandlerAdapter();
-        private readonly IoProcessor<DummySession> _processor;
-        private readonly IoFilterChain _filterChain;
+        private volatile IOHandler _handler = new IOHandlerAdapter();
+        private readonly IIoProcessor<DummySession> _processor;
         private volatile EndPoint _remoteAddress = AnonymousEndPoint.Instance;
         private volatile ITransportMetadata _transportMetadata = Metadata;
 
@@ -28,48 +27,30 @@ namespace Mina.Core.Session
             : base(new DummyService(new DummyConfig()))
         {
             _processor = new DummyProcessor();
-            _filterChain = new DefaultIoFilterChain(this);
+            FilterChain = new DefaultIOFilterChain(this);
 
-            IoSessionDataStructureFactory factory = new DefaultIoSessionDataStructureFactory();
+            IOSessionDataStructureFactory factory = new DefaultIoSessionDataStructureFactory();
             AttributeMap = factory.GetAttributeMap(this);
             SetWriteRequestQueue(factory.GetWriteRequestQueue(this));
         }
 
         /// <inheritdoc/>
-        public override IoProcessor Processor
-        {
-            get { return _processor; }
-        }
+        public override IOProcessor Processor => _processor;
 
         /// <inheritdoc/>
-        public override IoHandler Handler
-        {
-            get { return _handler; }
-        }
+        public override IOHandler Handler => _handler;
 
         /// <inheritdoc/>
-        public override IoFilterChain FilterChain
-        {
-            get { return _filterChain; }
-        }
+        public override IOFilterChain FilterChain { get; }
 
         /// <inheritdoc/>
-        public override EndPoint LocalEndPoint
-        {
-            get { return AnonymousEndPoint.Instance; }
-        }
+        public override EndPoint LocalEndPoint => AnonymousEndPoint.Instance;
 
         /// <inheritdoc/>
-        public override EndPoint RemoteEndPoint
-        {
-            get { return _remoteAddress; }
-        }
+        public override EndPoint RemoteEndPoint => _remoteAddress;
 
         /// <inheritdoc/>
-        public override ITransportMetadata TransportMetadata
-        {
-            get { return _transportMetadata; }
-        }
+        public override ITransportMetadata TransportMetadata => _transportMetadata;
 
         /// <summary>
         /// </summary>
@@ -87,21 +68,18 @@ namespace Mina.Core.Session
 
         /// <summary>
         /// </summary>
-        public void SetHandler(IoHandler handler)
+        public void SetHandler(IOHandler handler)
         {
             _handler = handler;
         }
 
-        class DummyService : AbstractIoAcceptor
+        class DummyService : AbstractIOAcceptor
         {
-            public DummyService(IoSessionConfig sessionConfig)
+            public DummyService(IOSessionConfig sessionConfig)
                 : base(sessionConfig)
             { }
 
-            public override ITransportMetadata TransportMetadata
-            {
-                get { return Metadata; }
-            }
+            public override ITransportMetadata TransportMetadata => Metadata;
 
             protected override IEnumerable<EndPoint> BindInternal(IEnumerable<EndPoint> localEndPoints)
             {
@@ -114,7 +92,7 @@ namespace Mina.Core.Session
             }
         }
 
-        class DummyProcessor : IoProcessor<DummySession>
+        class DummyProcessor : IIoProcessor<DummySession>
         {
             public void Add(DummySession session)
             {
@@ -129,7 +107,7 @@ namespace Mina.Core.Session
 
             public void Write(DummySession session, IWriteRequest writeRequest)
             {
-                IWriteRequestQueue queue = session.WriteRequestQueue;
+                var queue = session.WriteRequestQueue;
                 queue.Offer(session, writeRequest);
                 if (!session.WriteSuspended)
                     Flush(session);
@@ -137,13 +115,13 @@ namespace Mina.Core.Session
 
             public void Flush(DummySession session)
             {
-                IWriteRequest req = session.WriteRequestQueue.Poll(session);
+                var req = session.WriteRequestQueue.Poll(session);
 
                 // Chek that the request is not null. If the session has been closed,
                 // we may not have any pending requests.
                 if (req != null)
                 {
-                    Object m = req.Message;
+                    var m = req.Message;
                     session.FilterChain.FireMessageSent(req);
                 }
             }
@@ -153,27 +131,27 @@ namespace Mina.Core.Session
                 // Do nothing
             }
 
-            void IoProcessor.Write(IoSession session, IWriteRequest writeRequest)
+            void IOProcessor.Write(IOSession session, IWriteRequest writeRequest)
             {
                 Write((DummySession)session, writeRequest);
             }
 
-            void IoProcessor.Flush(IoSession session)
+            void IOProcessor.Flush(IOSession session)
             {
                 Flush((DummySession)session);
             }
 
-            void IoProcessor.Add(IoSession session)
+            void IOProcessor.Add(IOSession session)
             {
                 Add((DummySession)session);
             }
 
-            void IoProcessor.Remove(IoSession session)
+            void IOProcessor.Remove(IOSession session)
             {
                 Remove((DummySession)session);
             }
 
-            void IoProcessor.UpdateTrafficControl(IoSession session)
+            void IOProcessor.UpdateTrafficControl(IOSession session)
             {
                 UpdateTrafficControl((DummySession)session);
             }
@@ -181,7 +159,7 @@ namespace Mina.Core.Session
 
         class DummyConfig : AbstractIoSessionConfig
         {
-            protected override void DoSetAll(IoSessionConfig config)
+            protected override void DoSetAll(IOSessionConfig config)
             {
                 // Do nothing
             }
@@ -193,7 +171,7 @@ namespace Mina.Core.Session
 
             private AnonymousEndPoint() { }
 
-            public override String ToString()
+            public override string ToString()
             {
                 return "?";
             }

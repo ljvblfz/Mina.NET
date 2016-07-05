@@ -1,18 +1,15 @@
-﻿using System;
-using Mina.Core.Session;
+﻿using Mina.Core.Session;
 
 namespace Mina.Filter.Executor
 {
     /// <summary>
-    /// A <see cref="IoEventExecutor"/> that does not maintain the order of <see cref="IoEvent"/>s.
+    /// A <see cref="IOEventExecutor"/> that does not maintain the order of <see cref="IoEvent"/>s.
     /// This means more than one event handler methods can be invoked at the same time with mixed order.
     /// If you need to maintain the order of events per session, please use
     /// <see cref="OrderedThreadPoolExecutor"/>.
     /// </summary>
-    public class UnorderedThreadPoolExecutor : ThreadPoolExecutor, IoEventExecutor
+    public class UnorderedThreadPoolExecutor : ThreadPoolExecutor, IOEventExecutor
     {
-        private readonly IoEventQueueHandler _queueHandler;
-
         /// <summary>
         /// Instantiates with a <see cref="NoopIoEventQueueHandler"/>.
         /// </summary>
@@ -21,35 +18,32 @@ namespace Mina.Filter.Executor
         { }
 
         /// <summary>
-        /// Instantiates with the given <see cref="IoEventQueueHandler"/>.
+        /// Instantiates with the given <see cref="IOEventQueueHandler"/>.
         /// </summary>
         /// <param name="queueHandler">the handler</param>
-        public UnorderedThreadPoolExecutor(IoEventQueueHandler queueHandler)
+        public UnorderedThreadPoolExecutor(IOEventQueueHandler queueHandler)
         {
-            _queueHandler = queueHandler == null ? NoopIoEventQueueHandler.Instance : queueHandler;
+            QueueHandler = queueHandler == null ? NoopIoEventQueueHandler.Instance : queueHandler;
         }
 
         /// <summary>
-        /// Gets the <see cref="IoEventQueueHandler"/>.
+        /// Gets the <see cref="IOEventQueueHandler"/>.
         /// </summary>
-        public IoEventQueueHandler QueueHandler
-        {
-            get { return _queueHandler; }
-        }
+        public IOEventQueueHandler QueueHandler { get; }
 
         /// <inheritdoc/>
         public void Execute(IoEvent ioe)
         {
-            Boolean offeredEvent = _queueHandler.Accept(this, ioe);
+            var offeredEvent = QueueHandler.Accept(this, ioe);
             if (offeredEvent)
             {
                 Execute(() =>
                 {
-                    _queueHandler.Polled(this, ioe);
+                    QueueHandler.Polled(this, ioe);
                     ioe.Fire();
                 });
 
-                _queueHandler.Offered(this, ioe);
+                QueueHandler.Offered(this, ioe);
             }
         }
     }

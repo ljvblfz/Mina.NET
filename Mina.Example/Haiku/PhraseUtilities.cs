@@ -1,17 +1,16 @@
-﻿using System;
-using System.Text.RegularExpressions;
+﻿using System.Text.RegularExpressions;
 
 namespace Mina.Example.Haiku
 {
     class PhraseUtilities
     {
-        public static int CountSyllablesInPhrase(String phrase)
+        public static int CountSyllablesInPhrase(string phrase)
         {
-            int syllables = 0;
+            var syllables = 0;
 
-            Regex regex = new Regex("[^\\w-]+");
+            var regex = new Regex("[^\\w-]+");
 
-            foreach (String word in regex.Split(phrase))
+            foreach (var word in regex.Split(phrase))
             {
                 if (word.Length > 0)
                 {
@@ -22,15 +21,15 @@ namespace Mina.Example.Haiku
             return syllables;
         }
 
-        static int CountSyllablesInWord(String word)
+        static int CountSyllablesInWord(string word)
         {
-            char[] chars = word.ToCharArray();
-            int syllables = 0;
-            bool lastWasVowel = false;
+            var chars = word.ToCharArray();
+            var syllables = 0;
+            var lastWasVowel = false;
 
-            for (int i = 0; i < chars.Length; i++)
+            for (var i = 0; i < chars.Length; i++)
             {
-                char c = chars[i];
+                var c = chars[i];
                 if (IsVowel(c))
                 {
                     if (!lastWasVowel

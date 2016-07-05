@@ -1,5 +1,4 @@
-﻿using System;
-using Mina.Core.Buffer;
+﻿using Mina.Core.Buffer;
 
 namespace Mina.Filter.Codec.StateMachine
 {
@@ -9,12 +8,12 @@ namespace Mina.Filter.Codec.StateMachine
     /// </summary>
     public abstract class IntegerDecodingState : IDecodingState
     {
-        private Int32 _firstByte;
-        private Int32 _secondByte;
-        private Int32 _thirdByte;
-        private Int32 _counter;
+        private int _firstByte;
+        private int _secondByte;
+        private int _thirdByte;
+        private int _counter;
 
-        public IDecodingState Decode(IoBuffer input, IProtocolDecoderOutput output)
+        public IDecodingState Decode(IOBuffer input, IProtocolDecoderOutput output)
         {
             while (input.HasRemaining)
             {
@@ -54,6 +53,6 @@ namespace Mina.Filter.Codec.StateMachine
         /// <code>this</code> for loop transitions) or <code>null</code> if 
         /// the state machine has reached its end.
         /// </returns>
-        protected abstract IDecodingState FinishDecode(Int32 value, IProtocolDecoderOutput output);
+        protected abstract IDecodingState FinishDecode(int value, IProtocolDecoderOutput output);
     }
 }

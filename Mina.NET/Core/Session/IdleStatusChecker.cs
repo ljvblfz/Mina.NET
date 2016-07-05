@@ -9,33 +9,28 @@ namespace Mina.Core.Session
     /// </summary>
     public class IdleStatusChecker : IDisposable
     {
-        public const Int32 IdleCheckingInterval = 1000;
+        public const int IdleCheckingInterval = 1000;
 
         private readonly Timer _idleTimer;
-        private Int32 _interval;
 
-        public IdleStatusChecker(Func<IEnumerable<IoSession>> getSessionsFunc)
+        public IdleStatusChecker(Func<IEnumerable<IOSession>> getSessionsFunc)
             : this(IdleCheckingInterval, getSessionsFunc)
         { }
 
-        public IdleStatusChecker(Int32 interval, Func<IEnumerable<IoSession>> getSessionsFunc)
+        public IdleStatusChecker(int interval, Func<IEnumerable<IOSession>> getSessionsFunc)
         {
-            _interval = interval;
+            Interval = interval;
             _idleTimer = new Timer(o =>
             {
                 AbstractIoSession.NotifyIdleness(getSessionsFunc(), DateTime.Now);
             });
         }
 
-        public Int32 Interval
-        {
-            get { return _interval; }
-            set { _interval = value; }
-        }
+        public int Interval { get; set; }
 
         public void Start()
         {
-            _idleTimer.Change(0, _interval);
+            _idleTimer.Change(0, Interval);
         }
 
         public void Stop()
@@ -49,7 +44,7 @@ namespace Mina.Core.Session
             GC.SuppressFinalize(this);
         }
 
-        protected virtual void Dispose(Boolean disposing)
+        protected virtual void Dispose(bool disposing)
         {
             if (disposing)
             {

@@ -3,62 +3,67 @@
 namespace Mina.Core.Buffer
 {
     /// <summary>
-    /// A Byte buffer. 
+    /// A Byte buffer.
     /// </summary>
-    class ByteBuffer : AbstractIoBuffer
+    public class ByteBuffer : AbstractIOBuffer
     {
-        protected Byte[] _hb;
-        protected Int32 _offset;
-        protected Boolean _readOnly;
+        protected byte[] Hb;
+        protected int _offset;
+        protected bool _readOnly;
 
         /// <summary>
         /// Creates a new buffer with the given mark, position, limit, capacity,
         /// backing array, and array offset
         /// </summary>
-        public ByteBuffer(IoBufferAllocator allocator, Int32 mark, Int32 pos, Int32 lim, Int32 cap, Byte[] hb, Int32 offset)
-            : base(allocator, mark, pos, lim, cap)
+        public ByteBuffer(IOBufferAllocator allocator, int mark, int position, int limit, int capacity, byte[] hb, int offset)
+            : base(allocator, mark, position, limit, capacity)
         {
-            this._hb = hb;
-            this._offset = offset;
+            Hb = hb;
+            _offset = offset;
         }
 
-        public ByteBuffer(ByteBuffer parent, Int32 mark, Int32 pos, Int32 lim, Int32 cap, Byte[] hb, Int32 offset)
-            : base(parent, mark, pos, lim, cap)
+        public ByteBuffer(ByteBuffer parent, int mark, int position, int limit, int capacity, byte[] hb, int offset)
+            : base(parent, mark, position, limit, capacity)
         {
-            this._hb = hb;
-            this._offset = offset;
+            Hb = hb;
+            _offset = offset;
         }
 
-        public ByteBuffer(IoBufferAllocator allocator, Int32 cap, Int32 lim)
-            : this(allocator, -1, 0, lim, cap, new Byte[cap], 0)
-        { }
+        public ByteBuffer(IOBufferAllocator allocator, int capacity, int limit)
+            : this(allocator, -1, 0, limit, capacity, new byte[capacity], 0)
+        {
+        }
 
-        public ByteBuffer(IoBufferAllocator allocator, Byte[] buf, Int32 off, Int32 len)
-            : this(allocator, -1, off, off + len, buf.Length, buf, 0)
-        { }
+        public ByteBuffer(IOBufferAllocator allocator, byte[] buffer, int offset, int len)
+            : this(allocator, -1, offset, offset + len, buffer.Length, buffer, 0)
+        {
+        }
 
-        public ByteBuffer(ByteBuffer parent, Byte[] buf, Int32 mark, Int32 pos, Int32 lim, Int32 cap, Int32 off)
-            : this(parent, mark, pos, lim, cap, buf, off)
-        { }
+        public ByteBuffer(ByteBuffer parent, byte[] buffer, int mark, int position, int limit, int capacity, int offset)
+            : this(parent, mark, position, limit, capacity, buffer, offset)
+        {
+        }
 
         /// <inheritdoc/>
-        public override Int32 Capacity
+        public override int Capacity
         {
             get { return base.Capacity; }
             set
             {
                 if (!RecapacityAllowed)
+                {
                     throw new InvalidOperationException("Derived buffers and their parent can't be expanded.");
-                
-                // Allocate a new buffer and transfer all settings to it.
-                Int32 capacity = base.Capacity;
-                if (value > capacity)
-                { 
-                    // Reallocate.
-                    Byte[] newHb = new Byte[value];
-                    System.Buffer.BlockCopy(_hb, Offset(0), newHb, 0, capacity);
+                }
 
-                    _hb = newHb;
+                // Allocate a new buffer and transfer all settings to it.
+                var capacity = base.Capacity;
+                if (value > capacity)
+                {
+                    // Reallocate.
+                    var newHb = new byte[value];
+                    System.Buffer.BlockCopy(Hb, Offset(0), newHb, 0, capacity);
+
+                    Hb = newHb;
                     _offset = 0;
 
                     Recapacity(value);
@@ -67,72 +72,80 @@ namespace Mina.Core.Buffer
         }
 
         /// <inheritdoc/>
-        public override Boolean HasArray
+        public override bool HasArray => Hb != null && !_readOnly;
+
+        /// <inheritdoc/>
+        public override byte Get()
         {
-            get { return _hb != null && !_readOnly; }
+            return Hb[Offset(NextGetIndex())];
         }
 
         /// <inheritdoc/>
-        public override Byte Get()
+        public override byte Get(int index)
         {
-            return _hb[Offset(NextGetIndex())];
+            return Hb[Offset(CheckIndex(index))];
         }
 
         /// <inheritdoc/>
-        public override Byte Get(Int32 index)
-        {
-            return _hb[Offset(CheckIndex(index))];
-        }
-
-        /// <inheritdoc/>
-        public override IoBuffer Get(Byte[] dst, Int32 offset, Int32 length)
+        public override IOBuffer Get(byte[] dst, int offset, int length)
         {
             CheckBounds(offset, length, dst.Length);
             if (length > Remaining)
+            {
                 throw new BufferUnderflowException();
-            Array.Copy(_hb, Offset(Position), dst, offset, length);
+            }
+            Array.Copy(Hb, Offset(Position), dst, offset, length);
             Position += length;
             return this;
         }
 
         /// <inheritdoc/>
-        public override ArraySegment<Byte> GetRemaining()
+        public override ArraySegment<byte> GetRemaining()
         {
-            return new ArraySegment<Byte>(_hb, Offset(Position), Remaining);
+            return new ArraySegment<byte>(Hb, Offset(Position), Remaining);
         }
 
         /// <inheritdoc/>
-        public override IoBuffer Shrink()
+        public override IOBuffer Shrink()
         {
             if (!RecapacityAllowed)
+            {
                 throw new InvalidOperationException("Derived buffers and their parent can't be shrinked.");
+            }
 
-            Int32 position = Position;
-            Int32 capacity = Capacity;
-            Int32 limit = Limit;
+            var capacity = Capacity;
+            var limit = Limit;
             if (capacity == limit)
+            {
                 return this;
+            }
 
-            Int32 newCapacity = capacity;
-            Int32 minCapacity = Math.Max(MinimumCapacity, limit);
-            for (; ; )
+            var newCapacity = capacity;
+            var minCapacity = Math.Max(MinimumCapacity, limit);
+            for (;;)
             {
                 if (newCapacity >> 1 < minCapacity)
+                {
                     break;
+                }
                 newCapacity >>= 1;
                 if (minCapacity == 0)
+                {
                     break;
+                }
             }
 
             newCapacity = Math.Max(minCapacity, newCapacity);
 
             if (newCapacity == capacity)
+            {
                 return this;
+            }
 
             // Shrink and compact:
-            Byte[] newHb = new Byte[newCapacity];
-            System.Buffer.BlockCopy(_hb, Offset(0), newHb, 0, limit);
-            _hb = newHb;
+            var newHb = new byte[newCapacity];
+            System.Buffer.BlockCopy(Hb, Offset(0), newHb, 0, limit);
+            Hb = newHb;
             _offset = 0;
 
             MarkValue = -1;
@@ -143,51 +156,57 @@ namespace Mina.Core.Buffer
         }
 
         /// <inheritdoc/>
-        public override Boolean ReadOnly
-        {
-            get { return false; }
-        }
+        public override bool ReadOnly => false;
 
         /// <inheritdoc/>
-        public override IoBuffer Compact()
+        public override IOBuffer Compact()
         {
-            Int32 remaining = Remaining;
-            Int32 capacity = Capacity;
+            var remaining = Remaining;
+            var capacity = Capacity;
 
             if (capacity == 0)
+            {
                 return this;
+            }
 
             if (AutoShrink && remaining <= (capacity >> 2) && capacity > MinimumCapacity)
             {
-                Int32 newCapacity = capacity;
-                Int32 minCapacity = Math.Max(MinimumCapacity, Remaining << 1);
-                for (; ; )
+                var newCapacity = capacity;
+                var minCapacity = Math.Max(MinimumCapacity, Remaining << 1);
+                for (;;)
                 {
                     if ((newCapacity >> 1) < minCapacity)
+                    {
                         break;
+                    }
                     newCapacity >>= 1;
                 }
                 newCapacity = Math.Max(minCapacity, newCapacity);
                 if (newCapacity == capacity)
+                {
                     return this;
+                }
 
                 // Shrink and compact:
                 // Sanity check.
                 if (remaining > newCapacity)
-                    throw new InvalidOperationException("The amount of the remaining bytes is greater than the new capacity.");
+                {
+                    throw new InvalidOperationException(
+                        "The amount of the remaining bytes is greater than the new capacity.");
+                }
 
                 // Reallocate.
-                Byte[] newHb = new Byte[newCapacity];
-                System.Buffer.BlockCopy(_hb, Offset(Position), newHb, 0, remaining);
+                var newHb = new byte[newCapacity];
+                System.Buffer.BlockCopy(Hb, Offset(Position), newHb, 0, remaining);
 
-                _hb = newHb;
+                Hb = newHb;
                 _offset = 0;
 
                 Recapacity(newCapacity);
             }
             else
             {
-                System.Buffer.BlockCopy(_hb, Offset(Position), _hb, Offset(0), Remaining);
+                System.Buffer.BlockCopy(Hb, Offset(Position), Hb, Offset(0), Remaining);
             }
 
             Position = Remaining;
@@ -202,63 +221,65 @@ namespace Mina.Core.Buffer
         }
 
         /// <inheritdoc/>
-        protected override IoBuffer Slice0()
+        protected override IOBuffer Slice0()
         {
-            return new ByteBuffer(this, _hb, -1, 0, Remaining, Remaining, Position + _offset);
+            return new ByteBuffer(this, Hb, -1, 0, Remaining, Remaining, Position + _offset);
         }
 
         /// <inheritdoc/>
-        protected override IoBuffer Duplicate0()
+        protected override IOBuffer Duplicate0()
         {
-            return new ByteBuffer(this, _hb, MarkValue, Position, Limit, Capacity, _offset);
+            return new ByteBuffer(this, Hb, MarkValue, Position, Limit, Capacity, _offset);
         }
 
         /// <inheritdoc/>
-        protected override IoBuffer AsReadOnlyBuffer0()
+        protected override IOBuffer AsReadOnlyBuffer0()
         {
-            return new ByteBufferR(this, _hb, MarkValue, Position, Limit, Capacity, _offset);
+            return new ByteBufferR(this, Hb, MarkValue, Position, Limit, Capacity, _offset);
         }
 
         /// <inheritdoc/>
-        protected override void PutInternal(Byte[] src, Int32 offset, Int32 length)
+        protected override void PutInternal(byte[] src, int offset, int length)
         {
-            System.Buffer.BlockCopy(src, offset, _hb, Offset(Position), length);
+            System.Buffer.BlockCopy(src, offset, Hb, Offset(Position), length);
             Position += length;
         }
 
         /// <inheritdoc/>
-        protected override void PutInternal(IoBuffer src)
+        protected override void PutInternal(IOBuffer src)
         {
-            ByteBuffer bb = src as ByteBuffer;
+            var bb = src as ByteBuffer;
             if (bb == null)
             {
                 base.PutInternal(src);
             }
             else
             {
-                Int32 n = bb.Remaining;
+                var n = bb.Remaining;
                 if (n > Remaining)
+                {
                     throw new OverflowException();
-                System.Buffer.BlockCopy(bb._hb, bb.Offset(bb.Position), _hb, Offset(Position), n);
+                }
+                System.Buffer.BlockCopy(bb.Hb, bb.Offset(bb.Position), Hb, Offset(Position), n);
                 bb.Position += n;
                 Position += n;
             }
         }
 
         /// <inheritdoc/>
-        protected override Byte GetInternal(Int32 i)
+        protected override byte GetInternal(int i)
         {
-            return _hb[i];
+            return Hb[i];
         }
 
         /// <inheritdoc/>
-        protected override void PutInternal(Int32 i, Byte b)
+        protected override void PutInternal(int i, byte b)
         {
-            _hb[i] = b;
+            Hb[i] = b;
         }
 
         /// <inheritdoc/>
-        protected override Int32 Offset(Int32 i)
+        protected override int Offset(int i)
         {
             return i + _offset;
         }

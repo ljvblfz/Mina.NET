@@ -5,7 +5,7 @@ using Mina.Core.Service;
 namespace Mina.Transport.Socket
 {
     /// <summary>
-    /// <see cref="IoConnector"/> for datagram transport (UDP/IP).
+    /// <see cref="IOConnector"/> for datagram transport (UDP/IP).
     /// </summary>
     public class AsyncDatagramConnector : AbstractSocketConnector, IDatagramConnector
     {
@@ -17,16 +17,10 @@ namespace Mina.Transport.Socket
         { }
 
         /// <inheritdoc/>
-        public new IDatagramSessionConfig SessionConfig
-        {
-            get { return (IDatagramSessionConfig)base.SessionConfig; }
-        }
+        public new IDatagramSessionConfig SessionConfig => (IDatagramSessionConfig)base.SessionConfig;
 
         /// <inheritdoc/>
-        public override ITransportMetadata TransportMetadata
-        {
-            get { return AsyncDatagramSession.Metadata; }
-        }
+        public override ITransportMetadata TransportMetadata => AsyncDatagramSession.Metadata;
 
         /// <inheritdoc/>
         protected override System.Net.Sockets.Socket NewSocket(AddressFamily addressFamily)
@@ -41,12 +35,12 @@ namespace Mina.Transport.Socket
              * No idea why get a SocketError.InvalidArgument in ConnectAsync.
              * Call BeginConnect instead.
              */
-            connector.Socket.BeginConnect(connector.RemoteEP, ConnectCallback, connector);
+            connector.Socket.BeginConnect(connector.RemoteEp, ConnectCallback, connector);
         }
 
         private void ConnectCallback(IAsyncResult ar)
         {
-            ConnectorContext connector = (ConnectorContext)ar.AsyncState;
+            var connector = (ConnectorContext)ar.AsyncState;
             try
             {
                 connector.Socket.EndConnect(ar);
@@ -57,15 +51,15 @@ namespace Mina.Transport.Socket
                 return;
             }
 
-            SocketAsyncEventArgs readBuffer = new SocketAsyncEventArgs();
-            readBuffer.SetBuffer(new Byte[SessionConfig.ReadBufferSize], 0, SessionConfig.ReadBufferSize);
-            readBuffer.Completed += new EventHandler<SocketAsyncEventArgs>(SocketAsyncEventArgs_Completed);
+            var readBuffer = new SocketAsyncEventArgs();
+            readBuffer.SetBuffer(new byte[SessionConfig.ReadBufferSize], 0, SessionConfig.ReadBufferSize);
+            readBuffer.Completed += SocketAsyncEventArgs_Completed;
 
-            SocketAsyncEventArgs writeBuffer = new SocketAsyncEventArgs();
-            writeBuffer.SetBuffer(new Byte[SessionConfig.ReadBufferSize], 0, SessionConfig.ReadBufferSize);
-            writeBuffer.Completed += new EventHandler<SocketAsyncEventArgs>(SocketAsyncEventArgs_Completed);
+            var writeBuffer = new SocketAsyncEventArgs();
+            writeBuffer.SetBuffer(new byte[SessionConfig.ReadBufferSize], 0, SessionConfig.ReadBufferSize);
+            writeBuffer.Completed += SocketAsyncEventArgs_Completed;
 
-            EndConnect(new AsyncDatagramSession(this, Processor, connector.Socket, connector.RemoteEP,
+            EndConnect(new AsyncDatagramSession(this, Processor, connector.Socket, connector.RemoteEp,
                 new SocketAsyncEventArgsBuffer(readBuffer), new SocketAsyncEventArgsBuffer(writeBuffer),
                 ReuseBuffer), connector);
         }

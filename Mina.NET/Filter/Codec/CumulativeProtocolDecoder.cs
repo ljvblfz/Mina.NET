@@ -10,7 +10,7 @@ namespace Mina.Filter.Codec
     /// </summary>
     public abstract class CumulativeProtocolDecoder : ProtocolDecoderAdapter
     {
-        private readonly AttributeKey BUFFER = new AttributeKey(typeof(CumulativeProtocolDecoder), "buffer");
+        private readonly AttributeKey _buffer = new AttributeKey(typeof(CumulativeProtocolDecoder), "buffer");
 
         /// <summary>
         /// </summary>
@@ -18,7 +18,7 @@ namespace Mina.Filter.Codec
         { }
 
         /// <inheritdoc/>
-        public override void Decode(IoSession session, IoBuffer input, IProtocolDecoderOutput output)
+        public override void Decode(IOSession session, IOBuffer input, IProtocolDecoderOutput output)
         {
             if (!session.TransportMetadata.HasFragmentation)
             {
@@ -31,8 +31,8 @@ namespace Mina.Filter.Codec
                 return;
             }
 
-            Boolean usingSessionBuffer = true;
-            IoBuffer buf = session.GetAttribute<IoBuffer>(BUFFER);
+            var usingSessionBuffer = true;
+            var buf = session.GetAttribute<IOBuffer>(_buffer);
 
             // If we have a session buffer, append data to that; otherwise
             // use the buffer read from the network directly.
@@ -43,7 +43,7 @@ namespace Mina.Filter.Codec
             }
             else
             {
-                Boolean appended = false;
+                var appended = false;
                 // Make sure that the buffer is auto-expanded.
                 if (buf.AutoExpand)
                 {
@@ -73,7 +73,7 @@ namespace Mina.Filter.Codec
                     // derivation or disabled auto-expansion.
                     buf.Flip();
 
-                    IoBuffer newBuf = IoBuffer.Allocate(buf.Remaining + input.Remaining);
+                    var newBuf = IOBuffer.Allocate(buf.Remaining + input.Remaining);
                     newBuf.AutoExpand = true;
                     newBuf.Order = buf.Order;
                     newBuf.Put(buf);
@@ -82,14 +82,14 @@ namespace Mina.Filter.Codec
                     buf = newBuf;
 
                     // Update the session attribute.
-                    session.SetAttribute(BUFFER, buf);
+                    session.SetAttribute(_buffer, buf);
                 }
             }
 
             while (true)
             {
-                Int32 oldPos = buf.Position;
-                Boolean decoded = DoDecode(session, buf, output);
+                var oldPos = buf.Position;
+                var decoded = DoDecode(session, buf, output);
                 if (decoded)
                 {
                     if (buf.Position == oldPos)
@@ -138,22 +138,22 @@ namespace Mina.Filter.Codec
         /// Return false if remaining data is not enough to decode,
         /// then this method will be invoked again when more data is cumulated.
         /// </returns>
-        protected abstract Boolean DoDecode(IoSession session, IoBuffer input, IProtocolDecoderOutput output);
+        protected abstract bool DoDecode(IOSession session, IOBuffer input, IProtocolDecoderOutput output);
 
-        private void RemoveSessionBuffer(IoSession session)
+        private void RemoveSessionBuffer(IOSession session)
         {
-            session.RemoveAttribute(BUFFER);
+            session.RemoveAttribute(_buffer);
         }
 
-        private void StoreRemainingInSession(IoBuffer buf, IoSession session)
+        private void StoreRemainingInSession(IOBuffer buf, IOSession session)
         {
-            IoBuffer remainingBuf = IoBuffer.Allocate(buf.Capacity);
+            var remainingBuf = IOBuffer.Allocate(buf.Capacity);
             remainingBuf.AutoExpand = true;
 
             remainingBuf.Order = buf.Order;
             remainingBuf.Put(buf);
 
-            session.SetAttribute(BUFFER, remainingBuf);
+            session.SetAttribute(_buffer, remainingBuf);
         }
     }
 }

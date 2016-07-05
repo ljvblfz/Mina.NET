@@ -14,7 +14,6 @@ using TestMethod = NUnit.Framework.TestAttribute;
 #else
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 #endif
-using Mina.Core.Filterchain;
 using Mina.Core.Buffer;
 using Mina.Filter.Codec;
 using Mina.Filter.Codec.TextLine;
@@ -25,16 +24,16 @@ namespace Mina.Filter.Ssl
     [TestClass]
     public class SslTest
     {
-        private static readonly Int32 port = 5555;
+        private static readonly int Port = 5555;
 
         [TestMethod]
-        public void TestSSL()
+        public void TestSsl()
         {
             StartServer();
 
             Exception clientError = null;
 
-            Task task = Task.Factory.StartNew(() =>
+            var task = Task.Factory.StartNew(() =>
             {
                 try
                 {
@@ -54,13 +53,13 @@ namespace Mina.Filter.Ssl
 
         private static void StartServer()
         {
-            AsyncSocketAcceptor acceptor = new AsyncSocketAcceptor();
+            var acceptor = new AsyncSocketAcceptor();
 
-            DefaultIoFilterChainBuilder filters = acceptor.FilterChain;
+            var filters = acceptor.FilterChain;
 
             // Inject the SSL filter
 
-            SslFilter sslFilter = new SslFilter(AppDomain.CurrentDomain.BaseDirectory + "\\TempCert.cer");
+            var sslFilter = new SslFilter(AppDomain.CurrentDomain.BaseDirectory + "\\TempCert.cer");
             filters.AddLast("sslFilter", sslFilter);
 
             // Inject the TestLine codec filter
@@ -68,7 +67,7 @@ namespace Mina.Filter.Ssl
 
             acceptor.MessageReceived += (s, e) =>
             {
-                String line = (String)e.Message;
+                var line = (string)e.Message;
 
                 if (line.StartsWith("hello"))
                 {
@@ -86,7 +85,7 @@ namespace Mina.Filter.Ssl
                 }
             };
 
-            acceptor.Bind(new IPEndPoint(IPAddress.Any, port));
+            acceptor.Bind(new IPEndPoint(IPAddress.Any, Port));
         }
 
         private static void StartClient()
@@ -101,7 +100,7 @@ namespace Mina.Filter.Ssl
         private static void ClientConnect()
         {
             using (var client = new AsyncSocketConnector())
-            using (var ready = new System.Threading.ManualResetEventSlim(false))
+            using (var ready = new ManualResetEventSlim(false))
             {
                 client.FilterChain.AddLast("ssl", new SslFilter("TempCert", null));
                 client.FilterChain.AddLast("text", new ProtocolCodecFilter(new TextLineCodecFactory()));
@@ -112,7 +111,7 @@ namespace Mina.Filter.Ssl
                     ready.Set();
                 };
 
-                var session = client.Connect(new IPEndPoint(IPAddress.Loopback, port)).Await().Session;
+                var session = client.Connect(new IPEndPoint(IPAddress.Loopback, Port)).Await().Session;
 
                 Debug.WriteLine("Client sending: hello");
                 session.Write("hello                      ");
@@ -127,10 +126,10 @@ namespace Mina.Filter.Ssl
                 Assert.IsFalse(ready.IsSet);
 
                 Debug.WriteLine("Client sending: hello");
-                session.Write(IoBuffer.Wrap(Encoding.UTF8.GetBytes("hello                      \n")));
+                session.Write(IOBuffer.Wrap(Encoding.UTF8.GetBytes("hello                      \n")));
 
                 Debug.WriteLine("Client sending: send");
-                session.Write(IoBuffer.Wrap(Encoding.UTF8.GetBytes("send\n")));
+                session.Write(IOBuffer.Wrap(Encoding.UTF8.GetBytes("send\n")));
 
                 ready.Wait(3000);
                 Assert.IsTrue(ready.IsSet);
@@ -141,12 +140,12 @@ namespace Mina.Filter.Ssl
 
         private static void ConnectAndSend()
         {
-            TcpClient client = new TcpClient("localhost", port);
+            var client = new TcpClient("localhost", Port);
 
-            SslStream sslStream = new SslStream(
+            var sslStream = new SslStream(
                 client.GetStream(),
                 false,
-                new RemoteCertificateValidationCallback(ValidateServerCertificate),
+                ValidateServerCertificate,
                 null
                 );
             // The server name must match the name on the server certificate.
@@ -160,10 +159,10 @@ namespace Mina.Filter.Ssl
             sslStream.Write(Encoding.UTF8.GetBytes("send\n"));
             sslStream.Flush();
 
-            String line = ReadMessage(sslStream);
+            var line = ReadMessage(sslStream);
             Debug.WriteLine("Client got: " + line);
             client.Close();
-            Assert.IsTrue(!String.IsNullOrEmpty(line));
+            Assert.IsTrue(!string.IsNullOrEmpty(line));
         }
 
         static string ReadMessage(SslStream sslStream)
@@ -171,17 +170,17 @@ namespace Mina.Filter.Ssl
             // Read the  message sent by the server.
             // The end of the message is signaled using the
             // "<EOF>" marker.
-            byte[] buffer = new byte[2048];
-            StringBuilder messageData = new StringBuilder();
-            int bytes = -1;
+            var buffer = new byte[2048];
+            var messageData = new StringBuilder();
+            var bytes = -1;
             do
             {
                 bytes = sslStream.Read(buffer, 0, buffer.Length);
 
                 // Use Decoder class to convert from bytes to UTF8
                 // in case a character spans two buffers.
-                Decoder decoder = Encoding.UTF8.GetDecoder();
-                char[] chars = new char[decoder.GetCharCount(buffer, 0, bytes)];
+                var decoder = Encoding.UTF8.GetDecoder();
+                var chars = new char[decoder.GetCharCount(buffer, 0, bytes)];
                 decoder.GetChars(buffer, 0, bytes, chars, 0);
                 messageData.Append(chars);
                 // Check for EOF.

@@ -7,23 +7,23 @@ namespace Mina.Filter.Codec.StateMachine
 {
     public abstract class DecodingStateMachine : IDecodingState
     {
-        private static readonly ILog log = LogManager.GetLogger(typeof(DecodingStateMachine));
+        private static readonly ILog Log = LogManager.GetLogger(typeof(DecodingStateMachine));
 
-        private readonly List<Object> _childProducts = new List<Object>();
+        private readonly List<object> _childProducts = new List<object>();
         private readonly ChildOutput _childOutput;
         private IDecodingState _currentState;
-        private Boolean _initialized;
+        private bool _initialized;
 
         protected DecodingStateMachine()
         {
             _childOutput = new ChildOutput(this);
         }
 
-        public IDecodingState Decode(IoBuffer input, IProtocolDecoderOutput output)
+        public IDecodingState Decode(IOBuffer input, IProtocolDecoderOutput output)
         {
-            IDecodingState state = CurrentState;
+            var state = CurrentState;
 
-            Int32 limit = input.Limit, pos = input.Position;
+            int limit = input.Limit, pos = input.Position;
 
             try
             {
@@ -33,14 +33,14 @@ namespace Mina.Filter.Codec.StateMachine
                     if (pos == limit)
                         break;
 
-                    IDecodingState oldState = state;
+                    var oldState = state;
                     state = state.Decode(input, _childOutput);
 
                     // If finished, call finishDecode
                     if (state == null)
                         return FinishDecode(_childProducts, output);
 
-                    Int32 newPos = input.Position;
+                    var newPos = input.Position;
 
                     // Wait for more data if nothing is consumed and state didn't change.
                     if (newPos == pos && oldState == state)
@@ -69,13 +69,13 @@ namespace Mina.Filter.Codec.StateMachine
         public IDecodingState FinishDecode(IProtocolDecoderOutput output)
         {
             IDecodingState nextState;
-            IDecodingState state = CurrentState;
+            var state = CurrentState;
 
             try
             {
                 while (true)
                 {
-                    IDecodingState oldState = state;
+                    var oldState = state;
                     state = state.FinishDecode(_childOutput);
                     if (state == null)
                         // Finished
@@ -89,8 +89,8 @@ namespace Mina.Filter.Codec.StateMachine
             catch (Exception ex)
             {
                 state = null;
-                if (log.IsDebugEnabled)
-                    log.Debug("Ignoring the exception caused by a closed session.", ex);
+                if (Log.IsDebugEnabled)
+                    Log.Debug("Ignoring the exception caused by a closed session.", ex);
             }
             finally
             {
@@ -115,7 +115,7 @@ namespace Mina.Filter.Codec.StateMachine
         /// which were exposed to the received data during the life time of this state machine.</param>
         /// <param name="output">the real <see cref="IProtocolDecoderOutput"/> used by the <see cref="ProtocolCodecFilter"/></param>
         /// <returns>the next state if the state machine should resume</returns>
-        protected abstract IDecodingState FinishDecode(List<Object> childProducts, IProtocolDecoderOutput output);
+        protected abstract IDecodingState FinishDecode(List<object> childProducts, IProtocolDecoderOutput output);
 
         /// <summary>
         /// Invoked to destroy this state machine once the end state has been reached
@@ -127,7 +127,7 @@ namespace Mina.Filter.Codec.StateMachine
         {
             get
             {
-                IDecodingState state = _currentState;
+                var state = _currentState;
                 if (state == null)
                 {
                     state = Init();
@@ -150,8 +150,8 @@ namespace Mina.Filter.Codec.StateMachine
             }
             catch (Exception ex)
             {
-                if (log.IsWarnEnabled)
-                    log.Warn("Failed to destroy a decoding state machine.", ex);
+                if (Log.IsWarnEnabled)
+                    Log.Warn("Failed to destroy a decoding state machine.", ex);
             }
         }
 
@@ -164,12 +164,12 @@ namespace Mina.Filter.Codec.StateMachine
                 _parent = parent;
             }
 
-            public void Write(Object message)
+            public void Write(object message)
             {
                 _parent._childProducts.Add(message);
             }
 
-            public void Flush(Core.Filterchain.INextFilter nextFilter, Core.Session.IoSession session)
+            public void Flush(Core.Filterchain.INextFilter nextFilter, Core.Session.IOSession session)
             {
                 // Do nothing
             }

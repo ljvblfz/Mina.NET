@@ -13,8 +13,8 @@ namespace Mina.Filter.Codec.StateMachine
     public class DecodingStateProtocolDecoder : IProtocolDecoder
     {
         private readonly IDecodingState _state;
-        private readonly ConcurrentQueue<IoBuffer> _undecodedBuffers = new ConcurrentQueue<IoBuffer>();
-        private IoSession _session;
+        private readonly ConcurrentQueue<IOBuffer> _undecodedBuffers = new ConcurrentQueue<IOBuffer>();
+        private IOSession _session;
 
         /// <summary>
         /// Creates a new instance using the specified <see cref="IDecodingState"/>.
@@ -24,11 +24,11 @@ namespace Mina.Filter.Codec.StateMachine
         public DecodingStateProtocolDecoder(IDecodingState state)
         {
             if (state == null)
-                throw new ArgumentNullException("state");
+                throw new ArgumentNullException(nameof(state));
             _state = state;
         }
 
-        public void Decode(IoSession session, IoBuffer input, IProtocolDecoderOutput output)
+        public void Decode(IOSession session, IOBuffer input, IProtocolDecoderOutput output)
         {
             if (_session == null)
                 _session = session;
@@ -39,13 +39,13 @@ namespace Mina.Filter.Codec.StateMachine
             _undecodedBuffers.Enqueue(input);
             while (true)
             {
-                IoBuffer b;
+                IOBuffer b;
                 if (!_undecodedBuffers.TryPeek(out b))
                     break;
 
-                Int32 oldRemaining = b.Remaining;
+                var oldRemaining = b.Remaining;
                 _state.Decode(b, output);
-                Int32 newRemaining = b.Remaining;
+                var newRemaining = b.Remaining;
                 if (newRemaining != 0)
                 {
                     if (oldRemaining == newRemaining)
@@ -59,12 +59,12 @@ namespace Mina.Filter.Codec.StateMachine
             }
         }
 
-        public void FinishDecode(IoSession session, IProtocolDecoderOutput output)
+        public void FinishDecode(IOSession session, IProtocolDecoderOutput output)
         {
             _state.FinishDecode(output);
         }
 
-        public void Dispose(IoSession session)
+        public void Dispose(IOSession session)
         {
             // Do nothing
         }

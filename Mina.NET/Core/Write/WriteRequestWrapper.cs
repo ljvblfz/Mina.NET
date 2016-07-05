@@ -9,50 +9,30 @@ namespace Mina.Core.Write
     /// </summary>
     public class WriteRequestWrapper : IWriteRequest
     {
-        private readonly IWriteRequest _inner;
-
         /// <summary>
         /// </summary>
         public WriteRequestWrapper(IWriteRequest request)
         {
             if (request == null)
-                throw new ArgumentNullException("request");
-            _inner = request;
+                throw new ArgumentNullException(nameof(request));
+            InnerRequest = request;
         }
 
         /// <inheritdoc/>
-        public IWriteRequest OriginalRequest
-        {
-            get { return _inner.OriginalRequest; }
-        }
+        public IWriteRequest OriginalRequest => InnerRequest.OriginalRequest;
 
         /// <inheritdoc/>
-        public virtual Object Message
-        {
-            get { return _inner.Message; }
-        }
+        public virtual object Message => InnerRequest.Message;
 
         /// <inheritdoc/>
-        public EndPoint Destination
-        {
-            get { return _inner.Destination; }
-        }
+        public EndPoint Destination => InnerRequest.Destination;
 
         /// <inheritdoc/>
-        public Boolean Encoded
-        {
-            get { return _inner.Encoded; }
-        }
+        public bool Encoded => InnerRequest.Encoded;
 
         /// <inheritdoc/>
-        public IWriteFuture Future
-        {
-            get { return _inner.Future; }
-        }
+        public IWriteFuture Future => InnerRequest.Future;
 
-        public IWriteRequest InnerRequest
-        {
-            get { return _inner; }
-        }
+        public IWriteRequest InnerRequest { get; }
     }
 }

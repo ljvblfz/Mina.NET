@@ -6,110 +6,100 @@ using Mina.Core.Session;
 namespace Mina.Core.Service
 {
     /// <summary>
-    /// A base implementation of <see cref="IoConnector"/>.
+    /// A base implementation of <see cref="IOConnector"/>.
     /// </summary>
-    public abstract class AbstractIoConnector : AbstractIoService, IoConnector
+    public abstract class AbstractIOConnector : AbstractIOService, IOConnector
     {
-        private Int64 _connectTimeoutInMillis = 60000L;
-        private EndPoint _defaultRemoteEP;
-        private EndPoint _defaultLocalEP;
+        private EndPoint _defaultRemoteEp;
 
         /// <summary>
         /// </summary>
-        protected AbstractIoConnector(IoSessionConfig sessionConfig)
+        protected AbstractIOConnector(IOSessionConfig sessionConfig)
             : base(sessionConfig)
         { }
 
         /// <inheritdoc/>
         public EndPoint DefaultRemoteEndPoint
         {
-            get { return _defaultRemoteEP; }
+            get { return _defaultRemoteEp; }
             set
             {
                 if (value == null)
-                    throw new ArgumentNullException("value");
+                    throw new ArgumentNullException(nameof(value));
                 if (!TransportMetadata.EndPointType.IsAssignableFrom(value.GetType()))
                     throw new ArgumentException("defaultRemoteAddress type: " + value.GetType()
                             + " (expected: " + TransportMetadata.EndPointType + ")");
-                _defaultRemoteEP = value;
+                _defaultRemoteEp = value;
             }
         }
 
         /// <inheritdoc/>
-        public EndPoint DefaultLocalEndPoint
+        public EndPoint DefaultLocalEndPoint { get; set; }
+
+        /// <inheritdoc/>
+        public int ConnectTimeout
         {
-            get { return _defaultLocalEP; }
-            set { _defaultLocalEP = value; }
+            get { return (int)(ConnectTimeoutInMillis / 1000L); }
+            set { ConnectTimeoutInMillis = value * 1000L; }
         }
 
         /// <inheritdoc/>
-        public Int32 ConnectTimeout
-        {
-            get { return (Int32)(_connectTimeoutInMillis / 1000L); }
-            set { _connectTimeoutInMillis = value * 1000L; }
-        }
-
-        /// <inheritdoc/>
-        public Int64 ConnectTimeoutInMillis
-        {
-            get { return _connectTimeoutInMillis; }
-            set { _connectTimeoutInMillis = value; }
-        }
+        public long ConnectTimeoutInMillis { get; set; } = 60000L;
 
         /// <inheritdoc/>
         public IConnectFuture Connect()
         {
-            if (_defaultRemoteEP == null)
+            if (_defaultRemoteEp == null)
                 throw new InvalidOperationException("DefaultRemoteEndPoint is not set.");
-            return Connect(_defaultRemoteEP, _defaultLocalEP, null);
+            return Connect(_defaultRemoteEp, DefaultLocalEndPoint, null);
         }
 
         /// <inheritdoc/>
-        public IConnectFuture Connect(Action<IoSession, IConnectFuture> sessionInitializer)
+        public IConnectFuture Connect(Action<IOSession, IConnectFuture> sessionInitializer)
         {
-            if (_defaultRemoteEP == null)
+            if (_defaultRemoteEp == null)
                 throw new InvalidOperationException("DefaultRemoteEndPoint is not set.");
-            return Connect(_defaultRemoteEP, _defaultLocalEP, sessionInitializer);
+            return Connect(_defaultRemoteEp, DefaultLocalEndPoint, sessionInitializer);
         }
 
         /// <inheritdoc/>
-        public IConnectFuture Connect(EndPoint remoteEP)
+        public IConnectFuture Connect(EndPoint remoteEp)
         {
-            return Connect(remoteEP, _defaultLocalEP, null);
+            return Connect(remoteEp, DefaultLocalEndPoint, null);
         }
 
         /// <inheritdoc/>
-        public IConnectFuture Connect(EndPoint remoteEP, Action<IoSession, IConnectFuture> sessionInitializer)
+        public IConnectFuture Connect(EndPoint remoteEp, Action<IOSession, IConnectFuture> sessionInitializer)
         {
-            return Connect(remoteEP, _defaultLocalEP, sessionInitializer);
+            return Connect(remoteEp, DefaultLocalEndPoint, sessionInitializer);
         }
 
         /// <inheritdoc/>
-        public IConnectFuture Connect(EndPoint remoteEP, EndPoint localEP)
+        public IConnectFuture Connect(EndPoint remoteEp, EndPoint localEp)
         {
-            return Connect(remoteEP, localEP, null);
+            return Connect(remoteEp, localEp, null);
         }
 
         /// <inheritdoc/>
-        public IConnectFuture Connect(EndPoint remoteEP, EndPoint localEP, Action<IoSession, IConnectFuture> sessionInitializer)
+        public IConnectFuture Connect(EndPoint remoteEp, EndPoint localEp, Action<IOSession, IConnectFuture> sessionInitializer)
         {
             if (Disposed)
-                throw new ObjectDisposedException(this.GetType().Name);
+                throw new ObjectDisposedException(GetType().Name);
 
-            if (remoteEP == null)
-                throw new ArgumentNullException("remoteEP");
+            if (remoteEp == null)
+                throw new ArgumentNullException(nameof(remoteEp));
 
-            if (!TransportMetadata.EndPointType.IsAssignableFrom(remoteEP.GetType()))
-                throw new ArgumentException("remoteAddress type: " + remoteEP.GetType() + " (expected: "
+            if (!TransportMetadata.EndPointType.IsAssignableFrom(remoteEp.GetType()))
+                throw new ArgumentException("remoteAddress type: " + remoteEp.GetType() + " (expected: "
                         + TransportMetadata.EndPointType + ")");
 
-            return Connect0(remoteEP, localEP, sessionInitializer);
+            return Connect0(remoteEp, localEp, sessionInitializer);
         }
 
         /// <inheritdoc/>
         public override string ToString()
         {
-            ITransportMetadata m = TransportMetadata;
+            var m = TransportMetadata;
             return '(' + m.ProviderName + ' ' + m.Name + " connector: " + "managedSessionCount: "
                     + ManagedSessions.Count + ')';
         }
@@ -117,10 +107,10 @@ namespace Mina.Core.Service
         /// <summary>
         /// Implement this method to perform the actual connect operation.
         /// </summary>
-        protected abstract IConnectFuture Connect0(EndPoint remoteEP, EndPoint localEP, Action<IoSession, IConnectFuture> sessionInitializer);
+        protected abstract IConnectFuture Connect0(EndPoint remoteEp, EndPoint localEp, Action<IOSession, IConnectFuture> sessionInitializer);
 
         /// <inheritdoc/>
-        protected override void FinishSessionInitialization0(IoSession session, IoFuture future)
+        protected override void FinishSessionInitialization0(IOSession session, IOFuture future)
         {
             // In case that IConnectFuture.Cancel() is invoked before
             // SetSession() is invoked, add a listener that closes the

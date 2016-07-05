@@ -5,8 +5,8 @@
     /// </summary>
     public enum MessageDecoderResult
     {
-        OK,
+        Ok,
         NeedData,
-        NotOK
+        NotOk
     }
 }

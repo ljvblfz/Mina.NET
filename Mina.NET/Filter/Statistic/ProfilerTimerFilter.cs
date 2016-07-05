@@ -8,23 +8,23 @@ namespace Mina.Filter.Statistic
 {
     /// <summary>
     /// This class will measure the time it takes for a
-    /// method in the <see cref="IoFilter"/> class to execute.
+    /// method in the <see cref="IOFilter"/> class to execute.
     /// </summary>
     public class ProfilerTimerFilter : IoFilterAdapter
     {
         private volatile TimeUnit _timeUnit;
 
-        private Boolean _profileMessageReceived;
+        private bool _profileMessageReceived;
         private TimerWorker _messageReceivedTimerWorker;
-        private Boolean _profileMessageSent;
+        private bool _profileMessageSent;
         private TimerWorker _messageSentTimerWorker;
-        private Boolean _profileSessionCreated;
+        private bool _profileSessionCreated;
         private TimerWorker _sessionCreatedTimerWorker;
-        private Boolean _profileSessionOpened;
+        private bool _profileSessionOpened;
         private TimerWorker _sessionOpenedTimerWorker;
-        private Boolean _profileSessionIdle;
+        private bool _profileSessionIdle;
         private TimerWorker _sessionIdleTimerWorker;
-        private Boolean _profileSessionClosed;
+        private bool _profileSessionClosed;
         private TimerWorker _sessionClosedTimerWorker;
 
         /// <summary>
@@ -71,7 +71,7 @@ namespace Mina.Filter.Statistic
         {
             get
             {
-                IoEventType et = default(IoEventType);
+                var et = default(IoEventType);
                 
                 if (_profileMessageReceived)
                     et |= IoEventType.MessageReceived;
@@ -94,7 +94,7 @@ namespace Mina.Filter.Statistic
         /// <summary>
         /// Get the average time for the specified method represented by the <see cref="IoEventType"/>.
         /// </summary>
-        public Double GetAverageTime(IoEventType type)
+        public double GetAverageTime(IoEventType type)
         {
             return GetTimerWorker(type).Average;
         }
@@ -103,78 +103,78 @@ namespace Mina.Filter.Statistic
         /// Gets the total number of times the method has been called that is represented
         /// by the <see cref="IoEventType"/>.
         /// </summary>
-        public Int64 GetTotalCalls(IoEventType type)
+        public long GetTotalCalls(IoEventType type)
         {
-            return GetTimerWorker(type).callsNumber;
+            return GetTimerWorker(type).CallsNumber;
         }
 
         /// <summary>
         /// Gets the total time this method has been executing.
         /// </summary>
-        public Int64 GetTotalTime(IoEventType type)
+        public long GetTotalTime(IoEventType type)
         {
-            return GetTimerWorker(type).total;
+            return GetTimerWorker(type).Total;
         }
 
         /// <summary>
         /// Gets minimum time the method represented by <see cref="IoEventType"/> has executed.
         /// </summary>
-        public Int64 GetMinimumTime(IoEventType type)
+        public long GetMinimumTime(IoEventType type)
         {
-            return GetTimerWorker(type).minimum;
+            return GetTimerWorker(type).Minimum;
         }
 
         /// <summary>
         /// Gets maximum time the method represented by <see cref="IoEventType"/> has executed.
         /// </summary>
-        public Int64 GetMaximumTime(IoEventType type)
+        public long GetMaximumTime(IoEventType type)
         {
-            return GetTimerWorker(type).maximum;
+            return GetTimerWorker(type).Maximum;
         }
 
         /// <inheritdoc/>
-        public override void MessageReceived(INextFilter nextFilter, IoSession session, Object message)
+        public override void MessageReceived(INextFilter nextFilter, IOSession session, object message)
         {
             Profile(_profileMessageReceived, _messageReceivedTimerWorker, () => nextFilter.MessageReceived(session, message));
         }
 
         /// <inheritdoc/>
-        public override void MessageSent(INextFilter nextFilter, IoSession session, IWriteRequest writeRequest)
+        public override void MessageSent(INextFilter nextFilter, IOSession session, IWriteRequest writeRequest)
         {
             Profile(_profileMessageSent, _messageSentTimerWorker, () => nextFilter.MessageSent(session, writeRequest));
         }
 
         /// <inheritdoc/>
-        public override void SessionCreated(INextFilter nextFilter, IoSession session)
+        public override void SessionCreated(INextFilter nextFilter, IOSession session)
         {
             Profile(_profileSessionCreated, _sessionCreatedTimerWorker, () => nextFilter.SessionCreated(session));
         }
 
         /// <inheritdoc/>
-        public override void SessionOpened(INextFilter nextFilter, IoSession session)
+        public override void SessionOpened(INextFilter nextFilter, IOSession session)
         {
             Profile(_profileSessionOpened, _sessionOpenedTimerWorker, () => nextFilter.SessionOpened(session));
         }
 
         /// <inheritdoc/>
-        public override void SessionIdle(INextFilter nextFilter, IoSession session, IdleStatus status)
+        public override void SessionIdle(INextFilter nextFilter, IOSession session, IdleStatus status)
         {
             Profile(_profileSessionIdle, _sessionIdleTimerWorker, () => nextFilter.SessionIdle(session, status));
         }
 
         /// <inheritdoc/>
-        public override void SessionClosed(INextFilter nextFilter, IoSession session)
+        public override void SessionClosed(INextFilter nextFilter, IOSession session)
         {
             Profile(_profileSessionClosed, _sessionClosedTimerWorker, () => nextFilter.SessionClosed(session));
         }
 
-        private void Profile(Boolean profile, TimerWorker worker, Action action)
+        private void Profile(bool profile, TimerWorker worker, Action action)
         {
             if (profile)
             {
-                Int64 start = TimeNow();
+                var start = TimeNow();
                 action();
-                Int64 end = TimeNow();
+                var end = TimeNow();
                 worker.AddNewDuration(end - start);
             }
             else
@@ -252,7 +252,7 @@ namespace Mina.Filter.Statistic
             }
         }
 
-        private Int64 TimeNow()
+        private long TimeNow()
         {
             switch (_timeUnit)
             {
@@ -270,39 +270,36 @@ namespace Mina.Filter.Statistic
             /// <summary>
             /// The sum of all operation durations
             /// </summary>
-            public Int64 total;
+            public long Total;
             /// <summary>
             /// The number of calls
             /// </summary>
-            public Int64 callsNumber;
+            public long CallsNumber;
             /// <summary>
             /// The fastest operation
             /// </summary>
-            public Int64 minimum = Int64.MaxValue;
+            public long Minimum = long.MaxValue;
             /// <summary>
             /// The slowest operation
             /// </summary>
-            public Int64 maximum;
+            public long Maximum;
 
-            private Object _syncRoot = new Byte[0];
+            private object _syncRoot = new byte[0];
 
-            public void AddNewDuration(Int64 duration)
+            public void AddNewDuration(long duration)
             {
-                Interlocked.Increment(ref callsNumber);
-                Interlocked.Add(ref total, duration);
+                Interlocked.Increment(ref CallsNumber);
+                Interlocked.Add(ref Total, duration);
                 lock (_syncRoot)
                 {
-                    if (duration < minimum)
-                        minimum = duration;
-                    if (duration > maximum)
-                        maximum = duration;
+                    if (duration < Minimum)
+                        Minimum = duration;
+                    if (duration > Maximum)
+                        Maximum = duration;
                 }
             }
 
-            public Double Average
-            {
-                get { return total / callsNumber; }
-            }
+            public double Average => Total / CallsNumber;
         }
     }
 

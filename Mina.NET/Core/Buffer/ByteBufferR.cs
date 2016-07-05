@@ -3,74 +3,71 @@
 namespace Mina.Core.Buffer
 {
     /// <summary>
-    /// A read-only ByteBuffer. 
+    /// A read-only ByteBuffer.
     /// </summary>
-    class ByteBufferR : ByteBuffer
+    public class ByteBufferR : ByteBuffer
     {
-        ByteBufferR(IoBufferAllocator allocator, Int32 cap, Int32 lim)
-            : base(allocator, cap, lim)
+        public ByteBufferR(IOBufferAllocator allocator, int capacity, int limit)
+            : base(allocator, capacity, limit)
         {
             _readOnly = true;
         }
 
-        ByteBufferR(IoBufferAllocator allocator, Byte[] buf, Int32 off, Int32 len)
-            : base(allocator, buf, off, len)
+        public ByteBufferR(IOBufferAllocator allocator, byte[] buffer, int offset, int len)
+            : base(allocator, buffer, offset, len)
         {
             _readOnly = true;
         }
 
-        public ByteBufferR(ByteBuffer parent, Byte[] buf, Int32 mark, Int32 pos, Int32 lim, Int32 cap, Int32 off)
-            : base(parent, buf, mark, pos, lim, cap, off)
+        public ByteBufferR(ByteBuffer parent, byte[] buffer, int mark, int position, int limit, int capacity, int offset)
+            : base(parent, buffer, mark, position, limit, capacity, offset)
         {
             _readOnly = true;
         }
 
-        public override Boolean ReadOnly
-        {
-            get { return true; }
-        }
+        public override bool ReadOnly => true;
 
-        public override IoBuffer Fill(Byte value, Int32 size)
+        public override IOBuffer Fill(byte value, int size)
         {
             throw new NotSupportedException();
         }
 
-        public override IoBuffer Fill(Int32 size)
+        public override IOBuffer Fill(int size)
         {
             throw new NotSupportedException();
         }
 
-        public override IoBuffer Compact()
+        public override IOBuffer Compact()
         {
             throw new NotSupportedException();
         }
 
-        protected override IoBuffer Slice0()
+        protected override IOBuffer Slice0()
         {
-            return new ByteBufferR(this, _hb, -1, 0, Remaining, Remaining, Position + _offset);
+            return new ByteBufferR(this, Hb, -1, 0, Remaining, Remaining, Position + _offset);
         }
 
-        protected override IoBuffer Duplicate0()
+        protected override IOBuffer Duplicate0()
         {
-            return new ByteBufferR(this, _hb, MarkValue, Position, Limit, Capacity, _offset);
+            return new ByteBufferR(this, Hb, MarkValue, Position, Limit, Capacity, _offset);
         }
 
-        protected override IoBuffer AsReadOnlyBuffer0()
+        protected override IOBuffer AsReadOnlyBuffer0()
         {
             return Duplicate();
         }
 
-        protected override void PutInternal(Int32 i, Byte b)
+        protected override void PutInternal(int i, byte b)
         {
             throw new NotSupportedException();
         }
 
-        protected override void PutInternal(Byte[] src, Int32 offset, Int32 length)
+        protected override void PutInternal(byte[] src, int offset, int length)
         {
             throw new NotSupportedException();
         }
 
-        protected override void PutInternal(IoBuffer src)
+        protected override void PutInternal(IOBuffer src)
         {
             throw new NotSupportedException();
         }

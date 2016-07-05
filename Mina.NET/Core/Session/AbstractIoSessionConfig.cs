@@ -3,73 +3,52 @@
 namespace Mina.Core.Session
 {
     /// <summary>
-    /// A base implementation of <see cref="IoSessionConfig"/>.
+    /// A base implementation of <see cref="IOSessionConfig"/>.
     /// </summary>
-    public abstract class AbstractIoSessionConfig : IoSessionConfig
+    public abstract class AbstractIoSessionConfig : IOSessionConfig
     {
-        private Int32 _readBufferSize = 2048;
-        private Int32 _idleTimeForRead;
-        private Int32 _idleTimeForWrite;
-        private Int32 _idleTimeForBoth;
-        private Int32 _writeTimeout = 60;
-        private Int32 _throughputCalculationInterval = 3;
+        private int _idleTimeForRead;
+        private int _idleTimeForWrite;
+        private int _idleTimeForBoth;
 
         /// <inheritdoc/>
-        public Int32 ReadBufferSize
-        {
-            get { return _readBufferSize; }
-            set { _readBufferSize = value; }
-        }
+        public int ReadBufferSize { get; set; } = 2048;
 
         /// <inheritdoc/>
-        public Int32 ThroughputCalculationInterval
-        {
-            get { return _throughputCalculationInterval; }
-            set { _throughputCalculationInterval = value; }
-        }
+        public int ThroughputCalculationInterval { get; set; } = 3;
 
         /// <inheritdoc/>
-        public Int64 ThroughputCalculationIntervalInMillis
-        {
-            get { return _throughputCalculationInterval * 1000L; }
-        }
+        public long ThroughputCalculationIntervalInMillis => ThroughputCalculationInterval * 1000L;
 
         /// <inheritdoc/>
-        public Int32 WriteTimeout
-        {
-            get { return _writeTimeout; }
-            set { _writeTimeout = value; }
-        }
+        public int WriteTimeout { get; set; } = 60;
 
         /// <inheritdoc/>
-        public Int64 WriteTimeoutInMillis
-        {
-            get { return _writeTimeout * 1000L; }
-        }
+        public long WriteTimeoutInMillis => WriteTimeout * 1000L;
 
         /// <inheritdoc/>
-        public Int32 ReaderIdleTime
+        public int ReaderIdleTime
         {
             get { return GetIdleTime(IdleStatus.ReaderIdle); }
             set { SetIdleTime(IdleStatus.ReaderIdle, value); }
         }
 
         /// <inheritdoc/>
-        public Int32 WriterIdleTime
+        public int WriterIdleTime
         {
             get { return GetIdleTime(IdleStatus.WriterIdle); }
             set { SetIdleTime(IdleStatus.WriterIdle, value); }
         }
 
         /// <inheritdoc/>
-        public Int32 BothIdleTime
+        public int BothIdleTime
         {
             get { return GetIdleTime(IdleStatus.BothIdle); }
             set { SetIdleTime(IdleStatus.BothIdle, value); }
         }
 
         /// <inheritdoc/>
-        public Int32 GetIdleTime(IdleStatus status)
+        public int GetIdleTime(IdleStatus status)
         {
             switch (status)
             {
@@ -80,18 +59,18 @@ namespace Mina.Core.Session
                 case IdleStatus.BothIdle:
                     return _idleTimeForBoth;
                 default:
-                    throw new ArgumentException("Unknown status", "status");
+                    throw new ArgumentException("Unknown status", nameof(status));
             }
         }
 
         /// <inheritdoc/>
-        public Int64 GetIdleTimeInMillis(IdleStatus status)
+        public long GetIdleTimeInMillis(IdleStatus status)
         {
             return GetIdleTime(status) * 1000L;
         }
 
         /// <inheritdoc/>
-        public void SetIdleTime(IdleStatus status, Int32 idleTime)
+        public void SetIdleTime(IdleStatus status, int idleTime)
         {
             switch (status)
             {
@@ -105,15 +84,15 @@ namespace Mina.Core.Session
                     _idleTimeForBoth = idleTime;
                     break;
                 default:
-                    throw new ArgumentException("Unknown status", "status");
+                    throw new ArgumentException("Unknown status", nameof(status));
             }
         }
 
         /// <inheritdoc/>
-        public void SetAll(IoSessionConfig config)
+        public void SetAll(IOSessionConfig config)
         {
             if (config == null)
-                throw new ArgumentNullException("config");
+                throw new ArgumentNullException(nameof(config));
             ReadBufferSize = config.ReadBufferSize;
             SetIdleTime(IdleStatus.BothIdle, config.GetIdleTime(IdleStatus.BothIdle));
             SetIdleTime(IdleStatus.ReaderIdle, config.GetIdleTime(IdleStatus.ReaderIdle));
@@ -122,6 +101,6 @@ namespace Mina.Core.Session
             DoSetAll(config);
         }
 
-        protected abstract void DoSetAll(IoSessionConfig config);
+        protected abstract void DoSetAll(IOSessionConfig config);
     }
 }

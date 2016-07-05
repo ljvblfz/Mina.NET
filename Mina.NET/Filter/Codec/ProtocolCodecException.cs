@@ -17,13 +17,13 @@ namespace Mina.Filter.Codec
 
         /// <summary>
         /// </summary>
-        public ProtocolCodecException(String message)
+        public ProtocolCodecException(string message)
             : base(message)
         { }
 
         /// <summary>
         /// </summary>
-        public ProtocolCodecException(String message, Exception innerException)
+        public ProtocolCodecException(string message, Exception innerException)
             : base(message, innerException)
         { }
 
@@ -49,13 +49,13 @@ namespace Mina.Filter.Codec
 
         /// <summary>
         /// </summary>
-        public ProtocolEncoderException(String message)
+        public ProtocolEncoderException(string message)
             : base(message)
         { }
 
         /// <summary>
         /// </summary>
-        public ProtocolEncoderException(String message, Exception innerException)
+        public ProtocolEncoderException(string message, Exception innerException)
             : base(message, innerException)
         { }
 
@@ -69,13 +69,13 @@ namespace Mina.Filter.Codec
 
     /// <summary>
     /// An exception that is thrown when <see cref="IProtocolDecoder"/>
-    /// cannot understand or failed to validate the specified <see cref="Core.Buffer.IoBuffer"/>
+    /// cannot understand or failed to validate the specified <see cref="Core.Buffer.IOBuffer"/>
     /// content.
     /// </summary>
     [Serializable]
     public class ProtocolDecoderException : ProtocolCodecException
     {
-        private String _hexdump;
+        private string _hexdump;
 
         /// <summary>
         /// </summary>
@@ -84,13 +84,13 @@ namespace Mina.Filter.Codec
 
         /// <summary>
         /// </summary>
-        public ProtocolDecoderException(String message)
+        public ProtocolDecoderException(string message)
             : base(message)
         { }
 
         /// <summary>
         /// </summary>
-        public ProtocolDecoderException(String message, Exception innerException)
+        public ProtocolDecoderException(string message, Exception innerException)
             : base(message, innerException)
         { }
 
@@ -104,7 +104,7 @@ namespace Mina.Filter.Codec
         /// <summary>
         /// Gets the current data in hex.
         /// </summary>
-        public String Hexdump
+        public string Hexdump
         {
             get { return _hexdump; }
             set

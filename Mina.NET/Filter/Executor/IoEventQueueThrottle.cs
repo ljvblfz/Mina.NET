@@ -8,70 +8,70 @@ namespace Mina.Filter.Executor
     /// <summary>
     /// Throttles incoming or outgoing events.
     /// </summary>
-    public class IoEventQueueThrottle : IoEventQueueHandler
+    public class IoEventQueueThrottle : IOEventQueueHandler
     {
-        static readonly ILog log = LogManager.GetLogger(typeof(IoEventQueueThrottle));
+        static readonly ILog Log = LogManager.GetLogger(typeof(IoEventQueueThrottle));
 
-        private volatile Int32 _threshold;
-        private readonly IoEventSizeEstimator _sizeEstimator;
-        private readonly Object _syncRoot = new Byte[0];
-        private Int32 _counter;
-        private Int32 _waiters;
+        private volatile int _threshold;
+        private readonly IOEventSizeEstimator _sizeEstimator;
+        private readonly object _syncRoot = new byte[0];
+        private int _counter;
+        private int _waiters;
 
         public IoEventQueueThrottle()
             : this(new DefaultIoEventSizeEstimator(), 65536)
         { }
 
-        public IoEventQueueThrottle(Int32 threshold)
+        public IoEventQueueThrottle(int threshold)
             : this(new DefaultIoEventSizeEstimator(), threshold)
         { }
 
-        public IoEventQueueThrottle(IoEventSizeEstimator sizeEstimator, Int32 threshold)
+        public IoEventQueueThrottle(IOEventSizeEstimator sizeEstimator, int threshold)
         {
             if (sizeEstimator == null)
-                throw new ArgumentNullException("sizeEstimator");
+                throw new ArgumentNullException(nameof(sizeEstimator));
             _sizeEstimator = sizeEstimator;
             Threshold = threshold;
         }
 
-        public Int32 Threshold
+        public int Threshold
         {
             get { return _threshold; }
             set
             {
                 if (value <= 0)
-                    throw new ArgumentException("Threshold should be greater than 0", "value");
+                    throw new ArgumentException("Threshold should be greater than 0", nameof(value));
                 _threshold = value;
             }
         }
 
         /// <inheritdoc/>
-        public Boolean Accept(Object source, IoEvent ioe)
+        public bool Accept(object source, IoEvent ioe)
         {
             return true;
         }
 
         /// <inheritdoc/>
-        public void Offered(Object source, IoEvent ioe)
+        public void Offered(object source, IoEvent ioe)
         {
-            Int32 eventSize = EstimateSize(ioe);
-            Int32 currentCounter = Interlocked.Add(ref _counter, eventSize);
+            var eventSize = EstimateSize(ioe);
+            var currentCounter = Interlocked.Add(ref _counter, eventSize);
 
-            if (log.IsDebugEnabled)
-                log.Debug(Thread.CurrentThread.Name + " state: " + _counter + " / " + _threshold);
+            if (Log.IsDebugEnabled)
+                Log.Debug(Thread.CurrentThread.Name + " state: " + _counter + " / " + _threshold);
 
             if (currentCounter >= _threshold)
                 Block();
         }
 
         /// <inheritdoc/>
-        public void Polled(Object source, IoEvent ioe)
+        public void Polled(object source, IoEvent ioe)
         {
-            Int32 eventSize = EstimateSize(ioe);
-            Int32 currentCounter = Interlocked.Add(ref _counter, -eventSize);
+            var eventSize = EstimateSize(ioe);
+            var currentCounter = Interlocked.Add(ref _counter, -eventSize);
 
-            if (log.IsDebugEnabled)
-                log.Debug(Thread.CurrentThread.Name + " state: " + _counter + " / " + _threshold);
+            if (Log.IsDebugEnabled)
+                Log.Debug(Thread.CurrentThread.Name + " state: " + _counter + " / " + _threshold);
 
             if (currentCounter < _threshold)
                 Unblock();
@@ -79,8 +79,8 @@ namespace Mina.Filter.Executor
 
         protected void Block()
         {
-            if (log.IsDebugEnabled)
-                log.Debug(Thread.CurrentThread.Name + " blocked: " + _counter + " >= " + _threshold);
+            if (Log.IsDebugEnabled)
+                Log.Debug(Thread.CurrentThread.Name + " blocked: " + _counter + " >= " + _threshold);
 
             lock (_syncRoot)
             {
@@ -102,8 +102,8 @@ namespace Mina.Filter.Executor
                 }
             }
 
-            if (log.IsDebugEnabled)
-                log.Debug(Thread.CurrentThread.Name + " unblocked: " + _counter + " < " + _threshold);
+            if (Log.IsDebugEnabled)
+                Log.Debug(Thread.CurrentThread.Name + " unblocked: " + _counter + " < " + _threshold);
         }
 
         protected void Unblock()
@@ -117,9 +117,9 @@ namespace Mina.Filter.Executor
             }
         }
 
-        private Int32 EstimateSize(IoEvent ioe)
+        private int EstimateSize(IoEvent ioe)
         {
-            Int32 size = _sizeEstimator.EstimateSize(ioe);
+            var size = _sizeEstimator.EstimateSize(ioe);
             if (size < 0)
                 throw new InvalidOperationException(_sizeEstimator.GetType().Name + " returned "
                         + "a negative value (" + size + "): " + ioe);

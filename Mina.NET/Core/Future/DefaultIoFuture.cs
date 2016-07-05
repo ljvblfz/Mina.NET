@@ -9,24 +9,24 @@ using Interlocked = Mina.Util.InterlockedUtil;
 namespace Mina.Core.Future
 {
     /// <summary>
-    /// A default implementation of <see cref="IoFuture"/> associated with an <see cref="IoSession"/>.
+    /// A default implementation of <see cref="IOFuture"/> associated with an <see cref="IOSession"/>.
     /// </summary>
-    public class DefaultIoFuture : IoFuture, IDisposable
+    public class DefaultIoFuture : IOFuture, IDisposable
     {
-        private readonly IoSession _session;
-        private volatile Boolean _ready;
+        private readonly IOSession _session;
+        private volatile bool _ready;
 #if NET20
         private readonly ManualResetEvent _readyEvent = new ManualResetEvent(false);
 #else
         private readonly ManualResetEventSlim _readyEvent = new ManualResetEventSlim(false);
 #endif
-        private Object _value;
+        private object _value;
         private EventHandler<IoFutureEventArgs> _complete;
-        private Boolean _disposed;
+        private bool _disposed;
 
         /// <summary>
         /// </summary>
-        public DefaultIoFuture(IoSession session)
+        public DefaultIoFuture(IOSession session)
         {
             _session = session;
         }
@@ -37,11 +37,11 @@ namespace Mina.Core.Future
             add
             {
                 EventHandler<IoFutureEventArgs> tmp;
-                EventHandler<IoFutureEventArgs> complete = _complete;
+                var complete = _complete;
                 do
                 {
                     tmp = complete;
-                    EventHandler<IoFutureEventArgs> newComplete = (EventHandler<IoFutureEventArgs>)Delegate.Combine(tmp, value);
+                    var newComplete = (EventHandler<IoFutureEventArgs>)Delegate.Combine(tmp, value);
                     complete = Interlocked.CompareExchange(ref _complete, newComplete, tmp);
                 }
                 while (complete != tmp);
@@ -52,11 +52,11 @@ namespace Mina.Core.Future
             remove
             {
                 EventHandler<IoFutureEventArgs> tmp;
-                EventHandler<IoFutureEventArgs> complete = _complete;
+                var complete = _complete;
                 do
                 {
                     tmp = complete;
-                    EventHandler<IoFutureEventArgs> newComplete = (EventHandler<IoFutureEventArgs>)Delegate.Remove(tmp, value);
+                    var newComplete = (EventHandler<IoFutureEventArgs>)Delegate.Remove(tmp, value);
                     complete = Interlocked.CompareExchange(ref _complete, newComplete, tmp);
                 }
                 while (complete != tmp);
@@ -64,21 +64,15 @@ namespace Mina.Core.Future
         }
 
         /// <inheritdoc/>
-        public virtual IoSession Session
-        {
-            get { return _session; }
-        }
+        public virtual IOSession Session => _session;
 
         /// <inheritdoc/>
-        public Boolean Done
-        {
-            get { return _ready; }
-        }
+        public bool Done => _ready;
 
         /// <summary>
         /// Gets or sets the value associated with this future.
         /// </summary>
-        public Object Value
+        public object Value
         {
             get { return _value; }
             set
@@ -103,7 +97,7 @@ namespace Mina.Core.Future
         /// <code>true</code> if the value has been set,
         /// <code>false</code> if the future already has a value (thus is in ready state).
         /// </returns>
-        public Boolean SetValue(Object value)
+        public bool SetValue(object value)
         {
             lock (this)
             {
@@ -118,14 +112,14 @@ namespace Mina.Core.Future
         }
 
         /// <inheritdoc/>
-        public IoFuture Await()
+        public IOFuture Await()
         {
             Await0(Timeout.Infinite);
             return this;
         }
 
         /// <inheritdoc/>
-        public Boolean Await(Int32 millisecondsTimeout)
+        public bool Await(int millisecondsTimeout)
         {
             return Await0(millisecondsTimeout);
         }
@@ -142,19 +136,19 @@ namespace Mina.Core.Future
         /// <summary>
         /// Disposes resources.
         /// </summary>
-        protected virtual void Dispose(Boolean disposing)
+        protected virtual void Dispose(bool disposing)
         {
             if (!_disposed)
             {
                 if (disposing)
                 {
-                    ((IDisposable)_readyEvent).Dispose();
+                    _readyEvent.Dispose();
                     _disposed = true;
                 }
             }
         }
 
-        private Boolean Await0(Int32 millisecondsTimeout)
+        private bool Await0(int millisecondsTimeout)
         {
             if (_ready)
                 return _ready;
@@ -173,10 +167,10 @@ namespace Mina.Core.Future
 
         private void OnComplete()
         {
-            EventHandler<IoFutureEventArgs> complete = _complete;
+            var complete = _complete;
             if (complete != null)
             {
-                Delegate[] handlers = complete.GetInvocationList();
+                var handlers = complete.GetInvocationList();
                 foreach (var current in handlers)
                 {
                     OnComplete((EventHandler<IoFutureEventArgs>)current);

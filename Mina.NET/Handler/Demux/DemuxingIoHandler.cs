@@ -7,10 +7,10 @@ using Mina.Core.Session;
 namespace Mina.Handler.Demux
 {
     /// <summary>
-    /// A <see cref="IoHandler"/> that demuxes <code>MessageReceived</code> events
+    /// A <see cref="IOHandler"/> that demuxes <code>MessageReceived</code> events
     /// to the appropriate <see cref="IMessageHandler"/>.
     /// </summary>
-    public class DemuxingIoHandler : IoHandlerAdapter
+    public class DemuxingIoHandler : IOHandlerAdapter
     {
         private readonly ConcurrentDictionary<Type, IMessageHandler> _receivedMessageHandlers
             = new ConcurrentDictionary<Type, IMessageHandler>();
@@ -69,57 +69,54 @@ namespace Mina.Handler.Demux
 
         /// <summary>
         /// Registers a <see cref="IMessageHandler&lt;T&gt;"/> that handles exceptions of
-        /// the specified <typeparamref name="E"/>.
+        /// the specified <typeparamref name="TE"/>.
         /// </summary>
         /// <returns>the old handler if there is already a registered handler for the specified type</returns>
-        public IExceptionHandler<E> AddExceptionHandler<E>(IExceptionHandler<E> handler)
-            where E : Exception
+        public IExceptionHandler<TE> AddExceptionHandler<TE>(IExceptionHandler<TE> handler)
+            where TE : Exception
         {
-            return (IExceptionHandler<E>)AddHandler(_exceptionHandlers, _exceptionHandlerCache, typeof(E), handler);
+            return (IExceptionHandler<TE>)AddHandler(_exceptionHandlers, _exceptionHandlerCache, typeof(TE), handler);
         }
 
         /// <summary>
         /// Deregisters a <see cref="IMessageHandler&lt;T&gt;"/> that handles exceptions of
-        /// the specified <typeparamref name="E"/>.
+        /// the specified <typeparamref name="TE"/>.
         /// </summary>
         /// <returns>the removed handler if successfully removed, null otherwise</returns>
-        public IExceptionHandler<E> RemoveExceptionHandler<E>()
-            where E : Exception
+        public IExceptionHandler<TE> RemoveExceptionHandler<TE>()
+            where TE : Exception
         {
-            return (IExceptionHandler<E>)RemoveHandler(_exceptionHandlers, _exceptionHandlerCache, typeof(E));
+            return (IExceptionHandler<TE>)RemoveHandler(_exceptionHandlers, _exceptionHandlerCache, typeof(TE));
         }
 
         /// <inheritdoc/>
-        public override void MessageReceived(IoSession session, Object message)
+        public override void MessageReceived(IOSession session, object message)
         {
-            IMessageHandler handler = FindReceivedMessageHandler(message.GetType());
+            var handler = FindReceivedMessageHandler(message.GetType());
             if (handler == null)
                 throw new UnknownMessageTypeException("No message handler found for message type: "
                     + message.GetType().Name);
-            else
-                handler.HandleMessage(session, message);
+            handler.HandleMessage(session, message);
         }
 
         /// <inheritdoc/>
-        public override void MessageSent(IoSession session, Object message)
+        public override void MessageSent(IOSession session, object message)
         {
-            IMessageHandler handler = FindSentMessageHandler(message.GetType());
+            var handler = FindSentMessageHandler(message.GetType());
             if (handler == null)
                 throw new UnknownMessageTypeException("No message handler found for message type: "
                     + message.GetType().Name);
-            else
-                handler.HandleMessage(session, message);
+            handler.HandleMessage(session, message);
         }
 
         /// <inheritdoc/>
-        public override void ExceptionCaught(IoSession session, Exception cause)
+        public override void ExceptionCaught(IOSession session, Exception cause)
         {
-            IExceptionHandler handler = FindExceptionHandler(cause.GetType());
+            var handler = FindExceptionHandler(cause.GetType());
             if (handler == null)
                 throw new UnknownMessageTypeException("No handler found for exception type: "
                     + cause.GetType().Name);
-            else
-                handler.ExceptionCaught(session, cause);
+            handler.ExceptionCaught(session, cause);
         }
 
         protected IMessageHandler FindReceivedMessageHandler(Type type)
@@ -139,7 +136,7 @@ namespace Mina.Handler.Demux
 
         private static T FindHandler<T>(IDictionary<Type, T> handlers, IDictionary<Type, T> handlerCache, Type type, HashSet<Type> triedClasses)
         {
-            T handler = default(T);
+            var handler = default(T);
 
             if (triedClasses != null && triedClasses.Contains(type))
                 return default(T);
@@ -159,7 +156,7 @@ namespace Mina.Handler.Demux
                     triedClasses = new HashSet<Type>();
                 triedClasses.Add(type);
 
-                foreach (Type ifc in type.GetInterfaces())
+                foreach (var ifc in type.GetInterfaces())
                 {
                     handler = FindHandler(handlers, handlerCache, ifc, triedClasses);
                     if (handler != null)
@@ -170,7 +167,7 @@ namespace Mina.Handler.Demux
             if (handler == null)
             {
                 // No match in type's interfaces could be found. Search the superclass.
-                Type baseType = type.BaseType;
+                var baseType = type.BaseType;
                 if (baseType != null)
                     handler = FindHandler(handlers, handlerCache, baseType, null);
             }
@@ -192,7 +189,7 @@ namespace Mina.Handler.Demux
         {
             handlerCache.Clear();
 
-            T old = default(T);
+            var old = default(T);
             handlers.AddOrUpdate(type, handler, (t, h) =>
             {
                 old = h;

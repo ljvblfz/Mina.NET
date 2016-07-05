@@ -1,5 +1,4 @@
-﻿using System;
-using Mina.Core.Buffer;
+﻿using Mina.Core.Buffer;
 
 namespace Mina.Filter.Codec.StateMachine
 {
@@ -9,10 +8,10 @@ namespace Mina.Filter.Codec.StateMachine
     /// </summary>
     public abstract class ShortIntegerDecodingState : IDecodingState
     {
-        private Int32 _highByte;
-        private Int32 _counter;
+        private int _highByte;
+        private int _counter;
 
-        public IDecodingState Decode(IoBuffer input, IProtocolDecoderOutput output)
+        public IDecodingState Decode(IOBuffer input, IProtocolDecoderOutput output)
         {
             while (input.HasRemaining)
             {
@@ -23,7 +22,7 @@ namespace Mina.Filter.Codec.StateMachine
                         break;
                     case 1:
                         _counter = 0;
-                        return FinishDecode((Int16)((_highByte << 8) | (input.Get() & 0xff)), output);
+                        return FinishDecode((short)((_highByte << 8) | (input.Get() & 0xff)), output);
                 }
 
                 _counter++;
@@ -46,6 +45,6 @@ namespace Mina.Filter.Codec.StateMachine
         /// <code>this</code> for loop transitions) or <code>null</code> if 
         /// the state machine has reached its end.
         /// </returns>
-        protected abstract IDecodingState FinishDecode(Int16 value, IProtocolDecoderOutput output);
+        protected abstract IDecodingState FinishDecode(short value, IProtocolDecoderOutput output);
     }
 }

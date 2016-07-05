@@ -14,11 +14,11 @@ namespace Mina.Filter.Codec.PrefixedString
             : this(encoding, PrefixedStringCodecFactory.DefaultPrefixLength, PrefixedStringCodecFactory.DefaultMaxDataLength)
         { }
 
-        public PrefixedStringEncoder(Encoding encoding, Int32 prefixLength)
+        public PrefixedStringEncoder(Encoding encoding, int prefixLength)
              : this(encoding, prefixLength, PrefixedStringCodecFactory.DefaultMaxDataLength)
         { }
 
-        public PrefixedStringEncoder(Encoding encoding, Int32 prefixLength, Int32 maxDataLength)
+        public PrefixedStringEncoder(Encoding encoding, int prefixLength, int maxDataLength)
         {
             Encoding = encoding;
             PrefixLength = prefixLength;
@@ -28,12 +28,12 @@ namespace Mina.Filter.Codec.PrefixedString
         /// <summary>
         /// Gets or sets the length of the length prefix (1, 2, or 4).
         /// </summary>
-        public Int32 PrefixLength { get; set; }
+        public int PrefixLength { get; set; }
 
         /// <summary>
         /// Gets or sets the maximum number of bytes allowed for encoding a single string.
         /// </summary>
-        public Int32 MaxDataLength { get; set; }
+        public int MaxDataLength { get; set; }
 
         /// <summary>
         /// Gets or set the text encoding.
@@ -41,10 +41,10 @@ namespace Mina.Filter.Codec.PrefixedString
         public Encoding Encoding { get; set; }
 
         /// <inheritdoc/>
-        public override void Encode(IoSession session, Object message, IProtocolEncoderOutput output)
+        public override void Encode(IOSession session, object message, IProtocolEncoderOutput output)
         {
-            String value = (String)message;
-            IoBuffer buffer = IoBuffer.Allocate(value.Length);
+            var value = (string)message;
+            var buffer = IOBuffer.Allocate(value.Length);
             buffer.AutoExpand = true;
             buffer.PutPrefixedString(value, PrefixLength, Encoding);
             if (buffer.Position > MaxDataLength)

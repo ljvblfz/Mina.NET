@@ -1,5 +1,4 @@
-﻿using System;
-using Mina.Core.Buffer;
+﻿using Mina.Core.Buffer;
 
 namespace Mina.Filter.Codec.StateMachine
 {
@@ -8,8 +7,8 @@ namespace Mina.Filter.Codec.StateMachine
     /// </summary>
     public abstract class ConsumeToEndOfSessionDecodingState : IDecodingState
     {
-        private readonly Int32 _maxLength;
-        private IoBuffer _buffer;
+        private readonly int _maxLength;
+        private IOBuffer _buffer;
 
         /// <summary>
         /// Creates a new instance using the specified maximum length.
@@ -19,16 +18,16 @@ namespace Mina.Filter.Codec.StateMachine
         /// If the max is reached a <see cref="ProtocolDecoderException"/> will be 
         /// thrown by <code>Decode(IoBuffer, IProtocolDecoderOutput)</code>
         /// </remarks>
-        protected ConsumeToEndOfSessionDecodingState(Int32 maxLength)
+        protected ConsumeToEndOfSessionDecodingState(int maxLength)
         {
             _maxLength = maxLength;
         }
 
-        public IDecodingState Decode(IoBuffer input, IProtocolDecoderOutput output)
+        public IDecodingState Decode(IOBuffer input, IProtocolDecoderOutput output)
         {
             if (_buffer == null)
             {
-                _buffer = IoBuffer.Allocate(256);
+                _buffer = IOBuffer.Allocate(256);
                 _buffer.AutoExpand = true;
             }
 
@@ -45,7 +44,7 @@ namespace Mina.Filter.Codec.StateMachine
             {
                 if (_buffer == null)
                 {
-                    _buffer = IoBuffer.Allocate(0);
+                    _buffer = IOBuffer.Allocate(0);
                 }
                 _buffer.Flip();
                 return FinishDecode(_buffer, output);
@@ -66,6 +65,6 @@ namespace Mina.Filter.Codec.StateMachine
         /// <code>this</code> for loop transitions) or <code>null</code> if 
         /// the state machine has reached its end.
         /// </returns>
-        protected abstract IDecodingState FinishDecode(IoBuffer product, IProtocolDecoderOutput output);
+        protected abstract IDecodingState FinishDecode(IOBuffer product, IProtocolDecoderOutput output);
     }
 }

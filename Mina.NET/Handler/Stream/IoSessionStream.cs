@@ -3,64 +3,56 @@ using System.IO;
 using System.Threading;
 using Mina.Core.Buffer;
 using Mina.Core.Future;
+using Mina.Core.Service;
 using Mina.Core.Session;
 
 namespace Mina.Handler.Stream
 {
     /// <summary>
     /// A <see cref="System.IO.Stream"/> that buffers data read from
-    /// <see cref="Core.Service.IoHandler.MessageReceived(IoSession, Object)"/> events,
-    /// and forwards all write operations to the associated <see cref="IoSession"/>.
+    /// <see cref="IOHandler.MesIOSessionved(IoSession, object)"/> events,
+    /// and forwards all write operations to the associated <see cref="IOSession"/>.
     /// </summary>
     public class IoSessionStream : System.IO.Stream
     {
-        private volatile Boolean _closed;
+        private volatile bool _closed;
 
-        private readonly IoBuffer _buf;
-        private readonly Object _syncRoot;
-        private volatile Boolean _released;
+        private readonly IOBuffer _buf;
+        private readonly object _syncRoot;
+        private volatile bool _released;
         private IOException _exception;
 
-        private readonly IoSession _session;
+        private readonly IOSession _session;
         private IWriteFuture _lastWriteFuture;
 
         /// <summary>
         /// </summary>
         public IoSessionStream()
         {
-            _syncRoot = new Byte[0];
-            _buf = IoBuffer.Allocate(16);
+            _syncRoot = new byte[0];
+            _buf = IOBuffer.Allocate(16);
             _buf.AutoExpand = true;
             _buf.Limit = 0;
         }
 
         /// <summary>
         /// </summary>
-        public IoSessionStream(IoSession session)
+        public IoSessionStream(IOSession session)
         {
             _session = session;
         }
 
         /// <inheritdoc/>
-        public override Boolean CanRead
-        {
-            get { return _buf != null; }
-        }
+        public override bool CanRead => _buf != null;
 
         /// <inheritdoc/>
-        public override Boolean CanSeek
-        {
-            get { return false; }
-        }
+        public override bool CanSeek => false;
 
         /// <inheritdoc/>
-        public override Boolean CanWrite
-        {
-            get { return _session != null; }
-        }
+        public override bool CanWrite => _session != null;
 
         /// <inheritdoc/>
-        public override Int64 Length
+        public override long Length
         {
             get
             {
@@ -73,13 +65,12 @@ namespace Mina.Handler.Stream
                         return _buf.Remaining;
                     }
                 }
-                else
-                    throw new NotSupportedException();
+                throw new NotSupportedException();
             }
         }
 
         /// <inheritdoc/>
-        public override Int32 ReadByte()
+        public override int ReadByte()
         {
             lock (_syncRoot)
             {
@@ -90,20 +81,20 @@ namespace Mina.Handler.Stream
         }
 
         /// <inheritdoc/>
-        public override Int32 Read(Byte[] buffer, Int32 offset, Int32 count)
+        public override int Read(byte[] buffer, int offset, int count)
         {
             lock (_syncRoot)
             {
                 if (!WaitForData())
                     return 0;
 
-                Int32 readBytes = Math.Min(count, _buf.Remaining);
+                var readBytes = Math.Min(count, _buf.Remaining);
                 _buf.Get(buffer, offset, readBytes);
                 return readBytes;
             }
         }
 
-        private Boolean WaitForData()
+        private bool WaitForData()
         {
             if (_released)
                 return false;
@@ -146,9 +137,9 @@ namespace Mina.Handler.Stream
         }
 
         /// <inheritdoc/>
-        public override void Write(Byte[] buffer, Int32 offset, Int32 count)
+        public override void Write(byte[] buffer, int offset, int count)
         {
-            Write(IoBuffer.Wrap((Byte[])buffer.Clone(), offset, count));
+            Write(IOBuffer.Wrap((byte[])buffer.Clone(), offset, count));
         }
 
         /// <inheritdoc/>
@@ -196,7 +187,7 @@ namespace Mina.Handler.Stream
         /// <summary>
         /// Writes the given buffer.
         /// </summary>
-        public void Write(IoBuffer buf)
+        public void Write(IOBuffer buf)
         {
             if (CanRead)
             {
@@ -246,20 +237,20 @@ namespace Mina.Handler.Stream
         }
 
         /// <inheritdoc/>
-        public override Int64 Position
+        public override long Position
         {
             get { throw new NotSupportedException(); }
             set { throw new NotSupportedException(); }
         }
 
         /// <inheritdoc/>
-        public override Int64 Seek(Int64 offset, System.IO.SeekOrigin origin)
+        public override long Seek(long offset, SeekOrigin origin)
         {
             throw new NotSupportedException();
         }
 
         /// <inheritdoc/>
-        public override void SetLength(Int64 value)
+        public override void SetLength(long value)
         {
             throw new NotSupportedException();
         }

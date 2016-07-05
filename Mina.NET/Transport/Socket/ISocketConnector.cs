@@ -4,9 +4,9 @@ using Mina.Core.Service;
 namespace Mina.Transport.Socket
 {
     /// <summary>
-    /// <see cref="IoConnector"/> for socket transport (TCP/IP).
+    /// <see cref="IOConnector"/> for socket transport (TCP/IP).
     /// </summary>
-    public interface ISocketConnector : IoConnector
+    public interface ISocketConnector : IOConnector
     {
         /// <summary>
         /// Gets the default configuration of the new SocketSessions

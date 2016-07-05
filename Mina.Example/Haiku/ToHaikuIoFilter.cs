@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using Mina.Core.Filterchain;
 using Mina.Core.Session;
 
@@ -7,17 +6,17 @@ namespace Mina.Example.Haiku
 {
     class ToHaikuIoFilter : IoFilterAdapter
     {
-        public override void MessageReceived(INextFilter nextFilter, IoSession session, object message)
+        public override void MessageReceived(INextFilter nextFilter, IOSession session, object message)
         {
-            List<String> phrases = session.GetAttribute<List<String>>("phrases");
+            var phrases = session.GetAttribute<List<string>>("phrases");
 
             if (null == phrases)
             {
-                phrases = new List<String>();
+                phrases = new List<string>();
                 session.SetAttribute("phrases", phrases);
             }
 
-            phrases.Add((String)message);
+            phrases.Add((string)message);
 
             if (phrases.Count == 3)
             {

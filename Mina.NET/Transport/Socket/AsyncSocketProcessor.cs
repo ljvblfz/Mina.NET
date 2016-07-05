@@ -1,26 +1,20 @@
 ﻿using System;
 using System.Collections.Generic;
 using Mina.Core.Buffer;
-using Mina.Core.Filterchain;
 using Mina.Core.Service;
 using Mina.Core.Session;
 using Mina.Core.Write;
 
 namespace Mina.Transport.Socket
 {
-    class AsyncSocketProcessor : IoProcessor<SocketSession>, IDisposable
+    class AsyncSocketProcessor : IIoProcessor<SocketSession>, IDisposable
     {
-        private readonly IdleStatusChecker _idleStatusChecker;
-
-        public AsyncSocketProcessor(Func<IEnumerable<IoSession>> getSessionsFunc)
+        public AsyncSocketProcessor(Func<IEnumerable<IOSession>> getSessionsFunc)
         {
-            _idleStatusChecker = new IdleStatusChecker(getSessionsFunc);
+            IdleStatusChecker = new IdleStatusChecker(getSessionsFunc);
         }
 
-        public IdleStatusChecker IdleStatusChecker
-        {
-            get { return _idleStatusChecker; }
-        }
+        public IdleStatusChecker IdleStatusChecker { get; }
 
         public void Dispose()
         {
@@ -28,22 +22,22 @@ namespace Mina.Transport.Socket
             GC.SuppressFinalize(this);
         }
 
-        protected virtual void Dispose(Boolean disposing)
+        protected virtual void Dispose(bool disposing)
         {
             if (disposing)
             {
-                _idleStatusChecker.Dispose();
+                IdleStatusChecker.Dispose();
             }
         }
 
         public void Add(SocketSession session)
         {
             // Build the filter chain of this session.
-            IoFilterChainBuilder chainBuilder = session.Service.FilterChainBuilder;
+            var chainBuilder = session.Service.FilterChainBuilder;
             chainBuilder.BuildFilterChain(session.FilterChain);
 
             // Propagate the SESSION_CREATED event up to the chain
-            IoServiceSupport serviceSupport = session.Service as IoServiceSupport;
+            var serviceSupport = session.Service as IOServiceSupport;
             if (serviceSupport != null)
                 serviceSupport.FireSessionCreated(session);
 
@@ -64,14 +58,14 @@ namespace Mina.Transport.Socket
             }
             session.Socket.Close();
 
-            IoServiceSupport support = session.Service as IoServiceSupport;
+            var support = session.Service as IOServiceSupport;
             if (support != null)
                 support.FireSessionDestroyed(session);
         }
 
         public void Write(SocketSession session, IWriteRequest writeRequest)
         {
-            IWriteRequestQueue writeRequestQueue = session.WriteRequestQueue;
+            var writeRequestQueue = session.WriteRequestQueue;
             writeRequestQueue.Offer(session, writeRequest);
             if (!session.WriteSuspended)
                 Flush(session);
@@ -93,13 +87,13 @@ namespace Mina.Transport.Socket
 
         private void ClearWriteRequestQueue(SocketSession session)
         {
-            IWriteRequestQueue writeRequestQueue = session.WriteRequestQueue;
+            var writeRequestQueue = session.WriteRequestQueue;
             IWriteRequest req;
-            List<IWriteRequest> failedRequests = new List<IWriteRequest>();
+            var failedRequests = new List<IWriteRequest>();
 
             if ((req = writeRequestQueue.Poll(session)) != null)
             {
-                IoBuffer buf = req.Message as IoBuffer;
+                var buf = req.Message as IOBuffer;
                 if (buf != null)
                 {
                     // The first unwritten empty buffer must be
@@ -129,9 +123,9 @@ namespace Mina.Transport.Socket
             // Create an exception and notify.
             if (failedRequests.Count > 0)
             {
-                WriteToClosedSessionException cause = new WriteToClosedSessionException(failedRequests);
+                var cause = new WriteToClosedSessionException(failedRequests);
 
-                foreach (IWriteRequest r in failedRequests)
+                foreach (var r in failedRequests)
                 {
                     //session.DecreaseScheduledBytesAndMessages(r);
                     r.Future.Exception = cause;
@@ -141,27 +135,27 @@ namespace Mina.Transport.Socket
             }
         }
 
-        void IoProcessor.Write(IoSession session, IWriteRequest writeRequest)
+        void IOProcessor.Write(IOSession session, IWriteRequest writeRequest)
         {
             Write((SocketSession)session, writeRequest);
         }
 
-        void IoProcessor.Flush(IoSession session)
+        void IOProcessor.Flush(IOSession session)
         {
             Flush((SocketSession)session);
         }
 
-        void IoProcessor.Add(IoSession session)
+        void IOProcessor.Add(IOSession session)
         {
             Add((SocketSession)session);
         }
 
-        void IoProcessor.Remove(IoSession session)
+        void IOProcessor.Remove(IOSession session)
         {
             Remove((SocketSession)session);
         }
 
-        void IoProcessor.UpdateTrafficControl(IoSession session)
+        void IOProcessor.UpdateTrafficControl(IOSession session)
         {
             UpdateTrafficControl((SocketSession)session);
         }

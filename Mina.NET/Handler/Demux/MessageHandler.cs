@@ -8,9 +8,9 @@ namespace Mina.Handler.Demux
     /// </summary>
     public class MessageHandler<T> : IMessageHandler<T>
     {
-        public static readonly IMessageHandler<Object> Noop = new NoopMessageHandler();
+        public static readonly IMessageHandler<object> Noop = new NoopMessageHandler();
 
-        private readonly Action<IoSession, T> _act;
+        private readonly Action<IOSession, T> _act;
 
         /// <summary>
         /// </summary>
@@ -19,31 +19,31 @@ namespace Mina.Handler.Demux
 
         /// <summary>
         /// </summary>
-        public MessageHandler(Action<IoSession, T> act)
+        public MessageHandler(Action<IOSession, T> act)
         {
             if (act == null)
-                throw new ArgumentNullException("act");
+                throw new ArgumentNullException(nameof(act));
             _act = act;
         }
 
         /// <inheritdoc/>
-        public virtual void HandleMessage(IoSession session, T message)
+        public virtual void HandleMessage(IOSession session, T message)
         {
             if (_act != null)
                 _act(session, message);
         }
 
-        void IMessageHandler.HandleMessage(IoSession session, Object message)
+        void IMessageHandler.HandleMessage(IOSession session, object message)
         {
             HandleMessage(session, (T)message);
         }
     }
 
-    class NoopMessageHandler : IMessageHandler<Object>
+    class NoopMessageHandler : IMessageHandler<object>
     {
         internal NoopMessageHandler() { }
 
-        public void HandleMessage(IoSession session, Object message)
+        public void HandleMessage(IOSession session, object message)
         {
             // Do nothing
         }

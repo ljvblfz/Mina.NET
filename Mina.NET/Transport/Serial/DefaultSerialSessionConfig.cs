@@ -1,5 +1,4 @@
 ﻿#if !UNITY
-using System;
 using Mina.Core.Session;
 
 namespace Mina.Transport.Serial
@@ -9,10 +8,6 @@ namespace Mina.Transport.Serial
     /// </summary>
     class DefaultSerialSessionConfig : AbstractIoSessionConfig, ISerialSessionConfig
     {
-        private Int32 _readTimeout;
-        private Int32 _writeBufferSize;
-        private Int32 _receivedBytesThreshold;
-
         public DefaultSerialSessionConfig()
         {
             // reset configs
@@ -20,9 +15,9 @@ namespace Mina.Transport.Serial
             WriteTimeout = 0;
         }
 
-        protected override void DoSetAll(IoSessionConfig config)
+        protected override void DoSetAll(IOSessionConfig config)
         {
-            ISerialSessionConfig cfg = config as ISerialSessionConfig;
+            var cfg = config as ISerialSessionConfig;
             if (cfg != null)
             {
                 ReadTimeout = cfg.ReadTimeout;
@@ -31,23 +26,11 @@ namespace Mina.Transport.Serial
             }
         }
 
-        public Int32 ReadTimeout
-        {
-            get { return _readTimeout; }
-            set { _readTimeout = value; }
-        }
+        public int ReadTimeout { get; set; }
 
-        public Int32 WriteBufferSize
-        {
-            get { return _writeBufferSize; }
-            set { _writeBufferSize = value; }
-        }
+        public int WriteBufferSize { get; set; }
 
-        public Int32 ReceivedBytesThreshold
-        {
-            get { return _receivedBytesThreshold; }
-            set { _receivedBytesThreshold = value; }
-        }
+        public int ReceivedBytesThreshold { get; set; }
     }
 }
 #endif

@@ -7,34 +7,29 @@ using Mina.Core.Session;
 namespace Mina.Core.Service
 {
     /// <summary>
-    /// Base implementation of <see cref="IoAcceptor"/>.
+    /// Base implementation of <see cref="IOAcceptor"/>.
     /// </summary>
-    public abstract class AbstractIoAcceptor : AbstractIoService, IoAcceptor
+    public abstract class AbstractIOAcceptor : AbstractIOService, IOAcceptor
     {
         private readonly List<EndPoint> _defaultLocalEndPoints = new List<EndPoint>();
         private readonly List<EndPoint> _boundEndPoints = new List<EndPoint>();
-        private Boolean _disconnectOnUnbind = true;
 
         /// <summary>
         /// The lock for binding.
         /// </summary>
         [CLSCompliant(false)]
-        protected Object _bindLock;
+        protected object BindLock;
 
         /// <summary>
         /// </summary>
-        protected AbstractIoAcceptor(IoSessionConfig sessionConfig)
+        protected AbstractIOAcceptor(IOSessionConfig sessionConfig)
             : base(sessionConfig)
         { 
-            _bindLock = ((ICollection)_boundEndPoints).SyncRoot;
+            BindLock = ((ICollection)_boundEndPoints).SyncRoot;
         }
 
         /// <inheritdoc/>
-        public Boolean CloseOnDeactivation
-        {
-            get { return _disconnectOnUnbind; }
-            set { _disconnectOnUnbind = value; }
-        }
+        public bool CloseOnDeactivation { get; set; } = true;
 
         /// <inheritdoc/>
         public IEnumerable<EndPoint> DefaultLocalEndPoints
@@ -42,7 +37,7 @@ namespace Mina.Core.Service
             get { return _defaultLocalEndPoints; }
             set
             {
-                lock (_bindLock)
+                lock (BindLock)
                 {
                     if (_boundEndPoints.Count > 0)
                         throw new InvalidOperationException("LocalEndPoints can't be set while the acceptor is bound.");
@@ -59,7 +54,7 @@ namespace Mina.Core.Service
             get { return _defaultLocalEndPoints.Count == 0 ? null : _defaultLocalEndPoints[0]; }
             set
             {
-                lock (_bindLock)
+                lock (BindLock)
                 {
                     if (_boundEndPoints.Count > 0)
                         throw new InvalidOperationException("LocalEndPoint can't be set while the acceptor is bound.");
@@ -71,16 +66,10 @@ namespace Mina.Core.Service
         }
 
         /// <inheritdoc/>
-        public IEnumerable<EndPoint> LocalEndPoints
-        {
-            get { return _boundEndPoints; }
-        }
+        public IEnumerable<EndPoint> LocalEndPoints => _boundEndPoints;
 
         /// <inheritdoc/>
-        public EndPoint LocalEndPoint
-        {
-            get { return _boundEndPoints.Count == 0 ? null : _boundEndPoints[0]; }
-        }
+        public EndPoint LocalEndPoint => _boundEndPoints.Count == 0 ? null : _boundEndPoints[0];
 
         /// <inheritdoc/>
         public void Bind()
@@ -89,19 +78,19 @@ namespace Mina.Core.Service
         }
 
         /// <inheritdoc/>
-        public void Bind(EndPoint localEP)
+        public void Bind(EndPoint localEp)
         {
-            if (localEP == null)
-                throw new ArgumentNullException("localEP");
-            Bind(new EndPoint[] { localEP });
+            if (localEp == null)
+                throw new ArgumentNullException(nameof(localEp));
+            Bind(new EndPoint[] { localEp });
         }
 
         /// <inheritdoc/>
         public void Bind(params EndPoint[] localEndPoints)
         {
             if (localEndPoints == null)
-                throw new ArgumentNullException("localEndPoints");
-            else if (localEndPoints.Length == 0)
+                throw new ArgumentNullException(nameof(localEndPoints));
+            if (localEndPoints.Length == 0)
                 Bind(DefaultLocalEndPoints);
             else
                 Bind((IEnumerable<EndPoint>)localEndPoints);
@@ -111,13 +100,13 @@ namespace Mina.Core.Service
         public void Bind(IEnumerable<EndPoint> localEndPoints)
         {
             if (Disposed)
-                throw new ObjectDisposedException(this.GetType().Name);
+                throw new ObjectDisposedException(GetType().Name);
 
             if (localEndPoints == null)
-                throw new ArgumentNullException("localEndPoints");
+                throw new ArgumentNullException(nameof(localEndPoints));
 
-            List<EndPoint> localEndPointsCopy = new List<EndPoint>();
-            foreach (EndPoint ep in localEndPoints)
+            var localEndPointsCopy = new List<EndPoint>();
+            foreach (var ep in localEndPoints)
             {
                 if (ep != null && !TransportMetadata.EndPointType.IsAssignableFrom(ep.GetType()))
                     throw new ArgumentException("localAddress type: " + ep.GetType().Name + " (expected: "
@@ -126,20 +115,20 @@ namespace Mina.Core.Service
             }
 
             if (localEndPointsCopy.Count == 0)
-                throw new ArgumentException("localEndPoints is empty.", "localEndPoints");
+                throw new ArgumentException("localEndPoints is empty.", nameof(localEndPoints));
 
-            Boolean active = false;
-            lock (_bindLock)
+            var active = false;
+            lock (BindLock)
             {
                 if (_boundEndPoints.Count == 0)
                     active = true;
 
-                IEnumerable<EndPoint> eps = BindInternal(localEndPointsCopy);
+                var eps = BindInternal(localEndPointsCopy);
                 _boundEndPoints.AddRange(eps);
             }
 
             if (active)
-                ((IoServiceSupport)this).FireServiceActivated();
+                ((IOServiceSupport)this).FireServiceActivated();
         }
 
         /// <inheritdoc/>
@@ -149,11 +138,11 @@ namespace Mina.Core.Service
         }
 
         /// <inheritdoc/>
-        public void Unbind(EndPoint localEP)
+        public void Unbind(EndPoint localEp)
         {
-            if (localEP == null)
-                throw new ArgumentNullException("localEP");
-            Unbind(new EndPoint[] { localEP });
+            if (localEp == null)
+                throw new ArgumentNullException(nameof(localEp));
+            Unbind(new EndPoint[] { localEp });
         }
 
         /// <inheritdoc/>
@@ -166,10 +155,10 @@ namespace Mina.Core.Service
         public void Unbind(IEnumerable<EndPoint> localEndPoints)
         {
             if (localEndPoints == null)
-                throw new ArgumentNullException("localEndPoints");
+                throw new ArgumentNullException(nameof(localEndPoints));
 
-            Boolean deactivate = false;
-            lock (_bindLock)
+            var deactivate = false;
+            lock (BindLock)
             {
                 if (_boundEndPoints.Count == 0)
                     return;
@@ -189,7 +178,7 @@ namespace Mina.Core.Service
                 }
                 else
                 {
-                    foreach (EndPoint ep in localEndPoints)
+                    foreach (var ep in localEndPoints)
                     {
                         _boundEndPoints.Remove(ep);
                     }
@@ -200,13 +189,13 @@ namespace Mina.Core.Service
             }
 
             if (deactivate)
-                ((IoServiceSupport)this).FireServiceDeactivated();
+                ((IOServiceSupport)this).FireServiceDeactivated();
         }
 
         /// <inheritdoc/>
-        public override String ToString()
+        public override string ToString()
         {
-            ITransportMetadata m = TransportMetadata;
+            var m = TransportMetadata;
             return '('
                     + m.ProviderName
                     + ' '

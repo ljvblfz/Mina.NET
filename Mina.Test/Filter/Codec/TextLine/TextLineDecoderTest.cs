@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Text;
 #if !NETFX_CORE
 using NUnit.Framework;
@@ -18,12 +17,12 @@ namespace Mina.Filter.Codec.TextLine
         [TestMethod]
         public void TestNormalDecode()
         {
-            Encoding encoding = Encoding.UTF8;
-            TextLineDecoder decoder = new TextLineDecoder(encoding, LineDelimiter.Windows);
+            var encoding = Encoding.UTF8;
+            var decoder = new TextLineDecoder(encoding, LineDelimiter.Windows);
 
-            ProtocolCodecSession session = new ProtocolCodecSession();
-            IProtocolDecoderOutput output = session.DecoderOutput;
-            IoBuffer input = IoBuffer.Allocate(16);
+            var session = new ProtocolCodecSession();
+            var output = session.DecoderOutput;
+            var input = IOBuffer.Allocate(16);
 
             // Test one decode and one output.put
             input.PutString("ABC\r\n", encoding);
@@ -125,12 +124,12 @@ namespace Mina.Filter.Codec.TextLine
         [TestMethod]
         public void TestAutoDecode()
         {
-            Encoding encoding = Encoding.UTF8;
-            TextLineDecoder decoder = new TextLineDecoder(encoding, LineDelimiter.Auto);
+            var encoding = Encoding.UTF8;
+            var decoder = new TextLineDecoder(encoding, LineDelimiter.Auto);
 
-            ProtocolCodecSession session = new ProtocolCodecSession();
-            IProtocolDecoderOutput output = session.DecoderOutput;
-            IoBuffer input = IoBuffer.Allocate(16);
+            var session = new ProtocolCodecSession();
+            var output = session.DecoderOutput;
+            var input = IOBuffer.Allocate(16);
 
             // Test one decode and one output
             input.PutString("ABC\r\n", encoding);
@@ -228,7 +227,7 @@ namespace Mina.Filter.Codec.TextLine
             Assert.AreEqual("STU", session.DecoderOutputQueue.Dequeue());
 
             input.Clear();
-            String s = encoding.GetString(new byte[] { 0, 77, 105, 110, 97 });
+            var s = encoding.GetString(new byte[] { 0, 77, 105, 110, 97 });
             input.PutString(s, encoding);
             input.Put(0x0a);
             input.Flip();
@@ -240,13 +239,13 @@ namespace Mina.Filter.Codec.TextLine
         [TestMethod]
         public void TestOverflow()
         {
-            Encoding encoding = Encoding.UTF8;
-            TextLineDecoder decoder = new TextLineDecoder(encoding, LineDelimiter.Auto);
+            var encoding = Encoding.UTF8;
+            var decoder = new TextLineDecoder(encoding, LineDelimiter.Auto);
             decoder.MaxLineLength = 3;
 
-            ProtocolCodecSession session = new ProtocolCodecSession();
-            IProtocolDecoderOutput output = session.DecoderOutput;
-            IoBuffer input = IoBuffer.Allocate(16);
+            var session = new ProtocolCodecSession();
+            var output = session.DecoderOutput;
+            var input = IOBuffer.Allocate(16);
 
             // Make sure the overflow exception is not thrown until
             // the delimiter is encountered.
@@ -280,9 +279,9 @@ namespace Mina.Filter.Codec.TextLine
             //// Make sure OOM is not thrown.
             GC.Collect();
             //long oldFreeMemory = GC.GetTotalMemory(false);
-            input = IoBuffer.Allocate(1048576 * 16).Sweep((byte)' ').Mark();
+            input = IOBuffer.Allocate(1048576 * 16).Sweep((byte)' ').Mark();
 
-            for (int i = 0; i < 10; i++)
+            for (var i = 0; i < 10; i++)
             {
                 input.Reset();
                 input.Mark();
@@ -314,13 +313,13 @@ namespace Mina.Filter.Codec.TextLine
         }
 
         [TestMethod]
-        public void TestSMTPDataBounds()
+        public void TestSmtpDataBounds()
         {
-            Encoding encoding = Encoding.ASCII;
-            TextLineDecoder decoder = new TextLineDecoder(encoding, new LineDelimiter("\r\n.\r\n"));
+            var encoding = Encoding.ASCII;
+            var decoder = new TextLineDecoder(encoding, new LineDelimiter("\r\n.\r\n"));
 
-            ProtocolCodecSession session = new ProtocolCodecSession();
-            IoBuffer input = IoBuffer.Allocate(16);
+            var session = new ProtocolCodecSession();
+            var input = IOBuffer.Allocate(16);
             input.AutoExpand = true;
 
             input.PutString("\r\n", encoding).Flip().Mark();

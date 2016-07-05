@@ -11,11 +11,11 @@ namespace Mina.Util
         /// Safely invokes an <see cref="EventHandler"/>.
         /// All catched exceptions will be forwarded to <see cref="ExceptionMonitor"/>.
         /// </summary>
-        public static void SafeInvoke(EventHandler handler, Object sender)
+        public static void SafeInvoke(EventHandler handler, object sender)
         {
             if (handler != null)
             {
-                foreach (Delegate d in handler.GetInvocationList())
+                foreach (var d in handler.GetInvocationList())
                 {
                     try
                     {
@@ -33,12 +33,12 @@ namespace Mina.Util
         /// Safely invokes an <see cref="EventHandler&lt;TEventArgs&gt;"/>.
         /// All catched exceptions will be forwarded to <see cref="ExceptionMonitor"/>.
         /// </summary>
-        public static void SafeInvoke<TEventArgs>(EventHandler<TEventArgs> handler, Object sender, TEventArgs e)
+        public static void SafeInvoke<TEventArgs>(EventHandler<TEventArgs> handler, object sender, TEventArgs e)
             where TEventArgs : EventArgs
         {
             if (handler != null)
             {
-                foreach (Delegate d in handler.GetInvocationList())
+                foreach (var d in handler.GetInvocationList())
                 {
                     try
                     {
@@ -60,7 +60,7 @@ namespace Mina.Util
         {
             if (act != null)
             {
-                foreach (Delegate d in act.GetInvocationList())
+                foreach (var d in act.GetInvocationList())
                 {
                     try
                     {
@@ -82,7 +82,7 @@ namespace Mina.Util
         {
             if (act != null)
             {
-                foreach (Delegate d in act.GetInvocationList())
+                foreach (var d in act.GetInvocationList())
                 {
                     try
                     {
@@ -104,7 +104,7 @@ namespace Mina.Util
         {
             if (act != null)
             {
-                foreach (Delegate d in act.GetInvocationList())
+                foreach (var d in act.GetInvocationList())
                 {
                     try
                     {
@@ -126,7 +126,7 @@ namespace Mina.Util
         {
             if (act != null)
             {
-                foreach (Delegate d in act.GetInvocationList())
+                foreach (var d in act.GetInvocationList())
                 {
                     try
                     {

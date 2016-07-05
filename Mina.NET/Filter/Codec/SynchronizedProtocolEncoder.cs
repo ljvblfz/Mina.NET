@@ -18,11 +18,11 @@ namespace Mina.Filter.Codec
         public SynchronizedProtocolEncoder(IProtocolEncoder encoder)
         {
             if (encoder == null)
-                throw new ArgumentNullException("encoder");
+                throw new ArgumentNullException(nameof(encoder));
             _encoder = encoder;
         } 
 
-        public void Encode(IoSession session, Object message, IProtocolEncoderOutput output)
+        public void Encode(IOSession session, object message, IProtocolEncoderOutput output)
         {
             lock (_encoder)
             {
@@ -30,7 +30,7 @@ namespace Mina.Filter.Codec
             }
         }
 
-        public void Dispose(IoSession session)
+        public void Dispose(IOSession session)
         {
             lock (_encoder)
             {

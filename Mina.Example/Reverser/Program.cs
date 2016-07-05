@@ -14,11 +14,11 @@ namespace Mina.Example.Reverser
     /// </summary>
     class Program
     {
-        private const int port = 8080;
+        private const int Port = 8080;
 
         static void Main(string[] args)
         {
-            IoAcceptor acceptor = new AsyncSocketAcceptor();
+            IOAcceptor acceptor = new AsyncSocketAcceptor();
 
             acceptor.FilterChain.AddLast("logger", new LoggingFilter());
             acceptor.FilterChain.AddLast("codec", new ProtocolCodecFilter(
@@ -27,16 +27,16 @@ namespace Mina.Example.Reverser
             acceptor.ExceptionCaught += (s, e) => e.Session.Close(true);
             acceptor.MessageReceived += (s, e) =>
             {
-                String str = e.Message.ToString();
-                StringBuilder sb = new StringBuilder(str.Length);
-                for (int i = str.Length - 1; i >= 0; i--)
+                var str = e.Message.ToString();
+                var sb = new StringBuilder(str.Length);
+                for (var i = str.Length - 1; i >= 0; i--)
                 {
                     sb.Append(str[i]);
                 }
                 e.Session.Write(sb.ToString());
             };
 
-            acceptor.Bind(new IPEndPoint(IPAddress.Any, port));
+            acceptor.Bind(new IPEndPoint(IPAddress.Any, Port));
 
             Console.WriteLine("Listening on " + acceptor.LocalEndPoint);
             Console.ReadLine();

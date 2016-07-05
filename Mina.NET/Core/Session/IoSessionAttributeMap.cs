@@ -1,14 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
 namespace Mina.Core.Session
 {
     /// <summary>
-    /// Stores the user-defined attributes which is provided per <see cref="IoSession"/>.
-    /// All user-defined attribute accesses in <see cref="IoSession"/> are forwarded to
-    /// the instance of <see cref="IoSessionAttributeMap"/>.
+    /// Stores the user-defined attributes which is provided per <see cref="IOSession"/>.
+    /// All user-defined attribute accesses in <see cref="IOSession"/> are forwarded to
+    /// the instance of <see cref="IOSessionAttributeMap"/>.
     /// </summary>
-    public interface IoSessionAttributeMap
+    public interface IOSessionAttributeMap
     {
         /// <summary>
         /// Returns the value of user defined attribute associated with the
@@ -16,32 +15,32 @@ namespace Mina.Core.Session
         /// value is associated with the specified key, and the default value is
         /// returned.
         /// </summary>
-        Object GetAttribute(IoSession session, Object key, Object defaultValue);
+        object GetAttribute(IOSession session, object key, object defaultValue);
         /// <summary>
         /// Sets a user-defined attribute.
         /// </summary>
-        Object SetAttribute(IoSession session, Object key, Object value);
+        object SetAttribute(IOSession session, object key, object value);
         /// <summary>
         /// Sets a user defined attribute if the attribute with the specified key
         /// is not set yet.
         /// </summary>
-        Object SetAttributeIfAbsent(IoSession session, Object key, Object value);
+        object SetAttributeIfAbsent(IOSession session, object key, object value);
         /// <summary>
         /// Removes a user-defined attribute with the specified key.
         /// </summary>
-        Object RemoveAttribute(IoSession session, Object key);
+        object RemoveAttribute(IOSession session, object key);
         /// <summary>
         /// Returns <tt>true</tt> if this session contains the attribute with the specified <tt>key</tt>.
         /// </summary>
-        Boolean ContainsAttribute(IoSession session, Object key);
+        bool ContainsAttribute(IOSession session, object key);
         /// <summary>
         /// Returns the keys of all user-defined attributes.
         /// </summary>
-        IEnumerable<Object> GetAttributeKeys(IoSession session);
+        IEnumerable<object> GetAttributeKeys(IOSession session);
         /// <summary>
         /// Disposes any releases associated with the specified session.
         /// This method is invoked on disconnection.
         /// </summary>
-        void Dispose(IoSession session);
+        void Dispose(IOSession session);
     }
 }

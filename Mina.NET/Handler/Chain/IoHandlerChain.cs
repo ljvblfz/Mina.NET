@@ -6,14 +6,14 @@ using Mina.Core.Session;
 namespace Mina.Handler.Chain
 {
     /// <summary>
-    /// A chain of <see cref="IoHandlerCommand"/>s.
+    /// A chain of <see cref="IOHandlerCommand"/>s.
     /// </summary>
-    public class IoHandlerChain : Chain<IoHandlerChain, IoHandlerCommand, INextCommand>, IoHandlerCommand
+    public class IoHandlerChain : Chain<IoHandlerChain, IOHandlerCommand, INextCommand>, IOHandlerCommand
     {
-        private static volatile Int32 nextId;
+        private static volatile int _nextId;
 
-        private readonly Int32 _id = nextId++;
-        private readonly String _nextCommandKey;
+        private readonly int _id = _nextId++;
+        private readonly string _nextCommandKey;
 
         /// <summary>
         /// </summary>
@@ -24,11 +24,11 @@ namespace Mina.Handler.Chain
             () => new TailCommand(typeof(IoHandlerChain).Name + "." + Guid.NewGuid() + ".nextCommand")
             )
         {
-            _nextCommandKey = ((TailCommand)Tail.Filter).nextCommandKey;
+            _nextCommandKey = ((TailCommand)Tail.Filter).NextCommandKey;
         }
 
         /// <inheritdoc/>
-        public void Execute(INextCommand next, IoSession session, Object message)
+        public void Execute(INextCommand next, IOSession session, object message)
         {
             if (next != null)
                 session.SetAttribute(_nextCommandKey, next);
@@ -44,13 +44,13 @@ namespace Mina.Handler.Chain
         }
 
         /// <inheritdoc/>
-        public override String ToString()
+        public override string ToString()
         {
-            StringBuilder buf = new StringBuilder();
+            var buf = new StringBuilder();
             buf.Append("{ ");
 
-            Boolean empty = true;
-            Entry e = Head.NextEntry;
+            var empty = true;
+            var e = Head.NextEntry;
             while (e != Tail)
             {
                 if (empty)
@@ -73,31 +73,31 @@ namespace Mina.Handler.Chain
             return buf.Append(" }").ToString();
         }
 
-        private static void CallNextCommand(IEntry<IoHandlerCommand, INextCommand> entry, IoSession session, Object message)
+        private static void CallNextCommand(IEntry<IOHandlerCommand, INextCommand> entry, IOSession session, object message)
         {
             entry.Filter.Execute(entry.NextFilter, session, message);
         }
 
-        class HeadCommand : IoHandlerCommand
+        class HeadCommand : IOHandlerCommand
         {
-            public void Execute(INextCommand next, IoSession session, Object message)
+            public void Execute(INextCommand next, IOSession session, object message)
             {
                 next.Execute(session, message);
             }
         }
 
-        class TailCommand : IoHandlerCommand
+        class TailCommand : IOHandlerCommand
         {
-            public readonly String nextCommandKey;
+            public readonly string NextCommandKey;
 
-            public TailCommand(String nextCommandKey)
+            public TailCommand(string nextCommandKey)
             {
-                this.nextCommandKey = nextCommandKey;
+                this.NextCommandKey = nextCommandKey;
             }
 
-            public void Execute(INextCommand next, IoSession session, Object message)
+            public void Execute(INextCommand next, IOSession session, object message)
             {
-                next = session.GetAttribute<INextCommand>(nextCommandKey);
+                next = session.GetAttribute<INextCommand>(NextCommandKey);
                 if (next != null)
                     next.Execute(session, message);
             }
@@ -112,7 +112,7 @@ namespace Mina.Handler.Chain
                 _entry = entry;
             }
 
-            public void Execute(IoSession session, Object message)
+            public void Execute(IOSession session, object message)
             {
                 CallNextCommand(_entry.NextEntry, session, message);
             }

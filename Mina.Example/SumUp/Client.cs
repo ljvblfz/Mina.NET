@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Net;
 using System.Threading;
-using Mina.Core.Future;
 using Mina.Core.Session;
 using Mina.Example.SumUp.Codec;
 using Mina.Example.SumUp.Message;
@@ -14,11 +13,11 @@ namespace Mina.Example.SumUp
 {
     class Client
     {
-        private static readonly int PORT = 8080;
-        private static readonly long CONNECT_TIMEOUT = 30 * 1000L; // 30 seconds
+        private static readonly int Port = 8080;
+        private static readonly long ConnectTimeout = 30 * 1000L; // 30 seconds
 
         // Set this to false to use object serialization instead of custom codec.
-        private static readonly Boolean USE_CUSTOM_CODEC = false;
+        private static readonly bool UseCustomCodec = false;
 
         static void Main(string[] args)
         {
@@ -29,18 +28,18 @@ namespace Mina.Example.SumUp
             }
 
             // prepare values to sum up
-            int[] values = new int[args.Length];
-            for (int i = 0; i < args.Length; i++)
+            var values = new int[args.Length];
+            for (var i = 0; i < args.Length; i++)
             {
-                values[i] = Int32.Parse(args[i]);
+                values[i] = int.Parse(args[i]);
             }
 
-            AsyncSocketConnector connector = new AsyncSocketConnector();
+            var connector = new AsyncSocketConnector();
 
             // Configure the service.
-            connector.ConnectTimeoutInMillis = CONNECT_TIMEOUT;
+            connector.ConnectTimeoutInMillis = ConnectTimeout;
 
-            if (USE_CUSTOM_CODEC)
+            if (UseCustomCodec)
             {
                 connector.FilterChain.AddLast("codec",
                     new ProtocolCodecFilter(new SumUpProtocolCodecFactory(false)));
@@ -56,9 +55,9 @@ namespace Mina.Example.SumUp
             connector.SessionOpened += (s, e) =>
             {
                 // send summation requests
-                for (int i = 0; i < values.Length; i++)
+                for (var i = 0; i < values.Length; i++)
                 {
-                    AddMessage m = new AddMessage();
+                    var m = new AddMessage();
                     m.Sequence = i;
                     m.Value = values[i];
                     e.Session.Write(m);
@@ -75,8 +74,8 @@ namespace Mina.Example.SumUp
             {
                 // server only sends ResultMessage. otherwise, we will have to identify
                 // its type using instanceof operator.
-                ResultMessage rm = (ResultMessage)e.Message;
-                if (rm.OK)
+                var rm = (ResultMessage)e.Message;
+                if (rm.Ok)
                 {
                     // server returned OK code.
                     // if received the result message which has the last sequence
@@ -97,12 +96,12 @@ namespace Mina.Example.SumUp
                 }
             };
 
-            IoSession session;
+            IOSession session;
             while (true)
             {
                 try
                 {
-                    IConnectFuture future = connector.Connect(new IPEndPoint(IPAddress.Loopback, PORT));
+                    var future = connector.Connect(new IPEndPoint(IPAddress.Loopback, Port));
                     future.Await();
                     session = future.Session;
                     break;

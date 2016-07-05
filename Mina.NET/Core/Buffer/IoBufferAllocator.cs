@@ -3,10 +3,10 @@
 namespace Mina.Core.Buffer
 {
     /// <summary>
-    /// Allocates <see cref="IoBuffer"/>s and manages them.
+    /// Allocates <see cref="IOBuffer"/>s and manages them.
     /// Please implement this interface if you need more advanced memory management scheme.
     /// </summary>
-    public interface IoBufferAllocator
+    public interface IOBufferAllocator
     {
         /// <summary>
         /// Returns the buffer which is capable of the specified size.
@@ -14,11 +14,13 @@ namespace Mina.Core.Buffer
         /// <param name="capacity">the capacity of the buffer</param>
         /// <returns>the allocated buffer</returns>
         /// <exception cref="ArgumentException">If the <paramref name="capacity"/> is a negative integer</exception>
-        IoBuffer Allocate(Int32 capacity);
+        IOBuffer Allocate(int capacity);
+
         /// <summary>
         /// Wraps the specified byte array into Mina.NET buffer.
         /// </summary>
-        IoBuffer Wrap(Byte[] array);
+        IOBuffer Wrap(byte[] array);
+
         /// <summary>
         /// Wraps the specified byte array into Mina.NET buffer.
         /// </summary>
@@ -26,6 +28,6 @@ namespace Mina.Core.Buffer
         /// If the preconditions on the <paramref name="offset"/> and <paramref name="length"/>
         /// parameters do not hold
         /// </exception>
-        IoBuffer Wrap(Byte[] array, Int32 offset, Int32 length);
+        IOBuffer Wrap(byte[] array, int offset, int length);
     }
 }

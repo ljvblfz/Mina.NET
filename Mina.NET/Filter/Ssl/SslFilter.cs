@@ -20,19 +20,16 @@ namespace Mina.Filter.Ssl
     /// </summary>
     public class SslFilter : IoFilterAdapter
     {
-        static readonly ILog log = LogManager.GetLogger(typeof(SslFilter));
+        static readonly ILog Log = LogManager.GetLogger(typeof(SslFilter));
 
-        private static readonly AttributeKey NEXT_FILTER = new AttributeKey(typeof(SslFilter), "nextFilter");
-        private static readonly AttributeKey SSL_HANDLER = new AttributeKey(typeof(SslFilter), "handler");
-
-        X509Certificate _serverCertificate = null;
-        SslProtocols _sslProtocol = SslProtocols.Default;
+        private static readonly AttributeKey NextFilter = new AttributeKey(typeof(SslFilter), "nextFilter");
+        private static readonly AttributeKey SslHandler = new AttributeKey(typeof(SslFilter), "handler");
 
         /// <summary>
         /// Creates a new SSL filter using the specified PKCS7 signed file.
         /// </summary>
         /// <param name="certFile">the path of the PKCS7 signed file from which to create the X.509 certificate</param>
-        public SslFilter(String certFile)
+        public SslFilter(string certFile)
             : this(X509Certificate.CreateFromCertFile(certFile))
         { }
 
@@ -42,7 +39,7 @@ namespace Mina.Filter.Ssl
         /// <param name="cert">the <see cref="X509Certificate"/> to use</param>
         public SslFilter(X509Certificate cert)
         {
-            _serverCertificate = cert;
+            Certificate = cert;
             CheckCertificateRevocation = true;
         }
 
@@ -51,7 +48,7 @@ namespace Mina.Filter.Ssl
         /// </summary>
         /// <param name="targetHost">the name of the server that shares this SSL connection</param>
         /// <param name="clientCertificates">the <see cref="X509CertificateCollection"/> containing client certificates</param>
-        public SslFilter(String targetHost, X509CertificateCollection clientCertificates)
+        public SslFilter(string targetHost, X509CertificateCollection clientCertificates)
         {
             TargetHost = targetHost;
             ClientCertificates = clientCertificates;
@@ -62,46 +59,39 @@ namespace Mina.Filter.Ssl
         /// <summary>
         /// Gets or sets the protocol used for authentication.
         /// </summary>
-        public SslProtocols SslProtocol
-        {
-            get { return _sslProtocol; }
-            set { _sslProtocol = value; }
-        }
+        public SslProtocols SslProtocol { get; set; } = SslProtocols.Default;
 
         /// <summary>
         /// Gets the X.509 certificate.
         /// </summary>
-        public X509Certificate Certificate
-        {
-            get { return _serverCertificate; }
-        }
+        public X509Certificate Certificate { get; }
 
         /// <summary>
-        /// Gets or sets a <see cref="Boolean"/> value that specifies
+        /// Gets or sets a <see cref="bool"/> value that specifies
         /// whether the client must supply a certificate.
         /// The default value is <code>false</code>.
         /// </summary>
-        public Boolean ClientCertificateRequired { get; set; }
+        public bool ClientCertificateRequired { get; set; }
 
         /// <summary>
-        /// Gets or sets a <see cref="Boolean"/> value that specifies
+        /// Gets or sets a <see cref="bool"/> value that specifies
         /// whether the certificate revocation list is checked during authentication.
         /// The default value is <code>true</code> in server mode,
         /// <code>false</code> in client mode.
         /// </summary>
-        public Boolean CheckCertificateRevocation { get; set; }
+        public bool CheckCertificateRevocation { get; set; }
 
         /// <summary>
-        /// Gets or sets a <see cref="Boolean"/> value that specifies
+        /// Gets or sets a <see cref="bool"/> value that specifies
         /// whether to use client (or server) mode when handshaking.
         /// The default value is <code>false</code> (server mode).
         /// </summary>
-        public Boolean UseClientMode { get; set; }
+        public bool UseClientMode { get; set; }
 
         /// <summary>
         /// Gets or sets the name of the server that shares this SSL connection.
         /// </summary>
-        public String TargetHost { get; set; }
+        public string TargetHost { get; set; }
 
         /// <summary>
         /// Gets or sets the <see cref="X509CertificateCollection"/> containing client certificates
@@ -112,44 +102,44 @@ namespace Mina.Filter.Ssl
         /// Returns <code>true</code> if and only if the specified session is
         /// encrypted/decrypted over SSL/TLS currently.
         /// </summary>
-        public Boolean IsSslStarted(IoSession session)
+        public bool IsSslStarted(IOSession session)
         {
-            SslHandler handler = session.GetAttribute<SslHandler>(SSL_HANDLER);
+            var handler = session.GetAttribute<SslHandler>(SslHandler);
             return handler != null && handler.Authenticated;
         }
 
         /// <inheritdoc/>
-        public override void OnPreAdd(IoFilterChain parent, String name, INextFilter nextFilter)
+        public override void OnPreAdd(IOFilterChain parent, string name, INextFilter nextFilter)
         {
             if (parent.Contains<SslFilter>())
                 throw new InvalidOperationException("Only one SSL filter is permitted in a chain.");
 
-            IoSession session = parent.Session;
-            session.SetAttribute(NEXT_FILTER, nextFilter);
+            var session = parent.Session;
+            session.SetAttribute(NextFilter, nextFilter);
             // Create a SSL handler and start handshake.
-            SslHandler handler = new SslHandler(this, session);
-            session.SetAttribute(SSL_HANDLER, handler);
+            var handler = new SslHandler(this, session);
+            session.SetAttribute(SslHandler, handler);
         }
 
         /// <inheritdoc/>
-        public override void OnPostAdd(IoFilterChain parent, String name, INextFilter nextFilter)
+        public override void OnPostAdd(IOFilterChain parent, string name, INextFilter nextFilter)
         {
-            SslHandler handler = GetSslSessionHandler(parent.Session);
+            var handler = GetSslSessionHandler(parent.Session);
             handler.Handshake(nextFilter);
         }
 
         /// <inheritdoc/>
-        public override void OnPreRemove(IoFilterChain parent, String name, INextFilter nextFilter)
+        public override void OnPreRemove(IOFilterChain parent, string name, INextFilter nextFilter)
         {
-            IoSession session = parent.Session;
-            session.RemoveAttribute(NEXT_FILTER);
-            session.RemoveAttribute(SSL_HANDLER);
+            var session = parent.Session;
+            session.RemoveAttribute(NextFilter);
+            session.RemoveAttribute(SslHandler);
         }
 
         /// <inheritdoc/>
-        public override void SessionClosed(INextFilter nextFilter, IoSession session)
+        public override void SessionClosed(INextFilter nextFilter, IOSession session)
         {
-            SslHandler handler = GetSslSessionHandler(session);
+            var handler = GetSslSessionHandler(session);
             try
             {
                 // release resources
@@ -163,18 +153,18 @@ namespace Mina.Filter.Ssl
         }
 
         /// <inheritdoc/>
-        public override void MessageReceived(INextFilter nextFilter, IoSession session, Object message)
+        public override void MessageReceived(INextFilter nextFilter, IOSession session, object message)
         {
-            IoBuffer buf = (IoBuffer)message;
-            SslHandler handler = GetSslSessionHandler(session);
+            var buf = (IOBuffer)message;
+            var handler = GetSslSessionHandler(session);
             // forward read encrypted data to SSL handler
             handler.MessageReceived(nextFilter, buf);
         }
 
         /// <inheritdoc/>
-        public override void MessageSent(INextFilter nextFilter, IoSession session, IWriteRequest writeRequest)
+        public override void MessageSent(INextFilter nextFilter, IOSession session, IWriteRequest writeRequest)
         {
-            EncryptedWriteRequest encryptedWriteRequest = writeRequest as EncryptedWriteRequest;
+            var encryptedWriteRequest = writeRequest as EncryptedWriteRequest;
             if (encryptedWriteRequest == null)
             {
                 // ignore extra buffers used for handshaking
@@ -186,22 +176,22 @@ namespace Mina.Filter.Ssl
         }
 
         /// <inheritdoc/>
-        public override void ExceptionCaught(INextFilter nextFilter, IoSession session, Exception cause)
+        public override void ExceptionCaught(INextFilter nextFilter, IOSession session, Exception cause)
         {
             base.ExceptionCaught(nextFilter, session, cause);
         }
 
         /// <inheritdoc/>
-        public override void FilterWrite(INextFilter nextFilter, IoSession session, IWriteRequest writeRequest)
+        public override void FilterWrite(INextFilter nextFilter, IOSession session, IWriteRequest writeRequest)
         {
-            SslHandler handler = GetSslSessionHandler(session);
+            var handler = GetSslSessionHandler(session);
             handler.ScheduleFilterWrite(nextFilter, writeRequest);
         }
 
         /// <inheritdoc/>
-        public override void FilterClose(INextFilter nextFilter, IoSession session)
+        public override void FilterClose(INextFilter nextFilter, IOSession session)
         {
-            SslHandler handler = session.GetAttribute<SslHandler>(SSL_HANDLER);
+            var handler = session.GetAttribute<SslHandler>(SslHandler);
             if (handler == null)
             {
                 // The connection might already have closed, or
@@ -223,16 +213,16 @@ namespace Mina.Filter.Ssl
             }
         }
 
-        private IWriteFuture InitiateClosure(SslHandler handler, INextFilter nextFilter, IoSession session)
+        private IWriteFuture InitiateClosure(SslHandler handler, INextFilter nextFilter, IOSession session)
         {
-            IWriteFuture future = DefaultWriteFuture.NewWrittenFuture(session);
+            var future = DefaultWriteFuture.NewWrittenFuture(session);
             handler.Destroy();
             return future;
         }
 
-        private SslHandler GetSslSessionHandler(IoSession session)
+        private SslHandler GetSslSessionHandler(IOSession session)
         {
-            SslHandler handler = session.GetAttribute<SslHandler>(SSL_HANDLER);
+            var handler = session.GetAttribute<SslHandler>(SslHandler);
 
             if (handler == null)
                 throw new InvalidOperationException();
@@ -245,100 +235,93 @@ namespace Mina.Filter.Ssl
 
         public static void DisplaySecurityLevel(SslStream stream)
         {
-            log.DebugFormat("Cipher: {0} strength {1}", stream.CipherAlgorithm, stream.CipherStrength);
-            log.DebugFormat("Hash: {0} strength {1}", stream.HashAlgorithm, stream.HashStrength);
-            log.DebugFormat("Key exchange: {0} strength {1}", stream.KeyExchangeAlgorithm, stream.KeyExchangeStrength);
-            log.DebugFormat("Protocol: {0}", stream.SslProtocol);
+            Log.DebugFormat("Cipher: {0} strength {1}", stream.CipherAlgorithm, stream.CipherStrength);
+            Log.DebugFormat("Hash: {0} strength {1}", stream.HashAlgorithm, stream.HashStrength);
+            Log.DebugFormat("Key exchange: {0} strength {1}", stream.KeyExchangeAlgorithm, stream.KeyExchangeStrength);
+            Log.DebugFormat("Protocol: {0}", stream.SslProtocol);
         }
 
         public static void DisplaySecurityServices(SslStream stream)
         {
-            log.DebugFormat("Is authenticated: {0} as server? {1}", stream.IsAuthenticated, stream.IsServer);
-            log.DebugFormat("IsSigned: {0}", stream.IsSigned);
-            log.DebugFormat("Is Encrypted: {0}", stream.IsEncrypted);
+            Log.DebugFormat("Is authenticated: {0} as server? {1}", stream.IsAuthenticated, stream.IsServer);
+            Log.DebugFormat("IsSigned: {0}", stream.IsSigned);
+            Log.DebugFormat("Is Encrypted: {0}", stream.IsEncrypted);
         }
 
         public static void DisplayStreamProperties(SslStream stream)
         {
-            log.DebugFormat("Can read: {0}, write {1}", stream.CanRead, stream.CanWrite);
-            log.DebugFormat("Can timeout: {0}", stream.CanTimeout);
+            Log.DebugFormat("Can read: {0}, write {1}", stream.CanRead, stream.CanWrite);
+            Log.DebugFormat("Can timeout: {0}", stream.CanTimeout);
         }
 
         public static void DisplayCertificateInformation(SslStream stream)
         {
-            log.DebugFormat("Certificate revocation list checked: {0}", stream.CheckCertRevocationStatus);
+            Log.DebugFormat("Certificate revocation list checked: {0}", stream.CheckCertRevocationStatus);
 
-            X509Certificate localCertificate = stream.LocalCertificate;
+            var localCertificate = stream.LocalCertificate;
             if (stream.LocalCertificate != null)
             {
-                log.DebugFormat("Local cert was issued to {0} and is valid from {1} until {2}.",
+                Log.DebugFormat("Local cert was issued to {0} and is valid from {1} until {2}.",
                     localCertificate.Subject,
                     localCertificate.GetEffectiveDateString(),
                     localCertificate.GetExpirationDateString());
             }
             else
             {
-                log.DebugFormat("Local certificate is null.");
+                Log.DebugFormat("Local certificate is null.");
             }
             // Display the properties of the client's certificate.
-            X509Certificate remoteCertificate = stream.RemoteCertificate;
+            var remoteCertificate = stream.RemoteCertificate;
             if (stream.RemoteCertificate != null)
             {
-                log.DebugFormat("Remote cert was issued to {0} and is valid from {1} until {2}.",
+                Log.DebugFormat("Remote cert was issued to {0} and is valid from {1} until {2}.",
                     remoteCertificate.Subject,
                     remoteCertificate.GetEffectiveDateString(),
                     remoteCertificate.GetExpirationDateString());
             }
             else
             {
-                log.DebugFormat("Remote certificate is null.");
+                Log.DebugFormat("Remote certificate is null.");
             }
         }
 
         internal class EncryptedWriteRequest : WriteRequestWrapper
         {
-            private readonly IoBuffer _encryptedMessage;
+            private readonly IOBuffer _encryptedMessage;
 
-            public EncryptedWriteRequest(IWriteRequest writeRequest, IoBuffer encryptedMessage)
+            public EncryptedWriteRequest(IWriteRequest writeRequest, IOBuffer encryptedMessage)
                 : base(writeRequest)
             {
                 _encryptedMessage = encryptedMessage;
             }
 
-            public override Object Message
-            {
-                get { return _encryptedMessage; }
-            }
+            public override object Message => _encryptedMessage;
         }
     }
 
     class SslHandler : IDisposable
     {
-        static readonly ILog log = LogManager.GetLogger(typeof(SslFilter));
+        static readonly ILog Log = LogManager.GetLogger(typeof(SslFilter));
 
-        private readonly SslFilter _sslFilter;
-        private readonly IoSession _session;
+        private readonly IOSession _session;
         private readonly IoSessionStream _sessionStream;
         private readonly SslStream _sslStream;
-        private volatile Boolean _authenticated;
+        private volatile bool _authenticated;
         private readonly ConcurrentQueue<IoFilterEvent> _preHandshakeEventQueue = new ConcurrentQueue<IoFilterEvent>();
         private INextFilter _currentNextFilter;
         private IWriteRequest _currentWriteRequest;
 
-        public SslHandler(SslFilter sslFilter, IoSession session)
+        public SslHandler(SslFilter sslFilter, IOSession session)
         {
-            _sslFilter = sslFilter;
+            SslFilter = sslFilter;
             _session = session;
             _sessionStream = new IoSessionStream(this);
             _sslStream = new SslStream(_sessionStream, false);
         }
 
-        public SslFilter SslFilter
-        {
-            get { return _sslFilter; }
-        }
+        public SslFilter SslFilter { get; }
 
-        public Boolean Authenticated
+        public bool Authenticated
         {
             get { return _authenticated; }
             private set
@@ -361,17 +344,17 @@ namespace Mina.Filter.Ssl
             {
                 _currentNextFilter = nextFilter;
 
-                if (_sslFilter.UseClientMode)
+                if (SslFilter.UseClientMode)
                 {
-                    _sslStream.BeginAuthenticateAsClient(_sslFilter.TargetHost,
-                        _sslFilter.ClientCertificates, _sslFilter.SslProtocol,
-                        _sslFilter.CheckCertificateRevocation, AuthenticateAsClientCallback, null);
+                    _sslStream.BeginAuthenticateAsClient(SslFilter.TargetHost,
+                        SslFilter.ClientCertificates, SslFilter.SslProtocol,
+                        SslFilter.CheckCertificateRevocation, AuthenticateAsClientCallback, null);
                 }
                 else
                 {
-                    _sslStream.BeginAuthenticateAsServer(_sslFilter.Certificate,
-                        _sslFilter.ClientCertificateRequired, _sslFilter.SslProtocol,
-                        _sslFilter.CheckCertificateRevocation, AuthenticateCallback, null);
+                    _sslStream.BeginAuthenticateAsServer(SslFilter.Certificate,
+                        SslFilter.ClientCertificateRequired, SslFilter.SslProtocol,
+                        SslFilter.CheckCertificateRevocation, AuthenticateCallback, null);
                 }
             }
         }
@@ -384,18 +367,18 @@ namespace Mina.Filter.Ssl
             }
             catch (AuthenticationException e)
             {
-                _sslFilter.ExceptionCaught(_currentNextFilter, _session, e);
+                SslFilter.ExceptionCaught(_currentNextFilter, _session, e);
                 return;
             }
             catch (Exception e)
             {
-                _sslFilter.ExceptionCaught(_currentNextFilter, _session, e);
+                SslFilter.ExceptionCaught(_currentNextFilter, _session, e);
                 return;
             }
 
             Authenticated = true;
 
-            if (log.IsDebugEnabled)
+            if (Log.IsDebugEnabled)
             {
                 // Display the properties and settings for the authenticated stream.
                 SslFilter.DisplaySecurityLevel(_sslStream);
@@ -413,18 +396,18 @@ namespace Mina.Filter.Ssl
             }
             catch (AuthenticationException e)
             {
-                _sslFilter.ExceptionCaught(_currentNextFilter, _session, e);
+                SslFilter.ExceptionCaught(_currentNextFilter, _session, e);
                 return;
             }
             catch (IOException e)
             {
-                _sslFilter.ExceptionCaught(_currentNextFilter, _session, e);
+                SslFilter.ExceptionCaught(_currentNextFilter, _session, e);
                 return;
             }
 
             Authenticated = true;
 
-            if (log.IsDebugEnabled)
+            if (Log.IsDebugEnabled)
             {
                 // Display the properties and settings for the authenticated stream.
                 SslFilter.DisplaySecurityLevel(_sslStream);
@@ -446,13 +429,13 @@ namespace Mina.Filter.Ssl
                 return;
             }
 
-            IoBuffer buf = (IoBuffer)writeRequest.Message;
+            var buf = (IOBuffer)writeRequest.Message;
             if (!buf.HasRemaining)
                 // empty message will break this SSL stream?
                 return;
             lock (this)
             {
-                ArraySegment<Byte> array = buf.GetRemaining();
+                var array = buf.GetRemaining();
                 _currentNextFilter = nextFilter;
                 _currentWriteRequest = writeRequest;
                 // SSL encrypt
@@ -460,7 +443,7 @@ namespace Mina.Filter.Ssl
             }
         }
 
-        public void MessageReceived(INextFilter nextFilter, IoBuffer buf)
+        public void MessageReceived(INextFilter nextFilter, IOBuffer buf)
         {
             lock (this)
             {
@@ -468,7 +451,7 @@ namespace Mina.Filter.Ssl
                 _sessionStream.Write(buf);
                 if (_authenticated)
                 {
-                    IoBuffer readBuffer = ReadBuffer();
+                    var readBuffer = ReadBuffer();
                     nextFilter.MessageReceived(_session, readBuffer);
                 }
             }
@@ -489,12 +472,12 @@ namespace Mina.Filter.Ssl
                 IoFilterEvent scheduledWrite;
                 while (_preHandshakeEventQueue.TryDequeue(out scheduledWrite))
                 {
-                    _sslFilter.FilterWrite(scheduledWrite.NextFilter, scheduledWrite.Session, (IWriteRequest)scheduledWrite.Parameter);
+                    SslFilter.FilterWrite(scheduledWrite.NextFilter, scheduledWrite.Session, (IWriteRequest)scheduledWrite.Parameter);
                 }
             }
         }
 
-        private void WriteBuffer(IoBuffer buf)
+        private void WriteBuffer(IOBuffer buf)
         {
             IWriteRequest writeRequest;
             if (_authenticated)
@@ -504,26 +487,23 @@ namespace Mina.Filter.Ssl
             _currentNextFilter.FilterWrite(_session, writeRequest);
         }
 
-        private IoBuffer ReadBuffer()
+        private IOBuffer ReadBuffer()
         {
-            IoBuffer buf = IoBuffer.Allocate(_sessionStream.Remaining);
+            var buf = IOBuffer.Allocate(_sessionStream.Remaining);
 
             while (true)
             {
-                ArraySegment<Byte> array = buf.GetRemaining();
-                Int32 bytesRead = _sslStream.Read(array.Array, array.Offset, array.Count);
+                var array = buf.GetRemaining();
+                var bytesRead = _sslStream.Read(array.Array, array.Offset, array.Count);
                 if (bytesRead <= 0)
                     break;
                 buf.Position += bytesRead;
 
                 if (_sessionStream.Remaining == 0)
                     break;
-                else
-                {
-                    // We have to grow the target buffer, it's too small.
-                    buf.Capacity <<= 1;
-                    buf.Limit = buf.Capacity;
-                }
+                // We have to grow the target buffer, it's too small.
+                buf.Capacity <<= 1;
+                buf.Limit = buf.Capacity;
             }
 
             buf.Flip();
@@ -532,22 +512,22 @@ namespace Mina.Filter.Ssl
 
         class IoSessionStream : System.IO.Stream
         {
-            readonly Object _syncRoot = new Byte[0];
+            readonly object _syncRoot = new byte[0];
             readonly SslHandler _sslHandler;
-            readonly IoBuffer _buf;
-            volatile Boolean _closed;
-            volatile Boolean _released;
+            readonly IOBuffer _buf;
+            volatile bool _closed;
+            volatile bool _released;
             IOException _exception;
 
             public IoSessionStream(SslHandler sslHandler)
             {
                 _sslHandler = sslHandler;
-                _buf = IoBuffer.Allocate(16);
+                _buf = IOBuffer.Allocate(16);
                 _buf.AutoExpand = true;
                 _buf.Limit = 0;
             }
 
-            public override Int32 ReadByte()
+            public override int ReadByte()
             {
                 lock (_syncRoot)
                 {
@@ -557,14 +537,14 @@ namespace Mina.Filter.Ssl
                 }
             }
 
-            public override Int32 Read(Byte[] buffer, Int32 offset, Int32 count)
+            public override int Read(byte[] buffer, int offset, int count)
             {
                 lock (_syncRoot)
                 {
                     if (!WaitForData())
                         return 0;
 
-                    Int32 readBytes = Math.Min(count, _buf.Remaining);
+                    var readBytes = Math.Min(count, _buf.Remaining);
                     _buf.Get(buffer, offset, readBytes);
                     return readBytes;
                 }
@@ -585,14 +565,14 @@ namespace Mina.Filter.Ssl
                 }
             }
 
-            public override void Write(Byte[] buffer, Int32 offset, Int32 count)
+            public override void Write(byte[] buffer, int offset, int count)
             {
-                _sslHandler.WriteBuffer(IoBuffer.Wrap((Byte[])buffer.Clone(), offset, count));
+                _sslHandler.WriteBuffer(IOBuffer.Wrap((byte[])buffer.Clone(), offset, count));
             }
 
-            public override void WriteByte(Byte value)
+            public override void WriteByte(byte value)
             {
-                IoBuffer buf = IoBuffer.Allocate(1);
+                var buf = IOBuffer.Allocate(1);
                 buf.Put(value);
                 buf.Flip();
                 _sslHandler.WriteBuffer(buf);
@@ -601,7 +581,7 @@ namespace Mina.Filter.Ssl
             public override void Flush()
             { }
 
-            public void Write(IoBuffer buf)
+            public void Write(IOBuffer buf)
             {
                 if (_closed)
                     return;
@@ -620,7 +600,7 @@ namespace Mina.Filter.Ssl
                 }
             }
 
-            private Boolean WaitForData()
+            private bool WaitForData()
             {
                 if (_released)
                     return false;
@@ -677,43 +657,31 @@ namespace Mina.Filter.Ssl
                 }
             }
 
-            public Int32 Remaining
-            {
-                get { return _buf.Remaining; }
-            }
+            public int Remaining => _buf.Remaining;
 
-            public override Boolean CanRead
-            {
-                get { return true; }
-            }
+            public override bool CanRead => true;
 
-            public override Boolean CanSeek
-            {
-                get { return false; }
-            }
+            public override bool CanSeek => false;
 
-            public override Boolean CanWrite
-            {
-                get { return true; }
-            }
+            public override bool CanWrite => true;
 
-            public override Int64 Length
+            public override long Length
             {
                 get { throw new NotSupportedException(); }
             }
 
-            public override Int64 Position
+            public override long Position
             {
                 get { throw new NotSupportedException(); }
                 set { throw new NotSupportedException(); }
             }
 
-            public override Int64 Seek(Int64 offset, SeekOrigin origin)
+            public override long Seek(long offset, SeekOrigin origin)
             {
                 throw new NotSupportedException();
             }
 
-            public override void SetLength(Int64 value)
+            public override void SetLength(long value)
             {
                 throw new NotSupportedException();
             }

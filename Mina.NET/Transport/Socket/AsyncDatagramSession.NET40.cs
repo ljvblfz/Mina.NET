@@ -15,9 +15,9 @@ namespace Mina.Transport.Socket
         /// <summary>
         /// Creates a new connector-side session instance.
         /// </summary>
-        public AsyncDatagramSession(IoService service, IoProcessor<SocketSession> processor,
-            System.Net.Sockets.Socket socket, EndPoint remoteEP,
-            SocketAsyncEventArgsBuffer readBuffer, SocketAsyncEventArgsBuffer writeBuffer, Boolean reuseBuffer)
+        public AsyncDatagramSession(IOService service, IIoProcessor<SocketSession> processor,
+            System.Net.Sockets.Socket socket, EndPoint remoteEp,
+            SocketAsyncEventArgsBuffer readBuffer, SocketAsyncEventArgsBuffer writeBuffer, bool reuseBuffer)
             : base(service, processor, new DatagramSessionConfigImpl(socket), socket, socket.LocalEndPoint, socket.RemoteEndPoint, reuseBuffer)
         {
             _readBuffer = readBuffer;
@@ -27,12 +27,12 @@ namespace Mina.Transport.Socket
             _completeHandler = saea_Completed;
         }
 
-        private void BeginSend(IoBuffer buf, EndPoint destination)
+        private void BeginSend(IOBuffer buf, EndPoint destination)
         {
             _writeBuffer.Clear();
 
             SocketAsyncEventArgs saea;
-            SocketAsyncEventArgsBuffer saeaBuf = buf as SocketAsyncEventArgsBuffer;
+            var saeaBuf = buf as SocketAsyncEventArgsBuffer;
             if (saeaBuf == null)
             {
                 if (_writeBuffer.Remaining < buf.Remaining)
@@ -55,7 +55,7 @@ namespace Mina.Transport.Socket
 
             saea.RemoteEndPoint = destination;
 
-            Boolean willRaiseEvent;
+            bool willRaiseEvent;
             try
             {
                 willRaiseEvent = Socket.SendToAsync(saea);
@@ -76,7 +76,7 @@ namespace Mina.Transport.Socket
             }
         }
 
-        void saea_Completed(Object sender, SocketAsyncEventArgs e)
+        void saea_Completed(object sender, SocketAsyncEventArgs e)
         {
             if (e != _writeBuffer.SocketAsyncEventArgs)
             {
@@ -97,7 +97,7 @@ namespace Mina.Transport.Socket
             }
             else
             {
-                EndSend(new SocketException((Int32)e.SocketError));
+                EndSend(new SocketException((int)e.SocketError));
             }
         }
 
@@ -106,7 +106,7 @@ namespace Mina.Transport.Socket
         {
             _readBuffer.Clear();
 
-            Boolean willRaiseEvent;
+            bool willRaiseEvent;
             try
             {
                 if (_readBuffer.SocketAsyncEventArgs.RemoteEndPoint == null)
@@ -149,7 +149,7 @@ namespace Mina.Transport.Socket
                     }
                     else
                     {
-                        IoBuffer buf = IoBuffer.Allocate(_readBuffer.Remaining);
+                        var buf = IOBuffer.Allocate(_readBuffer.Remaining);
                         buf.Put(_readBuffer);
                         buf.Flip();
                         EndReceive(buf);
@@ -161,7 +161,7 @@ namespace Mina.Transport.Socket
             else if (e.SocketError != SocketError.OperationAborted
                 && e.SocketError != SocketError.Interrupted)
             {
-                EndReceive(new SocketException((Int32)e.SocketError));
+                EndReceive(new SocketException((int)e.SocketError));
             }
         }
     }

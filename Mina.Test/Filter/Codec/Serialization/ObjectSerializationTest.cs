@@ -1,6 +1,4 @@
-﻿using System;
-using System.IO;
-#if !NETFX_CORE
+﻿#if !NETFX_CORE
 using NUnit.Framework;
 using TestClass = NUnit.Framework.TestFixtureAttribute;
 using TestMethod = NUnit.Framework.TestAttribute;
@@ -8,8 +6,6 @@ using TestMethod = NUnit.Framework.TestAttribute;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 #endif
 using Mina.Core.Buffer;
-using Mina.Core.Service;
-using Mina.Core.Session;
 
 namespace Mina.Filter.Codec.Serialization
 {
@@ -19,26 +15,26 @@ namespace Mina.Filter.Codec.Serialization
         [TestMethod]
         public void TestEncoder()
         {
-            String expected = "1234";
+            var expected = "1234";
 
-            ProtocolCodecSession session = new ProtocolCodecSession();
-            IProtocolEncoderOutput output = session.EncoderOutput;
+            var session = new ProtocolCodecSession();
+            var output = session.EncoderOutput;
 
             IProtocolEncoder encoder = new ObjectSerializationEncoder();
             encoder.Encode(session, expected, output);
 
             Assert.AreEqual(1, session.EncoderOutputQueue.Count);
-            IoBuffer buf = (IoBuffer)session.EncoderOutputQueue.Dequeue();
+            var buf = (IOBuffer)session.EncoderOutputQueue.Dequeue();
 
             TestDecoderAndInputStream(expected, buf);
         }
 
-        private void TestDecoderAndInputStream(String expected, IoBuffer input)
+        private void TestDecoderAndInputStream(string expected, IOBuffer input)
         {
             // Test ProtocolDecoder
             IProtocolDecoder decoder = new ObjectSerializationDecoder();
-            ProtocolCodecSession session = new ProtocolCodecSession();
-            IProtocolDecoderOutput decoderOut = session.DecoderOutput;
+            var session = new ProtocolCodecSession();
+            var decoderOut = session.DecoderOutput;
             decoder.Decode(session, input.Duplicate(), decoderOut);
 
             Assert.AreEqual(1, session.DecoderOutputQueue.Count);

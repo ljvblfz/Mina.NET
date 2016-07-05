@@ -2,14 +2,14 @@
 
 namespace Mina.Core.Session
 {
-    class DefaultIoSessionDataStructureFactory : IoSessionDataStructureFactory
+    class DefaultIoSessionDataStructureFactory : IOSessionDataStructureFactory
     {
-        public IoSessionAttributeMap GetAttributeMap(IoSession session)
+        public IOSessionAttributeMap GetAttributeMap(IOSession session)
         {
             return new DefaultIoSessionAttributeMap();
         }
 
-        public IWriteRequestQueue GetWriteRequestQueue(IoSession session)
+        public IWriteRequestQueue GetWriteRequestQueue(IOSession session)
         {
             return new DefaultWriteRequestQueue();
         }

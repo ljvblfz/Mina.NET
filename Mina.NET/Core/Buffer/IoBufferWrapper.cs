@@ -4,534 +4,518 @@ using System.Text;
 namespace Mina.Core.Buffer
 {
     /// <summary>
-    /// A <see cref="IoBuffer"/> that wraps a buffer and proxies any operations to it.
+    /// A <see cref="IOBuffer"/> that wraps a buffer and proxies any operations to it.
     /// </summary>
-    public class IoBufferWrapper : IoBuffer
+    public class IOBufferWrapper : IOBuffer
     {
-        private readonly IoBuffer _buf;
+        private readonly IOBuffer _buffer;
 
         /// <summary>
         /// </summary>
-        protected IoBufferWrapper(IoBuffer buf)
+        protected IOBufferWrapper(IOBuffer buffer)
             : base(-1, 0, 0, 0)
         {
-            if (buf == null)
-                throw new ArgumentNullException("buf");
-            _buf = buf;
+            if (buffer == null)
+            {
+                throw new ArgumentNullException(nameof(buffer));
+            }
+            _buffer = buffer;
         }
 
         /// <inheritdoc/>
-        public override IoBufferAllocator BufferAllocator
-        {
-            get { return _buf.BufferAllocator; }
-        }
+        public override IOBufferAllocator BufferAllocator => _buffer.BufferAllocator;
 
         /// <inheritdoc/>
         public override ByteOrder Order
         {
-            get { return _buf.Order; }
-            set { _buf.Order = value; }
+            get { return _buffer.Order; }
+            set { _buffer.Order = value; }
         }
 
         /// <inheritdoc/>
-        public override Int32 Capacity
+        public override int Capacity
         {
-            get { return _buf.Capacity; }
-            set { _buf.Capacity = value; }
+            get { return _buffer.Capacity; }
+            set { _buffer.Capacity = value; }
         }
 
         /// <inheritdoc/>
-        public override Int32 Position
+        public override int Position
         {
-            get { return _buf.Position; }
-            set { _buf.Position = value; }
+            get { return _buffer.Position; }
+            set { _buffer.Position = value; }
         }
 
         /// <inheritdoc/>
-        public override Int32 Limit
+        public override int Limit
         {
-            get { return _buf.Limit; }
-            set { _buf.Limit = value; }
+            get { return _buffer.Limit; }
+            set { _buffer.Limit = value; }
         }
 
         /// <inheritdoc/>
-        public override Int32 Remaining
+        public override int Remaining => _buffer.Remaining;
+
+        /// <inheritdoc/>
+        public override bool HasRemaining => _buffer.HasRemaining;
+
+        /// <inheritdoc/>
+        public override bool AutoExpand
         {
-            get { return _buf.Remaining; }
+            get { return _buffer.AutoExpand; }
+            set { _buffer.AutoExpand = value; }
         }
 
         /// <inheritdoc/>
-        public override Boolean HasRemaining
+        public override bool AutoShrink
         {
-            get { return _buf.HasRemaining; }
+            get { return _buffer.AutoShrink; }
+            set { _buffer.AutoShrink = value; }
         }
 
         /// <inheritdoc/>
-        public override Boolean AutoExpand
+        public override bool Derived => _buffer.Derived;
+
+        /// <inheritdoc/>
+        public override int MinimumCapacity
         {
-            get { return _buf.AutoExpand; }
-            set { _buf.AutoExpand = value; }
+            get { return _buffer.MinimumCapacity; }
+            set { _buffer.MinimumCapacity = value; }
         }
 
         /// <inheritdoc/>
-        public override Boolean AutoShrink
-        {
-            get { return _buf.AutoShrink; }
-            set { _buf.AutoShrink = value; }
-        }
+        public override bool HasArray => _buffer.HasArray;
 
         /// <inheritdoc/>
-        public override Boolean Derived
+        public override IOBuffer Expand(int expectedRemaining)
         {
-            get { return _buf.Derived; }
-        }
-
-        /// <inheritdoc/>
-        public override Int32 MinimumCapacity
-        {
-            get { return _buf.MinimumCapacity; }
-            set { _buf.MinimumCapacity = value; }
-        }
-
-        /// <inheritdoc/>
-        public override Boolean HasArray
-        {
-            get { return _buf.HasArray; }
-        }
-
-        /// <inheritdoc/>
-        public override IoBuffer Expand(Int32 expectedRemaining)
-        {
-            _buf.Expand(expectedRemaining);
+            _buffer.Expand(expectedRemaining);
             return this;
         }
 
         /// <inheritdoc/>
-        public override IoBuffer Expand(Int32 pos, Int32 expectedRemaining)
+        public override IOBuffer Expand(int pos, int expectedRemaining)
         {
-            _buf.Expand(pos, expectedRemaining);
+            _buffer.Expand(pos, expectedRemaining);
             return this;
         }
 
         /// <inheritdoc/>
-        public override IoBuffer Shrink()
+        public override IOBuffer Shrink()
         {
-            _buf.Shrink();
+            _buffer.Shrink();
             return this;
         }
 
         /// <inheritdoc/>
-        public override IoBuffer Sweep()
+        public override IOBuffer Sweep()
         {
-            _buf.Sweep();
+            _buffer.Sweep();
             return this;
         }
 
         /// <inheritdoc/>
-        public override IoBuffer Sweep(Byte value)
+        public override IOBuffer Sweep(byte value)
         {
-            _buf.Sweep(value);
+            _buffer.Sweep(value);
             return this;
         }
 
         /// <inheritdoc/>
-        public override IoBuffer FillAndReset(Int32 size)
+        public override IOBuffer FillAndReset(int size)
         {
-            _buf.FillAndReset(size);
+            _buffer.FillAndReset(size);
             return this;
         }
 
         /// <inheritdoc/>
-        public override IoBuffer FillAndReset(Byte value, Int32 size)
+        public override IOBuffer FillAndReset(byte value, int size)
         {
-            _buf.FillAndReset(value, size);
+            _buffer.FillAndReset(value, size);
             return this;
         }
 
         /// <inheritdoc/>
-        public override IoBuffer Fill(Int32 size)
+        public override IOBuffer Fill(int size)
         {
-            _buf.Fill(size);
+            _buffer.Fill(size);
             return this;
         }
 
         /// <inheritdoc/>
-        public override IoBuffer Fill(Byte value, Int32 size)
+        public override IOBuffer Fill(byte value, int size)
         {
-            _buf.Fill(value, size);
+            _buffer.Fill(value, size);
             return this;
         }
 
         /// <inheritdoc/>
-        public override String GetHexDump()
+        public override string GetHexDump()
         {
-            return _buf.GetHexDump();
+            return _buffer.GetHexDump();
         }
 
         /// <inheritdoc/>
-        public override String GetHexDump(Int32 lengthLimit)
+        public override string GetHexDump(int lengthLimit)
         {
-            return _buf.GetHexDump(lengthLimit);
+            return _buffer.GetHexDump(lengthLimit);
         }
 
         /// <inheritdoc/>
-        public override Boolean PrefixedDataAvailable(Int32 prefixLength)
+        public override bool PrefixedDataAvailable(int prefixLength)
         {
-            return _buf.PrefixedDataAvailable(prefixLength);
+            return _buffer.PrefixedDataAvailable(prefixLength);
         }
 
         /// <inheritdoc/>
-        public override Boolean PrefixedDataAvailable(Int32 prefixLength, Int32 maxDataLength)
+        public override bool PrefixedDataAvailable(int prefixLength, int maxDataLength)
         {
-            return _buf.PrefixedDataAvailable(prefixLength, maxDataLength);
+            return _buffer.PrefixedDataAvailable(prefixLength, maxDataLength);
         }
 
         /// <inheritdoc/>
-        public override Int32 IndexOf(Byte b)
+        public override int IndexOf(byte b)
         {
-            return _buf.IndexOf(b);
+            return _buffer.IndexOf(b);
         }
 
         /// <inheritdoc/>
-        public override String GetPrefixedString(Encoding encoding)
+        public override string GetPrefixedString(Encoding encoding)
         {
-            return _buf.GetPrefixedString(encoding);
+            return _buffer.GetPrefixedString(encoding);
         }
 
         /// <inheritdoc/>
-        public override String GetPrefixedString(Int32 prefixLength, Encoding encoding)
+        public override string GetPrefixedString(int prefixLength, Encoding encoding)
         {
-            return _buf.GetPrefixedString(prefixLength, encoding);
+            return _buffer.GetPrefixedString(prefixLength, encoding);
         }
 
         /// <inheritdoc/>
-        public override IoBuffer PutPrefixedString(String value, Encoding encoding)
+        public override IOBuffer PutPrefixedString(string value, Encoding encoding)
         {
-            return _buf.PutPrefixedString(value, encoding);
+            return _buffer.PutPrefixedString(value, encoding);
         }
 
         /// <inheritdoc/>
-        public override IoBuffer PutPrefixedString(String value, Int32 prefixLength, Encoding encoding)
+        public override IOBuffer PutPrefixedString(string value, int prefixLength, Encoding encoding)
         {
-            _buf.PutPrefixedString(value, prefixLength, encoding);
+            _buffer.PutPrefixedString(value, prefixLength, encoding);
             return this;
         }
 
         /// <inheritdoc/>
-        public override Object GetObject()
+        public override object GetObject()
         {
-            return _buf.GetObject();
+            return _buffer.GetObject();
         }
 
         /// <inheritdoc/>
-        public override IoBuffer PutObject(Object o)
+        public override IOBuffer PutObject(object o)
         {
-            _buf.PutObject(o);
+            _buffer.PutObject(o);
             return this;
         }
 
         /// <inheritdoc/>
-        public override Byte Get()
+        public override byte Get()
         {
-            return _buf.Get();
+            return _buffer.Get();
         }
 
         /// <inheritdoc/>
-        public override Byte Get(Int32 index)
+        public override byte Get(int index)
         {
-            return _buf.Get(index);
+            return _buffer.Get(index);
         }
 
         /// <inheritdoc/>
-        public override IoBuffer Get(Byte[] dst, Int32 offset, Int32 length)
+        public override IOBuffer Get(byte[] dst, int offset, int length)
         {
-            _buf.Get(dst, offset, length);
+            _buffer.Get(dst, offset, length);
             return this;
         }
 
         /// <inheritdoc/>
-        public override ArraySegment<Byte> GetRemaining()
+        public override ArraySegment<byte> GetRemaining()
         {
-            return _buf.GetRemaining();
+            return _buffer.GetRemaining();
         }
 
         /// <inheritdoc/>
         public override void Free()
         {
-            _buf.Free();
+            _buffer.Free();
         }
 
         /// <inheritdoc/>
-        public override IoBuffer Slice()
+        public override IOBuffer Slice()
         {
-            return _buf.Slice();
+            return _buffer.Slice();
         }
 
         /// <inheritdoc/>
-        public override IoBuffer GetSlice(Int32 index, Int32 length)
+        public override IOBuffer GetSlice(int index, int length)
         {
-            return _buf.GetSlice(index, length);
+            return _buffer.GetSlice(index, length);
         }
 
         /// <inheritdoc/>
-        public override IoBuffer GetSlice(Int32 length)
+        public override IOBuffer GetSlice(int length)
         {
-            return _buf.GetSlice(length);
+            return _buffer.GetSlice(length);
         }
 
         /// <inheritdoc/>
-        public override IoBuffer Duplicate()
+        public override IOBuffer Duplicate()
         {
-            return _buf.Duplicate();
+            return _buffer.Duplicate();
         }
 
         /// <inheritdoc/>
-        public override IoBuffer AsReadOnlyBuffer()
+        public override IOBuffer AsReadOnlyBuffer()
         {
-            return _buf.AsReadOnlyBuffer();
+            return _buffer.AsReadOnlyBuffer();
         }
 
         /// <inheritdoc/>
-        public override IoBuffer Skip(Int32 size)
+        public override IOBuffer Skip(int size)
         {
-            _buf.Skip(size);
+            _buffer.Skip(size);
             return this;
         }
 
         /// <inheritdoc/>
-        public override IoBuffer Put(Byte b)
+        public override IOBuffer Put(byte b)
         {
-            _buf.Put(b);
+            _buffer.Put(b);
             return this;
         }
 
         /// <inheritdoc/>
-        public override IoBuffer Put(Int32 i, Byte b)
+        public override IOBuffer Put(int i, byte b)
         {
-            _buf.Put(i, b);
+            _buffer.Put(i, b);
             return this;
         }
 
         /// <inheritdoc/>
-        public override IoBuffer Put(Byte[] src, Int32 offset, Int32 length)
+        public override IOBuffer Put(byte[] src, int offset, int length)
         {
-            _buf.Put(src, offset, length);
+            _buffer.Put(src, offset, length);
             return this;
         }
 
         /// <inheritdoc/>
-        public override IoBuffer Put(IoBuffer src)
+        public override IOBuffer Put(IOBuffer src)
         {
-            _buf.Put(src);
+            _buffer.Put(src);
             return this;
         }
 
         /// <inheritdoc/>
-        public override IoBuffer Compact()
+        public override IOBuffer Compact()
         {
-            _buf.Compact();
+            _buffer.Compact();
             return this;
         }
 
         /// <inheritdoc/>
-        public override IoBuffer Put(Byte[] src)
+        public override IOBuffer Put(byte[] src)
         {
-            _buf.Put(src);
+            _buffer.Put(src);
             return this;
         }
 
         /// <inheritdoc/>
-        public override IoBuffer PutString(String s)
+        public override IOBuffer PutString(string s)
         {
-            _buf.PutString(s);
+            _buffer.PutString(s);
             return this;
         }
 
         /// <inheritdoc/>
-        public override IoBuffer PutString(String s, Encoding encoding)
+        public override IOBuffer PutString(string s, Encoding encoding)
         {
-            _buf.PutString(s, encoding);
+            _buffer.PutString(s, encoding);
             return this;
         }
 
         /// <inheritdoc/>
-        public override IoBuffer PutString(String s, Int32 fieldSize, Encoding encoding)
+        public override IOBuffer PutString(string s, int fieldSize, Encoding encoding)
         {
-            return _buf.PutString(s, fieldSize, encoding);
+            return _buffer.PutString(s, fieldSize, encoding);
         }
 
         /// <inheritdoc/>
-        public override String GetString(Encoding encoding)
+        public override string GetString(Encoding encoding)
         {
-            return _buf.GetString(encoding);
+            return _buffer.GetString(encoding);
         }
 
         /// <inheritdoc/>
-        public override String GetString(Int32 fieldSize, Encoding encoding)
+        public override string GetString(int fieldSize, Encoding encoding)
         {
-            return _buf.GetString(fieldSize, encoding);
+            return _buffer.GetString(fieldSize, encoding);
         }
 
         /// <inheritdoc/>
-        public override Char GetChar()
+        public override char GetChar()
         {
-            return _buf.GetChar();
+            return _buffer.GetChar();
         }
 
         /// <inheritdoc/>
-        public override Char GetChar(Int32 index)
+        public override char GetChar(int index)
         {
-            return _buf.GetChar(index);
+            return _buffer.GetChar(index);
         }
 
         /// <inheritdoc/>
-        public override IoBuffer PutChar(Char value)
+        public override IOBuffer PutChar(char value)
         {
-            _buf.PutChar(value);
+            _buffer.PutChar(value);
             return this;
         }
 
         /// <inheritdoc/>
-        public override IoBuffer PutChar(Int32 index, Char value)
+        public override IOBuffer PutChar(int index, char value)
         {
-            _buf.PutChar(index, value);
+            _buffer.PutChar(index, value);
             return this;
         }
 
         /// <inheritdoc/>
-        public override Int16 GetInt16()
+        public override short GetInt16()
         {
-            return _buf.GetInt16();
+            return _buffer.GetInt16();
         }
 
         /// <inheritdoc/>
-        public override Int16 GetInt16(Int32 index)
+        public override short GetInt16(int index)
         {
-            return _buf.GetInt16(index);
+            return _buffer.GetInt16(index);
         }
 
         /// <inheritdoc/>
-        public override IoBuffer PutInt16(Int16 value)
+        public override IOBuffer PutInt16(short value)
         {
-            _buf.PutInt16(value);
+            _buffer.PutInt16(value);
             return this;
         }
 
         /// <inheritdoc/>
-        public override IoBuffer PutInt16(Int32 index, Int16 value)
+        public override IOBuffer PutInt16(int index, short value)
         {
-            _buf.PutInt16(index, value);
+            _buffer.PutInt16(index, value);
             return this;
         }
 
         /// <inheritdoc/>
-        public override Int32 GetInt32()
+        public override int GetInt32()
         {
-            return _buf.GetInt32();
+            return _buffer.GetInt32();
         }
 
         /// <inheritdoc/>
-        public override Int32 GetInt32(Int32 index)
+        public override int GetInt32(int index)
         {
-            return _buf.GetInt32(index);
+            return _buffer.GetInt32(index);
         }
 
         /// <inheritdoc/>
-        public override IoBuffer PutInt32(Int32 value)
+        public override IOBuffer PutInt32(int value)
         {
-            _buf.PutInt32(value);
+            _buffer.PutInt32(value);
             return this;
         }
 
         /// <inheritdoc/>
-        public override IoBuffer PutInt32(Int32 index, Int32 value)
+        public override IOBuffer PutInt32(int index, int value)
         {
-            _buf.PutInt32(index, value);
+            _buffer.PutInt32(index, value);
             return this;
         }
 
         /// <inheritdoc/>
-        public override Int64 GetInt64()
+        public override long GetInt64()
         {
-            return _buf.GetInt64();
+            return _buffer.GetInt64();
         }
 
         /// <inheritdoc/>
-        public override Int64 GetInt64(Int32 index)
+        public override long GetInt64(int index)
         {
-            return _buf.GetInt64(index);
+            return _buffer.GetInt64(index);
         }
 
         /// <inheritdoc/>
-        public override IoBuffer PutInt64(Int64 value)
+        public override IOBuffer PutInt64(long value)
         {
-            _buf.PutInt64(value);
+            _buffer.PutInt64(value);
             return this;
         }
 
         /// <inheritdoc/>
-        public override IoBuffer PutInt64(Int32 index, Int64 value)
+        public override IOBuffer PutInt64(int index, long value)
         {
-            _buf.PutInt64(index, value);
+            _buffer.PutInt64(index, value);
             return this;
         }
 
         /// <inheritdoc/>
-        public override Single GetSingle()
+        public override float GetSingle()
         {
-            return _buf.GetSingle();
+            return _buffer.GetSingle();
         }
 
         /// <inheritdoc/>
-        public override Single GetSingle(Int32 index)
+        public override float GetSingle(int index)
         {
-            return _buf.GetSingle(index);
+            return _buffer.GetSingle(index);
         }
 
         /// <inheritdoc/>
-        public override IoBuffer PutSingle(Single value)
+        public override IOBuffer PutSingle(float value)
         {
-            _buf.PutSingle(value);
+            _buffer.PutSingle(value);
             return this;
         }
 
         /// <inheritdoc/>
-        public override IoBuffer PutSingle(Int32 index, Single value)
+        public override IOBuffer PutSingle(int index, float value)
         {
-            _buf.PutSingle(index, value);
+            _buffer.PutSingle(index, value);
             return this;
         }
 
         /// <inheritdoc/>
-        public override Double GetDouble()
+        public override double GetDouble()
         {
-            return _buf.GetDouble();
+            return _buffer.GetDouble();
         }
 
         /// <inheritdoc/>
-        public override Double GetDouble(Int32 index)
+        public override double GetDouble(int index)
         {
-            return _buf.GetDouble(index);
+            return _buffer.GetDouble(index);
         }
 
         /// <inheritdoc/>
-        public override IoBuffer PutDouble(Double value)
+        public override IOBuffer PutDouble(double value)
         {
-            _buf.PutDouble(value);
+            _buffer.PutDouble(value);
             return this;
         }
 
         /// <inheritdoc/>
-        public override IoBuffer PutDouble(Int32 index, Double value)
+        public override IOBuffer PutDouble(int index, double value)
         {
-            _buf.PutDouble(index, value);
+            _buffer.PutDouble(index, value);
             return this;
         }
 
         /// <inheritdoc/>
-        public override Boolean ReadOnly
-        {
-            get { return _buf.ReadOnly; }
-        }
+        public override bool ReadOnly => _buffer.ReadOnly;
     }
 }

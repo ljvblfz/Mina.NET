@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Net;
 using System.Net.Sockets;
 using Mina.Core.Buffer;
@@ -9,26 +8,26 @@ using Mina.Util;
 
 namespace Mina.Transport.Socket
 {
-    partial class AsyncDatagramAcceptor : AbstractIoAcceptor, IDatagramAcceptor
+    partial class AsyncDatagramAcceptor : AbstractIOAcceptor, IDatagramAcceptor
     {
         private void BeginReceive(SocketContext ctx)
         {
-            if (ctx.receiveBuffer == null)
+            if (ctx.ReceiveBuffer == null)
             {
-                Byte[] buffer = new Byte[SessionConfig.ReadBufferSize];
-                ctx.receiveBuffer = new SocketAsyncEventArgs();
-                ctx.receiveBuffer.SetBuffer(buffer, 0, buffer.Length);
-                ctx.receiveBuffer.Completed += new EventHandler<SocketAsyncEventArgs>(OnCompleted);
-                ctx.receiveBuffer.UserToken = ctx;
+                var buffer = new byte[SessionConfig.ReadBufferSize];
+                ctx.ReceiveBuffer = new SocketAsyncEventArgs();
+                ctx.ReceiveBuffer.SetBuffer(buffer, 0, buffer.Length);
+                ctx.ReceiveBuffer.Completed += OnCompleted;
+                ctx.ReceiveBuffer.UserToken = ctx;
             }
 
-            ctx.receiveBuffer.RemoteEndPoint = new IPEndPoint(ctx.Socket.AddressFamily == AddressFamily.InterNetwork ?
+            ctx.ReceiveBuffer.RemoteEndPoint = new IPEndPoint(ctx.Socket.AddressFamily == AddressFamily.InterNetwork ?
                 IPAddress.Any : IPAddress.IPv6Any, 0);
 
-            Boolean willRaiseEvent;
+            bool willRaiseEvent;
             try
             {
-                willRaiseEvent = ctx.Socket.ReceiveFromAsync(ctx.receiveBuffer);
+                willRaiseEvent = ctx.Socket.ReceiveFromAsync(ctx.ReceiveBuffer);
             }
             catch (ObjectDisposedException)
             {
@@ -37,11 +36,11 @@ namespace Mina.Transport.Socket
             }
             if (!willRaiseEvent)
             {
-                ProcessReceive(ctx.receiveBuffer);
+                ProcessReceive(ctx.ReceiveBuffer);
             }
         }
 
-        void OnCompleted(Object sender, SocketAsyncEventArgs e)
+        void OnCompleted(object sender, SocketAsyncEventArgs e)
         {
             ProcessReceive(e);
         }
@@ -50,7 +49,7 @@ namespace Mina.Transport.Socket
         {
             if (e.SocketError == SocketError.Success)
             {
-                IoBuffer buf = IoBuffer.Allocate(e.BytesTransferred);
+                var buf = IOBuffer.Allocate(e.BytesTransferred);
                 buf.Put(e.Buffer, e.Offset, e.BytesTransferred);
                 buf.Flip();
                 EndReceive((SocketContext)e.UserToken, buf, e.RemoteEndPoint);
@@ -58,41 +57,41 @@ namespace Mina.Transport.Socket
             else if (e.SocketError != SocketError.OperationAborted
                 && e.SocketError != SocketError.Interrupted)
             {
-                ExceptionMonitor.Instance.ExceptionCaught(new SocketException((Int32)e.SocketError));
+                ExceptionMonitor.Instance.ExceptionCaught(new SocketException((int)e.SocketError));
             }
         }
 
         partial class SocketContext
         {
-            public SocketAsyncEventArgs receiveBuffer;
+            public SocketAsyncEventArgs ReceiveBuffer;
             private SocketAsyncEventArgsBuffer _writeBuffer;
             private readonly EventHandler<SocketAsyncEventArgs> _completeHandler;
 
-            public SocketContext(System.Net.Sockets.Socket socket, IoSessionConfig config)
+            public SocketContext(System.Net.Sockets.Socket socket, IOSessionConfig config)
             {
                 _socket = socket;
 
                 _completeHandler = OnCompleted;
 
-                Byte[] writeBuffer = new Byte[config.ReadBufferSize];
+                var writeBuffer = new byte[config.ReadBufferSize];
                 _writeBuffer = SocketAsyncEventArgsBufferAllocator.Instance.Wrap(writeBuffer);
-                _writeBuffer.SocketAsyncEventArgs.Completed += new EventHandler<SocketAsyncEventArgs>(OnCompleted);
+                _writeBuffer.SocketAsyncEventArgs.Completed += OnCompleted;
                 _writeBuffer.SocketAsyncEventArgs.UserToken = this;
             }
 
             public void Close()
             {
                 _socket.Close();
-                receiveBuffer.Dispose();
+                ReceiveBuffer.Dispose();
                 _writeBuffer.Dispose();
             }
 
-            private void BeginSend(AsyncDatagramSession session, IoBuffer buf, EndPoint remoteEP)
+            private void BeginSend(AsyncDatagramSession session, IOBuffer buf, EndPoint remoteEp)
             {
                 _writeBuffer.Clear();
 
                 SocketAsyncEventArgs saea;
-                SocketAsyncEventArgsBuffer saeaBuf = buf as SocketAsyncEventArgsBuffer;
+                var saeaBuf = buf as SocketAsyncEventArgsBuffer;
                 if (saeaBuf == null)
                 {
                     if (_writeBuffer.Remaining < buf.Remaining)
@@ -114,9 +113,9 @@ namespace Mina.Transport.Socket
                 }
 
                 saea.UserToken = session;
-                saea.RemoteEndPoint = remoteEP;
+                saea.RemoteEndPoint = remoteEp;
 
-                Boolean willRaiseEvent;
+                bool willRaiseEvent;
                 try
                 {
                     willRaiseEvent = Socket.SendToAsync(saea);
@@ -137,7 +136,7 @@ namespace Mina.Transport.Socket
                 }
             }
 
-            void OnCompleted(Object sender, SocketAsyncEventArgs e)
+            void OnCompleted(object sender, SocketAsyncEventArgs e)
             {
                 if (e != _writeBuffer.SocketAsyncEventArgs)
                 {
@@ -154,7 +153,7 @@ namespace Mina.Transport.Socket
                 }
                 else
                 {
-                    EndSend((AsyncDatagramSession)e.UserToken, new SocketException((Int32)e.SocketError));
+                    EndSend((AsyncDatagramSession)e.UserToken, new SocketException((int)e.SocketError));
                 }
             }
         }

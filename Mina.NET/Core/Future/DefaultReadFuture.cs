@@ -8,25 +8,25 @@ namespace Mina.Core.Future
     /// </summary>
     public class DefaultReadFuture : DefaultIoFuture, IReadFuture
     {
-        private static readonly Object CLOSED = new Object();
+        private static readonly object CLOSED = new object();
 
         /// <summary>
         /// </summary>
-        public DefaultReadFuture(IoSession session)
+        public DefaultReadFuture(IOSession session)
             : base(session)
         { }
 
         /// <inheritdoc/>
-        public Object Message
+        public object Message
         {
             get
             {
                 if (Done)
                 {
-                    Object val = Value;
-                    if (Object.ReferenceEquals(val, CLOSED))
+                    var val = Value;
+                    if (ReferenceEquals(val, CLOSED))
                         return null;
-                    Exception ex = val as Exception;
+                    var ex = val as Exception;
                     if (ex != null)
                         throw ex;
                     return val;
@@ -37,29 +37,29 @@ namespace Mina.Core.Future
             set
             {
                 if (value == null)
-                    throw new ArgumentNullException("value");
+                    throw new ArgumentNullException(nameof(value));
                 Value = value;
             }
         }
 
         /// <inheritdoc/>
-        public Boolean Read
+        public bool Read
         {
             get
             {
                 if (Done)
                 {
-                    Object val = Value;
-                    return !Object.ReferenceEquals(val, CLOSED) && !(val is Exception);
+                    var val = Value;
+                    return !ReferenceEquals(val, CLOSED) && !(val is Exception);
                 }
                 return false;
             }
         }
 
         /// <inheritdoc/>
-        public Boolean Closed
+        public bool Closed
         {
-            get { return Done && Object.ReferenceEquals(Value, CLOSED); }
+            get { return Done && ReferenceEquals(Value, CLOSED); }
             set { Value = CLOSED; }
         }
 
@@ -77,7 +77,7 @@ namespace Mina.Core.Future
             set
             {
                 if (value == null)
-                    throw new ArgumentNullException("value");
+                    throw new ArgumentNullException(nameof(value));
                 Value = value;
             }
         }

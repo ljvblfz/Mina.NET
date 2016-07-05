@@ -4,36 +4,27 @@ using System.IO;
 namespace Mina.Core.Buffer
 {
     /// <summary>
-    /// Wraps an <see cref="IoBuffer"/> as a stream.
+    /// Wraps an <see cref="IOBuffer"/> as a stream.
     /// </summary>
-    public class IoBufferStream : Stream
+    public class IOBufferStream : Stream
     {
-        private readonly IoBuffer _buf;
+        private readonly IOBuffer _buffer;
 
         /// <summary>
         /// </summary>
-        public IoBufferStream(IoBuffer buf)
+        public IOBufferStream(IOBuffer buffer)
         {
-            _buf = buf;
+            _buffer = buffer;
         }
 
         /// <inheritdoc/>
-        public override Boolean CanRead
-        {
-            get { return true; }
-        }
+        public override bool CanRead => true;
 
         /// <inheritdoc/>
-        public override Boolean CanSeek
-        {
-            get { return true; }
-        }
+        public override bool CanSeek => true;
 
         /// <inheritdoc/>
-        public override Boolean CanWrite
-        {
-            get { return true; }
-        }
+        public override bool CanWrite => true;
 
         /// <inheritdoc/>
         public override void Flush()
@@ -42,28 +33,25 @@ namespace Mina.Core.Buffer
         }
 
         /// <inheritdoc/>
-        public override Int64 Length
+        public override long Length => _buffer.Remaining;
+
+        /// <inheritdoc/>
+        public override long Position
         {
-            get { return _buf.Remaining; }
+            get { return _buffer.Position; }
+            set { _buffer.Position = (int)value; }
         }
 
         /// <inheritdoc/>
-        public override Int64 Position
+        public override int Read(byte[] buffer, int offset, int count)
         {
-            get { return _buf.Position; }
-            set { _buf.Position = (Int32)value; }
-        }
-
-        /// <inheritdoc/>
-        public override Int32 Read(Byte[] buffer, Int32 offset, Int32 count)
-        {
-            Int32 read = Math.Min(_buf.Remaining, count);
-            _buf.Get(buffer, offset, read);
+            var read = Math.Min(_buffer.Remaining, count);
+            _buffer.Get(buffer, offset, read);
             return read;
         }
 
         /// <inheritdoc/>
-        public override Int64 Seek(Int64 offset, SeekOrigin origin)
+        public override long Seek(long offset, SeekOrigin origin)
         {
             switch (origin)
             {
@@ -74,7 +62,7 @@ namespace Mina.Core.Buffer
                     Position += offset;
                     break;
                 case SeekOrigin.End:
-                    Position = _buf.Remaining - offset;
+                    Position = _buffer.Remaining - offset;
                     break;
                 default:
                     break;
@@ -83,15 +71,15 @@ namespace Mina.Core.Buffer
         }
 
         /// <inheritdoc/>
-        public override void SetLength(Int64 value)
+        public override void SetLength(long value)
         {
             throw new NotSupportedException();
         }
 
         /// <inheritdoc/>
-        public override void Write(Byte[] buffer, Int32 offset, Int32 count)
+        public override void Write(byte[] buffer, int offset, int count)
         {
-            _buf.Put(buffer, offset, count);
+            _buffer.Put(buffer, offset, count);
         }
     }
 }

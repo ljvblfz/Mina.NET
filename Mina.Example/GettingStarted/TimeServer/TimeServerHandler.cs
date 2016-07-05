@@ -8,12 +8,12 @@ namespace Mina.Example.GettingStarted.TimeServer
     /// The Time Server handler : it return the current date when a message is received,
     /// or close the session if the "quit" message is received.
     /// </summary>
-    class TimeServerHandler : IoHandlerAdapter
+    class TimeServerHandler : IOHandlerAdapter
     {
         /// <summary>
         /// Trap exceptions.
         /// </summary>
-        public override void ExceptionCaught(IoSession session, Exception cause)
+        public override void ExceptionCaught(IOSession session, Exception cause)
         {
             Console.WriteLine(cause);
         }
@@ -22,9 +22,9 @@ namespace Mina.Example.GettingStarted.TimeServer
         /// If the message is 'quit', we exit by closing the session. Otherwise,
         /// we return the current date.
         /// </summary>
-        public override void MessageReceived(IoSession session, Object message)
+        public override void MessageReceived(IOSession session, object message)
         {
-            String str = message.ToString();
+            var str = message.ToString();
 
             // "Quit" ? let's get out ...
             if (str.Trim().Equals("quit", StringComparison.OrdinalIgnoreCase))
@@ -41,7 +41,7 @@ namespace Mina.Example.GettingStarted.TimeServer
         /// <summary>
         /// On idle, we just write a message on the console
         /// </summary>
-        public override void SessionIdle(IoSession session, IdleStatus status)
+        public override void SessionIdle(IOSession session, IdleStatus status)
         {
             Console.WriteLine("IDLE " + session.GetIdleCount(status));
         }

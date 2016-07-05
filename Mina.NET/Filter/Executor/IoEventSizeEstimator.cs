@@ -11,53 +11,53 @@ namespace Mina.Filter.Executor
     /// <summary>
     /// Estimates the amount of memory that the specified <see cref="IoEvent"/> occupies.
     /// </summary>
-    public interface IoEventSizeEstimator
+    public interface IOEventSizeEstimator
     {
         /// <summary>
         /// Estimate the IoEvent size in number of bytes.
         /// </summary>
         /// <param name="ioe">the event we want to estimate the size of</param>
         /// <returns>the estimated size of this event</returns>
-        Int32 EstimateSize(IoEvent ioe);
+        int EstimateSize(IoEvent ioe);
     }
 
-    class DefaultIoEventSizeEstimator : IoEventSizeEstimator
+    class DefaultIoEventSizeEstimator : IOEventSizeEstimator
     {
-        static readonly Dictionary<Type, Int32> _type2size = new Dictionary<Type, Int32>();
+        static readonly Dictionary<Type, int> Type2Size = new Dictionary<Type, int>();
 
         static DefaultIoEventSizeEstimator()
         {
-            _type2size[typeof(Boolean)] = sizeof(Boolean);
-            _type2size[typeof(Boolean)] = sizeof(Boolean);
-            _type2size[typeof(Boolean)] = sizeof(Boolean);
-            _type2size[typeof(Boolean)] = sizeof(Boolean);
-            _type2size[typeof(Boolean)] = sizeof(Boolean);
-            _type2size[typeof(Boolean)] = sizeof(Boolean);
-            _type2size[typeof(Boolean)] = sizeof(Boolean);
-            _type2size[typeof(Boolean)] = sizeof(Boolean);
-            _type2size[typeof(Boolean)] = sizeof(Boolean);
+            Type2Size[typeof(bool)] = sizeof(bool);
+            Type2Size[typeof(bool)] = sizeof(bool);
+            Type2Size[typeof(bool)] = sizeof(bool);
+            Type2Size[typeof(bool)] = sizeof(bool);
+            Type2Size[typeof(bool)] = sizeof(bool);
+            Type2Size[typeof(bool)] = sizeof(bool);
+            Type2Size[typeof(bool)] = sizeof(bool);
+            Type2Size[typeof(bool)] = sizeof(bool);
+            Type2Size[typeof(bool)] = sizeof(bool);
         }
 
-        public Int32 EstimateSize(IoEvent ioe)
+        public int EstimateSize(IoEvent ioe)
         {
-            return EstimateSize((Object)ioe) + EstimateSize(ioe.Parameter);
+            return EstimateSize((object)ioe) + EstimateSize(ioe.Parameter);
         }
 
-        private Int32 EstimateSize(Object obj)
+        private int EstimateSize(object obj)
         {
             if (obj == null)
                 return 8;
 
-            Int32 answer = 8 + EstimateSize(obj.GetType(), null);
+            var answer = 8 + EstimateSize(obj.GetType(), null);
 
-            if (obj is IoBuffer)
-                answer += ((IoBuffer)obj).Remaining;
+            if (obj is IOBuffer)
+                answer += ((IOBuffer)obj).Remaining;
             else if (obj is IWriteRequest)
                 answer += EstimateSize(((IWriteRequest)obj).Message);
-            else if (obj is String)
-                answer += ((String)obj).Length << 1;
+            else if (obj is string)
+                answer += ((string)obj).Length << 1;
             else if (obj is IEnumerable)
-                foreach (Object m in (IEnumerable)obj)
+                foreach (var m in (IEnumerable)obj)
                 {
                     answer += EstimateSize(m);
                 }
@@ -65,11 +65,11 @@ namespace Mina.Filter.Executor
             return Align(answer);
         }
 
-        private Int32 EstimateSize(Type type, HashSet<Type> visitedTypes)
+        private int EstimateSize(Type type, HashSet<Type> visitedTypes)
         {
-            Int32 answer;
+            int answer;
 
-            if (_type2size.TryGetValue(type, out answer))
+            if (Type2Size.TryGetValue(type, out answer))
                 return answer;
 
             if (visitedTypes == null)
@@ -81,10 +81,10 @@ namespace Mina.Filter.Executor
 
             answer = 8; // Basic overhead.
 
-            for (Type t = type; t != null; t = t.BaseType)
+            for (var t = type; t != null; t = t.BaseType)
             {
-                FieldInfo[] fields = t.GetFields(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly);
-                foreach (FieldInfo fi in fields)
+                var fields = t.GetFields(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly);
+                foreach (var fi in fields)
                 {
                     answer += EstimateSize(fi.FieldType, visitedTypes);
                 }
@@ -96,18 +96,18 @@ namespace Mina.Filter.Executor
             answer = Align(answer);
 
             // Put the final answer.
-            lock (((ICollection)_type2size).SyncRoot)
+            lock (((ICollection)Type2Size).SyncRoot)
             {
-                if (_type2size.ContainsKey(type))
-                    answer = _type2size[type];
+                if (Type2Size.ContainsKey(type))
+                    answer = Type2Size[type];
                 else
-                    _type2size[type] = answer;
+                    Type2Size[type] = answer;
             }
 
             return answer;
         }
 
-        private static Int32 Align(Int32 size)
+        private static int Align(int size)
         {
             if (size % 8 != 0)
             {

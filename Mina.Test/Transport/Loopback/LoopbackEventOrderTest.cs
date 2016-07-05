@@ -9,7 +9,6 @@ using TestMethod = NUnit.Framework.TestAttribute;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 #endif
 using Mina.Core.Buffer;
-using Mina.Core.Future;
 using Mina.Core.Service;
 using Mina.Filter.Executor;
 
@@ -21,21 +20,21 @@ namespace Mina.Transport.Loopback
         [TestMethod]
         public void TestServerToClient()
         {
-            IoAcceptor acceptor = new LoopbackAcceptor();
-            IoConnector connector = new LoopbackConnector();
+            IOAcceptor acceptor = new LoopbackAcceptor();
+            IOConnector connector = new LoopbackConnector();
 
             acceptor.SessionOpened += (s, e) => e.Session.Write("B");
             acceptor.MessageSent += (s, e) => e.Session.Close(true);
 
             acceptor.Bind(new LoopbackEndPoint(1));
 
-            StringBuilder actual = new StringBuilder();
+            var actual = new StringBuilder();
 
             connector.MessageReceived += (s, e) => actual.Append(e.Message);
             connector.SessionClosed += (s, e) => actual.Append("C");
             connector.SessionOpened += (s, e) => actual.Append("A");
 
-            IConnectFuture future = connector.Connect(new LoopbackEndPoint(1));
+            var future = connector.Connect(new LoopbackEndPoint(1));
 
             future.Await();
             future.Session.CloseFuture.Await();
@@ -56,10 +55,10 @@ namespace Mina.Transport.Loopback
         [TestMethod]
         public void TestClientToServer()
         {
-            IoAcceptor acceptor = new LoopbackAcceptor();
-            IoConnector connector = new LoopbackConnector();
+            IOAcceptor acceptor = new LoopbackAcceptor();
+            IOConnector connector = new LoopbackConnector();
 
-            StringBuilder actual = new StringBuilder();
+            var actual = new StringBuilder();
 
             acceptor.MessageReceived += (s, e) => actual.Append(e.Message);
             acceptor.SessionClosed += (s, e) => actual.Append("C");
@@ -70,7 +69,7 @@ namespace Mina.Transport.Loopback
             connector.SessionOpened += (s, e) => e.Session.Write("B");
             connector.MessageSent += (s, e) => e.Session.Close(true);
 
-            IConnectFuture future = connector.Connect(new LoopbackEndPoint(1));
+            var future = connector.Connect(new LoopbackEndPoint(1));
 
             future.Await();
             future.Session.CloseFuture.Await();
@@ -91,10 +90,10 @@ namespace Mina.Transport.Loopback
         [TestMethod]
         public void TestSessionCreated()
         {
-            Semaphore semaphore = new Semaphore(0, 10);
-            StringBuilder sb = new StringBuilder();
-            LoopbackAcceptor acceptor = new LoopbackAcceptor();
-            LoopbackEndPoint lep = new LoopbackEndPoint(12345);
+            var semaphore = new Semaphore(0, 10);
+            var sb = new StringBuilder();
+            var acceptor = new LoopbackAcceptor();
+            var lep = new LoopbackEndPoint(12345);
 
             acceptor.SessionCreated += (s, e) =>
             {
@@ -115,11 +114,11 @@ namespace Mina.Transport.Loopback
 
             acceptor.Bind(lep);
 
-            LoopbackConnector connector = new LoopbackConnector();
+            var connector = new LoopbackConnector();
             connector.FilterChain.AddLast("executor", new ExecutorFilter());
-            IConnectFuture future = connector.Connect(lep);
+            var future = connector.Connect(lep);
             future.Await();
-            future.Session.Write(IoBuffer.Wrap(new byte[1])).Await();
+            future.Session.Write(IOBuffer.Wrap(new byte[1])).Await();
             future.Session.Close(false).Await();
 
             semaphore.WaitOne(TimeSpan.FromSeconds(1));

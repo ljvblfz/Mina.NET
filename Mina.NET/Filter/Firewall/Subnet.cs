@@ -8,21 +8,21 @@ namespace Mina.Filter.Firewall
     /// </summary>
     public class Subnet
     {
-        private const UInt32 IP_MASK_V4 = 0x80000000;
-        private const UInt64 IP_MASK_V6 = 0x8000000000000000L;
-        private const Int32 BYTE_MASK = 0xFF;
+        private const uint IpMaskV4 = 0x80000000;
+        private const ulong IpMaskV6 = 0x8000000000000000L;
+        private const int ByteMask = 0xFF;
 
         private IPAddress _subnet;
         /// <summary>
         /// An int representation of a subnet for IPV4 addresses.
         /// </summary>
-        private Int32 _subnetInt;
+        private int _subnetInt;
         /// <summary>
         /// An long representation of a subnet for IPV6 addresses.
         /// </summary>
-        private Int64 _subnetLong;
-        private Int64 _subnetMask;
-        private Int32 _suffix;
+        private long _subnetLong;
+        private long _subnetMask;
+        private int _suffix;
 
         /// <summary>
         /// Creates a subnet from CIDR notation.
@@ -31,42 +31,42 @@ namespace Mina.Filter.Firewall
         /// </summary>
         /// <param name="subnet">the <see cref="IPAddress"/> of the subnet</param>
         /// <param name="mask">the mask</param>
-        public Subnet(IPAddress subnet, Int32 mask)
+        public Subnet(IPAddress subnet, int mask)
         {
             if (subnet == null)
-                throw new ArgumentNullException("subnet");
+                throw new ArgumentNullException(nameof(subnet));
 
             if (subnet.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork)
             {
                 if (mask < 0 || mask > 32)
                     throw new ArgumentException("Mask has to be an integer between 0 and 32 for an IPv4 address");
-                this._subnet = subnet;
-                this._subnetInt = ToInt(subnet);
-                this._suffix = mask;
+                _subnet = subnet;
+                _subnetInt = ToInt(subnet);
+                _suffix = mask;
                 
                 // binary mask for this subnet
                 unchecked
                 {
-                    this._subnetMask = (Int32)IP_MASK_V4 >> (mask - 1);
+                    _subnetMask = (int)IpMaskV4 >> (mask - 1);
                 }
             }
             else if (subnet.AddressFamily == System.Net.Sockets.AddressFamily.InterNetworkV6)
             {
                 if (mask < 0 || mask > 128)
                     throw new ArgumentException("Mask has to be an integer between 0 and 128 for an IPv6 address");
-                this._subnet = subnet;
-                this._subnetLong = ToLong(subnet);
-                this._suffix = mask;
+                _subnet = subnet;
+                _subnetLong = ToLong(subnet);
+                _suffix = mask;
 
                 // binary mask for this subnet
                 unchecked
                 {
-                    this._subnetMask = (Int64)IP_MASK_V6 >> (mask - 1);
+                    _subnetMask = (long)IpMaskV6 >> (mask - 1);
                 }
             }
             else
             {
-                throw new ArgumentException("Unsupported address family: " + subnet.AddressFamily, "subnet");
+                throw new ArgumentException("Unsupported address family: " + subnet.AddressFamily, nameof(subnet));
             }
         }
 
@@ -75,28 +75,27 @@ namespace Mina.Filter.Firewall
         /// </summary>
         /// <param name="address">the <see cref="IPAddress"/> to check</param>
         /// <returns>true if the address is within this subnet, otherwise false</returns>
-        public Boolean InSubnet(IPAddress address)
+        public bool InSubnet(IPAddress address)
         {
             if (address == null)
-                throw new ArgumentNullException("address");
-            else if (IPAddress.Any.Equals(address) || IPAddress.IPv6Any.Equals(address))
+                throw new ArgumentNullException(nameof(address));
+            if (IPAddress.Any.Equals(address) || IPAddress.IPv6Any.Equals(address))
                 return true;
-            else if (address.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork)
+            if (address.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork)
                 return ToSubnet32(address) == _subnetInt;
-            else
-                return ToSubnet64(address) == _subnetLong;
+            return ToSubnet64(address) == _subnetLong;
         }
 
         /// <inheritdoc/>
-        public override String ToString()
+        public override string ToString()
         {
             return _subnet + "/" + _suffix;
         }
 
         /// <inheritdoc/>
-        public override Boolean Equals(Object obj)
+        public override bool Equals(object obj)
         {
-            Subnet other = obj as Subnet;
+            var other = obj as Subnet;
 
             if (other == null)
                 return false;
@@ -105,42 +104,42 @@ namespace Mina.Filter.Firewall
         }
 
         /// <inheritdoc/>
-        public override Int32 GetHashCode()
+        public override int GetHashCode()
         {
             return 17 * _subnetInt + _suffix;
         }
 
-        private Int32 ToSubnet32(IPAddress address)
+        private int ToSubnet32(IPAddress address)
         {
-            return (Int32)(ToInt(address) & _subnetMask);
+            return (int)(ToInt(address) & _subnetMask);
         }
 
-        private Int64 ToSubnet64(IPAddress address)
+        private long ToSubnet64(IPAddress address)
         {
             return ToLong(address) & _subnetMask;
         }
 
-        private static Int32 ToInt(IPAddress addr)
+        private static int ToInt(IPAddress addr)
         {
-            Byte[] address = addr.GetAddressBytes();
-            Int32 result = 0;
-            for (Int32 i = 0; i < address.Length; i++)
+            var address = addr.GetAddressBytes();
+            var result = 0;
+            for (var i = 0; i < address.Length; i++)
             {
                 result <<= 8;
-                result |= address[i] & BYTE_MASK;
+                result |= address[i] & ByteMask;
             }
             return result;
         }
 
-        private static Int64 ToLong(IPAddress addr)
+        private static long ToLong(IPAddress addr)
         {
-            Byte[] address = addr.GetAddressBytes();
-            Int64 result = 0;
+            var address = addr.GetAddressBytes();
+            long result = 0;
 
-            for (Int32 i = 0; i < address.Length; i++)
+            for (var i = 0; i < address.Length; i++)
             {
                 result <<= 8;
-                result |= (UInt32)(address[i] & BYTE_MASK);
+                result |= (uint)(address[i] & ByteMask);
             }
 
             return result;

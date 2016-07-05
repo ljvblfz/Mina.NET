@@ -1,30 +1,26 @@
-﻿using System;
-using System.Collections.Concurrent;
+﻿using System.Collections.Concurrent;
 using System.Collections.Generic;
 
 namespace Mina.Core.Session
 {
-    class DefaultIoSessionAttributeMap : IoSessionAttributeMap
+    class DefaultIoSessionAttributeMap : IOSessionAttributeMap
     {
-        private readonly ConcurrentDictionary<Object, Object> _attributes = new ConcurrentDictionary<Object, Object>();
+        private readonly ConcurrentDictionary<object, object> _attributes = new ConcurrentDictionary<object, object>();
 
-        public Object GetAttribute(IoSession session, Object key, Object defaultValue)
+        public object GetAttribute(IOSession session, object key, object defaultValue)
         {
             if (defaultValue == null)
             {
-                Object obj;
+                object obj;
                 _attributes.TryGetValue(key, out obj);
                 return obj;
             }
-            else
-            {
-                return _attributes.GetOrAdd(key, defaultValue);
-            }
+            return _attributes.GetOrAdd(key, defaultValue);
         }
 
-        public Object SetAttribute(IoSession session, Object key, Object value)
+        public object SetAttribute(IOSession session, object key, object value)
         {
-            Object old = null;
+            object old = null;
             _attributes.AddOrUpdate(key, value, (k, v) => 
             {
                 old = v;
@@ -33,29 +29,29 @@ namespace Mina.Core.Session
             return old;
         }
 
-        public Object SetAttributeIfAbsent(IoSession session, Object key, Object value)
+        public object SetAttributeIfAbsent(IOSession session, object key, object value)
         {
             return _attributes.GetOrAdd(key, value);
         }
 
-        public Object RemoveAttribute(IoSession session, Object key)
+        public object RemoveAttribute(IOSession session, object key)
         {
-            Object obj;
+            object obj;
             _attributes.TryRemove(key, out obj);
             return obj;
         }
 
-        public Boolean ContainsAttribute(IoSession session, Object key)
+        public bool ContainsAttribute(IOSession session, object key)
         {
             return _attributes.ContainsKey(key);
         }
 
-        public IEnumerable<Object> GetAttributeKeys(IoSession session)
+        public IEnumerable<object> GetAttributeKeys(IOSession session)
         {
             return _attributes.Keys;
         }
 
-        public void Dispose(IoSession session)
+        public void Dispose(IOSession session)
         {
             // Do nothing
         }

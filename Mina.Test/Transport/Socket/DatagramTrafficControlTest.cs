@@ -1,5 +1,4 @@
-﻿using System;
-using System.Net;
+﻿using System.Net;
 #if !NETFX_CORE
 using NUnit.Framework;
 using TestClass = NUnit.Framework.TestFixtureAttribute;
@@ -18,19 +17,19 @@ namespace Mina.Transport.Socket
             : base(new AsyncDatagramAcceptor())
         { }
 
-        protected override EndPoint CreateServerEndPoint(Int32 port)
+        protected override EndPoint CreateServerEndPoint(int port)
         {
             return new IPEndPoint(IPAddress.Any, port);
         }
 
-        protected override Int32 GetPort(EndPoint ep)
+        protected override int GetPort(EndPoint ep)
         {
             return ((IPEndPoint)ep).Port;
         }
 
-        protected override IConnectFuture Connect(Int32 port, IoHandler handler)
+        protected override IConnectFuture Connect(int port, IOHandler handler)
         {
-            IoConnector connector = new AsyncDatagramConnector();
+            IOConnector connector = new AsyncDatagramConnector();
             connector.Handler = handler;
             return connector.Connect(new IPEndPoint(IPAddress.Loopback, port));
         }

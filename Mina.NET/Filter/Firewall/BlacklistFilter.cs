@@ -14,12 +14,12 @@ namespace Mina.Filter.Firewall
     /// </summary>
     public class BlacklistFilter : IoFilterAdapter
     {
-        static readonly ILog log = LogManager.GetLogger(typeof(BlacklistFilter));
+        static readonly ILog Log = LogManager.GetLogger(typeof(BlacklistFilter));
 
         private readonly List<Subnet> _blacklist = new List<Subnet>();
 
         /// <inheritdoc/>
-        public override void SessionCreated(INextFilter nextFilter, IoSession session)
+        public override void SessionCreated(INextFilter nextFilter, IOSession session)
         {
             if (IsBlocked(session))
                 BlockSession(session);
@@ -29,7 +29,7 @@ namespace Mina.Filter.Firewall
         }
 
         /// <inheritdoc/>
-        public override void SessionOpened(INextFilter nextFilter, IoSession session)
+        public override void SessionOpened(INextFilter nextFilter, IOSession session)
         {
             if (IsBlocked(session))
                 BlockSession(session);
@@ -39,7 +39,7 @@ namespace Mina.Filter.Firewall
         }
 
         /// <inheritdoc/>
-        public override void SessionClosed(INextFilter nextFilter, IoSession session)
+        public override void SessionClosed(INextFilter nextFilter, IOSession session)
         {
             if (IsBlocked(session))
                 BlockSession(session);
@@ -49,7 +49,7 @@ namespace Mina.Filter.Firewall
         }
 
         /// <inheritdoc/>
-        public override void SessionIdle(INextFilter nextFilter, IoSession session, IdleStatus status)
+        public override void SessionIdle(INextFilter nextFilter, IOSession session, IdleStatus status)
         {
             if (IsBlocked(session))
                 BlockSession(session);
@@ -59,7 +59,7 @@ namespace Mina.Filter.Firewall
         }
 
         /// <inheritdoc/>
-        public override void MessageReceived(INextFilter nextFilter, IoSession session, Object message)
+        public override void MessageReceived(INextFilter nextFilter, IOSession session, object message)
         {
             if (IsBlocked(session))
                 BlockSession(session);
@@ -69,7 +69,7 @@ namespace Mina.Filter.Firewall
         }
 
         /// <inheritdoc/>
-        public override void MessageSent(INextFilter nextFilter, IoSession session, IWriteRequest writeRequest)
+        public override void MessageSent(INextFilter nextFilter, IOSession session, IWriteRequest writeRequest)
         {
             if (IsBlocked(session))
                 BlockSession(session);
@@ -84,11 +84,11 @@ namespace Mina.Filter.Firewall
         public void SetBlacklist(IEnumerable<IPAddress> addresses)
         {
             if (addresses == null)
-                throw new ArgumentNullException("addresses");
+                throw new ArgumentNullException(nameof(addresses));
             lock (((IList)_blacklist).SyncRoot)
             {
                 _blacklist.Clear();
-                foreach (IPAddress addr in addresses)
+                foreach (var addr in addresses)
                 {
                     Block(addr);
                 }
@@ -101,11 +101,11 @@ namespace Mina.Filter.Firewall
         public void SetSubnetBlacklist(Subnet[] subnets)
         {
             if (subnets == null)
-                throw new ArgumentNullException("subnets");
+                throw new ArgumentNullException(nameof(subnets));
             lock (((IList)_blacklist).SyncRoot)
             {
                 _blacklist.Clear();
-                foreach (Subnet subnet in subnets)
+                foreach (var subnet in subnets)
                 {
                     Block(subnet);
                 }
@@ -118,7 +118,7 @@ namespace Mina.Filter.Firewall
         public void Block(IPAddress address)
         {
             if (address == null)
-                throw new ArgumentNullException("address");
+                throw new ArgumentNullException(nameof(address));
             Block(new Subnet(address, 32));
         }
 
@@ -128,7 +128,7 @@ namespace Mina.Filter.Firewall
         public void Block(Subnet subnet)
         {
             if (subnet == null)
-                throw new ArgumentNullException("subnet");
+                throw new ArgumentNullException(nameof(subnet));
             lock (((IList)_blacklist).SyncRoot)
             {
                 _blacklist.Add(subnet);
@@ -141,7 +141,7 @@ namespace Mina.Filter.Firewall
         public void Unblock(IPAddress address)
         {
             if (address == null)
-                throw new ArgumentNullException("address");
+                throw new ArgumentNullException(nameof(address));
             Unblock(new Subnet(address, 32));
         }
 
@@ -151,31 +151,31 @@ namespace Mina.Filter.Firewall
         private void Unblock(Subnet subnet)
         {
             if (subnet == null)
-                throw new ArgumentNullException("subnet");
+                throw new ArgumentNullException(nameof(subnet));
             lock (((IList)_blacklist).SyncRoot)
             {
                 _blacklist.Remove(subnet);
             }
         }
 
-        private void BlockSession(IoSession session)
+        private void BlockSession(IOSession session)
         {
-            if (log.IsWarnEnabled)
-                log.Warn("Remote address in the blacklist; closing.");
+            if (Log.IsWarnEnabled)
+                Log.Warn("Remote address in the blacklist; closing.");
             session.Close(true);
         }
 
-        private Boolean IsBlocked(IoSession session)
+        private bool IsBlocked(IOSession session)
         {
-            IPEndPoint ep = session.RemoteEndPoint as IPEndPoint;
+            var ep = session.RemoteEndPoint as IPEndPoint;
             if (ep != null)
             {
-                IPAddress address = ep.Address;
+                var address = ep.Address;
 
                 // check all subnets
                 lock (((IList)_blacklist).SyncRoot)
                 {
-                    foreach (Subnet subnet in _blacklist)
+                    foreach (var subnet in _blacklist)
                     {
                         if (subnet.InSubnet(address))
                         {

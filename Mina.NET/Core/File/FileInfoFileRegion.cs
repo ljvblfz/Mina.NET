@@ -10,9 +10,7 @@ namespace Mina.Core.File
     public class FileInfoFileRegion : IFileRegion
     {
         private readonly FileInfo _file;
-        private readonly Int64 _originalPosition;
-        private Int64 _position;
-        private Int64 _remainingBytes;
+        private readonly long _originalPosition;
 
         /// <summary>
         /// Instantiates.
@@ -20,7 +18,8 @@ namespace Mina.Core.File
         /// <param name="fileInfo">the file info</param>
         public FileInfoFileRegion(FileInfo fileInfo)
             : this(fileInfo, 0, fileInfo.Length)
-        { }
+        {
+        }
 
         /// <summary>
         /// Instantiates.
@@ -28,59 +27,50 @@ namespace Mina.Core.File
         /// <param name="fileInfo">the file info</param>
         /// <param name="position">the start position</param>
         /// <param name="remainingBytes">the count of remaining bytes</param>
-        public FileInfoFileRegion(FileInfo fileInfo, Int64 position, Int64 remainingBytes)
+        public FileInfoFileRegion(FileInfo fileInfo, long position, long remainingBytes)
         {
             if (fileInfo == null)
-                throw new ArgumentNullException("fileInfo");
+            {
+                throw new ArgumentNullException(nameof(fileInfo));
+            }
             if (position < 0L)
-                throw new ArgumentException("position may not be less than 0", "position");
+            {
+                throw new ArgumentException("position may not be less than 0", nameof(position));
+            }
             if (remainingBytes < 0L)
-                throw new ArgumentException("remainingBytes may not be less than 0", "remainingBytes");
+            {
+                throw new ArgumentException("remainingBytes may not be less than 0", nameof(remainingBytes));
+            }
 
             _file = fileInfo;
             _originalPosition = position;
-            _position = position;
-            _remainingBytes = remainingBytes;
+            Position = position;
+            RemainingBytes = remainingBytes;
         }
 
         /// <inheritdoc/>
-        public String FullName
-        {
-            get { return _file.FullName; }
-        }
+        public string FullName => _file.FullName;
 
         /// <inheritdoc/>
-        public Int64 Length
-        {
-            get { return _file.Length; }
-        }
+        public long Length => _file.Length;
 
         /// <inheritdoc/>
-        public Int64 Position
-        {
-            get { return _position; }
-        }
+        public long Position { get; private set; }
 
         /// <inheritdoc/>
-        public Int64 RemainingBytes
-        {
-            get { return _remainingBytes; }
-        }
+        public long RemainingBytes { get; private set; }
 
         /// <inheritdoc/>
-        public Int64 WrittenBytes
-        {
-            get { return _position - _originalPosition; }
-        }
+        public long WrittenBytes => Position - _originalPosition;
 
         /// <inheritdoc/>
-        public Int32 Read(IoBuffer buffer)
+        public int Read(IOBuffer buffer)
         {
-            using (FileStream fs = _file.OpenRead())
+            using (var fs = _file.OpenRead())
             {
-                fs.Position = _position;
-                Byte[] bytes = new Byte[buffer.Remaining];
-                Int32 read = fs.Read(bytes, 0, bytes.Length);
+                fs.Position = Position;
+                var bytes = new byte[buffer.Remaining];
+                var read = fs.Read(bytes, 0, bytes.Length);
                 buffer.Put(bytes, 0, read);
                 Update(read);
                 return read;
@@ -88,10 +78,10 @@ namespace Mina.Core.File
         }
 
         /// <inheritdoc/>
-        public void Update(Int64 amount)
+        public void Update(long amount)
         {
-            _position += amount;
-            _remainingBytes -= amount;
+            Position += amount;
+            RemainingBytes -= amount;
         }
     }
 }

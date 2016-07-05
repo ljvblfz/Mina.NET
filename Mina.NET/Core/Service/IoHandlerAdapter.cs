@@ -5,61 +5,61 @@ using Mina.Core.Session;
 namespace Mina.Core.Service
 {
     /// <summary>
-    /// An adapter class for <see cref="IoHandler"/>.  You can extend this
+    /// An adapter class for <see cref="IOHandler"/>.  You can extend this
     /// class and selectively override required event handler methods only.  All
     /// methods do nothing by default.
     /// </summary>
-    public class IoHandlerAdapter : IoHandler
+    public class IOHandlerAdapter : IOHandler
     {
-        private static readonly ILog log = LogManager.GetLogger(typeof(IoHandlerAdapter));
+        private static readonly ILog Log = LogManager.GetLogger(typeof(IOHandlerAdapter));
 
         /// <inheritdoc/>
-        public virtual void SessionCreated(IoSession session)
+        public virtual void SessionCreated(IOSession session)
         {
             // Empty handler
         }
 
         /// <inheritdoc/>
-        public virtual void SessionOpened(IoSession session)
+        public virtual void SessionOpened(IOSession session)
         {
             // Empty handler
         }
 
         /// <inheritdoc/>
-        public virtual void SessionClosed(IoSession session)
+        public virtual void SessionClosed(IOSession session)
         {
             // Empty handler
         }
 
         /// <inheritdoc/>
-        public virtual void SessionIdle(IoSession session, IdleStatus status)
+        public virtual void SessionIdle(IOSession session, IdleStatus status)
         {
             // Empty handler
         }
 
         /// <inheritdoc/>
-        public virtual void ExceptionCaught(IoSession session, Exception cause)
+        public virtual void ExceptionCaught(IOSession session, Exception cause)
         {
-            if (log.IsWarnEnabled)
+            if (Log.IsWarnEnabled)
             {
-                log.WarnFormat("EXCEPTION, please implement {0}.ExceptionCaught() for proper handling: {1}", GetType().Name, cause);
+                Log.WarnFormat("EXCEPTION, please implement {0}.ExceptionCaught() for proper handling: {1}", GetType().Name, cause);
             }
         }
 
         /// <inheritdoc/>
-        public virtual void MessageReceived(IoSession session, Object message)
+        public virtual void MessageReceived(IOSession session, object message)
         {
             // Empty handler
         }
 
         /// <inheritdoc/>
-        public virtual void MessageSent(IoSession session, Object message)
+        public virtual void MessageSent(IOSession session, object message)
         {
             // Empty handler
         }
 
         /// <inheritdoc/>
-        public void InputClosed(IoSession session)
+        public void InputClosed(IOSession session)
         {
             session.Close(true);
         }

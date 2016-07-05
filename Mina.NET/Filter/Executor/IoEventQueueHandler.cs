@@ -1,5 +1,4 @@
-﻿using System;
-using Mina.Core.Session;
+﻿using Mina.Core.Session;
 
 namespace Mina.Filter.Executor
 {
@@ -7,42 +6,42 @@ namespace Mina.Filter.Executor
     /// Listens and filters all event queue operations occurring in
     /// <see cref="OrderedThreadPoolExecutor"/> and <see cref="UnorderedThreadPoolExecutor"/>.
     /// </summary>
-    public interface IoEventQueueHandler
+    public interface IOEventQueueHandler
     {
         /// <summary>
         /// Returns <tt>true</tt> if and only if the specified <tt>event</tt> is
         /// allowed to be offered to the event queue.  The <tt>event</tt> is dropped
         /// if <tt>false</tt> is returned.
         /// </summary>
-        Boolean Accept(Object source, IoEvent ioe);
+        bool Accept(object source, IoEvent ioe);
         /// <summary>
         /// Invoked after the specified <paramref name="ioe"/> has been offered to the event queue.
         /// </summary>
-        void Offered(Object source, IoEvent ioe);
+        void Offered(object source, IoEvent ioe);
         /// <summary>
         /// Invoked after the specified <paramref name="ioe"/> has been polled to the event queue.
         /// </summary>
-        void Polled(Object source, IoEvent ioe);
+        void Polled(object source, IoEvent ioe);
     }
 
-    class NoopIoEventQueueHandler : IoEventQueueHandler
+    class NoopIoEventQueueHandler : IOEventQueueHandler
     {
         public static readonly NoopIoEventQueueHandler Instance = new NoopIoEventQueueHandler();
 
         private NoopIoEventQueueHandler()
         { }
 
-        public Boolean Accept(Object source, IoEvent ioe)
+        public bool Accept(object source, IoEvent ioe)
         {
             return true;
         }
 
-        public void Offered(Object source, IoEvent ioe)
+        public void Offered(object source, IoEvent ioe)
         {
             // NOOP
         }
 
-        public void Polled(Object source, IoEvent ioe)
+        public void Polled(object source, IoEvent ioe)
         {
             // NOOP
         }

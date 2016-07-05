@@ -4,35 +4,30 @@ namespace Mina.Example.Haiku
 {
     class Haiku
     {
-        private readonly String[] _phrases;
-
-        public Haiku(params String[] lines)
+        public Haiku(params string[] lines)
         {
             if (lines == null || lines.Length != 3)
                 throw new ArgumentException("Must pass in 3 phrases of text");
-            _phrases = lines;
+            Phrases = lines;
         }
 
-        public String[] Phrases
-        {
-            get { return _phrases; }
-        }
+        public string[] Phrases { get; }
 
         public override bool Equals(object obj)
         {
-            if (Object.ReferenceEquals(obj, this))
+            if (ReferenceEquals(obj, this))
                 return true;
 
-            Haiku haiku = obj as Haiku;
+            var haiku = obj as Haiku;
             if (haiku == null)
                 return false;
 
-            if (_phrases.Length != haiku._phrases.Length)
+            if (Phrases.Length != haiku.Phrases.Length)
                 return false;
 
-            for (int i = 0; i < _phrases.Length; i++)
+            for (var i = 0; i < Phrases.Length; i++)
             {
-                if (!String.Equals(_phrases[i], haiku._phrases[i]))
+                if (!string.Equals(Phrases[i], haiku.Phrases[i]))
                     return false;
             }
 
@@ -41,9 +36,9 @@ namespace Mina.Example.Haiku
 
         public override int GetHashCode()
         {
-            int result = 1;
+            var result = 1;
 
-            foreach (String s in _phrases)
+            foreach (var s in Phrases)
                 result = 31 * result + (s == null ? 0 : s.GetHashCode());
 
             return result;
@@ -51,7 +46,7 @@ namespace Mina.Example.Haiku
 
         public override string ToString()
         {
-            return "[" + String.Join(", ", _phrases) + "]";
+            return "[" + string.Join(", ", Phrases) + "]";
         }
     }
 }

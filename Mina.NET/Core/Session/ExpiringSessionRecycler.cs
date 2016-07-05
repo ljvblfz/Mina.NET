@@ -1,56 +1,55 @@
-﻿using System;
-using System.Net;
+﻿using System.Net;
 using Mina.Util;
 
 namespace Mina.Core.Session
 {
     /// <summary>
-    /// An <see cref="IoSessionRecycler"/> with sessions that time out on inactivity.
+    /// An <see cref="IOSessionRecycler"/> with sessions that time out on inactivity.
     /// </summary>
-    public class ExpiringSessionRecycler : IoSessionRecycler
+    public class ExpiringSessionRecycler : IOSessionRecycler
     {
-        private readonly ExpiringMap<EndPoint, IoSession> _sessionMap;
+        private readonly ExpiringMap<EndPoint, IOSession> _sessionMap;
 
         public ExpiringSessionRecycler()
-            : this(new ExpiringMap<EndPoint, IoSession>())
-        { }
+            : this(new ExpiringMap<EndPoint, IOSession>())
+        {
+        }
 
-        public ExpiringSessionRecycler(Int32 timeToLive)
-            : this(new ExpiringMap<EndPoint, IoSession>(timeToLive))
-        { }
+        public ExpiringSessionRecycler(int timeToLive)
+            : this(new ExpiringMap<EndPoint, IOSession>(timeToLive))
+        {
+        }
 
-        public ExpiringSessionRecycler(Int32 timeToLive, Int32 expirationInterval)
-            : this(new ExpiringMap<EndPoint, IoSession>(timeToLive, expirationInterval))
-        { }
+        public ExpiringSessionRecycler(int timeToLive, int expirationInterval)
+            : this(new ExpiringMap<EndPoint, IOSession>(timeToLive, expirationInterval))
+        {
+        }
 
-        private ExpiringSessionRecycler(ExpiringMap<EndPoint, IoSession> map)
+        private ExpiringSessionRecycler(ExpiringMap<EndPoint, IOSession> map)
         {
             _sessionMap = map;
-            _sessionMap.Expired += new EventHandler<ExpirationEventArgs<IoSession>>(_sessionMap_Expired);
-        }
-
-        void _sessionMap_Expired(object sender, ExpirationEventArgs<IoSession> e)
-        {
-            e.Object.Close(true);
+            _sessionMap.Expired += (sender, e) => e.Object.Close(true);
         }
 
         /// <inheritdoc/>
-        public void Put(IoSession session)
+        public void Put(IOSession session)
         {
             _sessionMap.StartExpiring();
-            EndPoint key = session.RemoteEndPoint;
+            var key = session.RemoteEndPoint;
             if (!_sessionMap.ContainsKey(key))
+            {
                 _sessionMap.Add(key, session);
+            }
         }
 
         /// <inheritdoc/>
-        public IoSession Recycle(EndPoint remoteEP)
+        public IOSession Recycle(EndPoint remoteEndPoint)
         {
-            return _sessionMap[remoteEP];
+            return _sessionMap[remoteEndPoint];
         }
 
         /// <inheritdoc/>
-        public void Remove(IoSession session)
+        public void Remove(IOSession session)
         {
             _sessionMap.Remove(session.RemoteEndPoint);
         }
@@ -60,13 +59,13 @@ namespace Mina.Core.Session
             _sessionMap.StopExpiring();
         }
 
-        public Int32 ExpirationInterval
+        public int ExpirationInterval
         {
             get { return _sessionMap.ExpirationInterval; }
             set { _sessionMap.ExpirationInterval = value; }
         }
 
-        public Int32 TimeToLive
+        public int TimeToLive
         {
             get { return _sessionMap.TimeToLive; }
             set { _sessionMap.TimeToLive = value; }

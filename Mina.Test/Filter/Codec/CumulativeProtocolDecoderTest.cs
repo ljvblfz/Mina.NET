@@ -18,58 +18,58 @@ namespace Mina.Filter.Codec
     [TestClass]
     public class CumulativeProtocolDecoderTest
     {
-        ProtocolCodecSession session = new ProtocolCodecSession();
-        IoBuffer buf;
-        IntegerDecoder decoder;
+        ProtocolCodecSession _session = new ProtocolCodecSession();
+        IOBuffer _buf;
+        IntegerDecoder _decoder;
 
         [TestInitialize]
         public void SetUp()
         {
-            buf = IoBuffer.Allocate(16);
-            decoder = new IntegerDecoder();
-            session.SetTransportMetadata(new DefaultTransportMetadata("mina", "dummy", false, true, typeof(System.Net.IPEndPoint)));
+            _buf = IOBuffer.Allocate(16);
+            _decoder = new IntegerDecoder();
+            _session.SetTransportMetadata(new DefaultTransportMetadata("mina", "dummy", false, true, typeof(System.Net.IPEndPoint)));
         }
 
         [TestMethod]
         public void TestCumulation()
         {
-            buf.Put((byte)0);
-            buf.Flip();
+            _buf.Put(0);
+            _buf.Flip();
 
-            decoder.Decode(session, buf, session.DecoderOutput);
-            Assert.AreEqual(0, session.DecoderOutputQueue.Count);
-            Assert.AreEqual(buf.Limit, buf.Position);
+            _decoder.Decode(_session, _buf, _session.DecoderOutput);
+            Assert.AreEqual(0, _session.DecoderOutputQueue.Count);
+            Assert.AreEqual(_buf.Limit, _buf.Position);
 
-            buf.Clear();
-            buf.Put((byte)0);
-            buf.Put((byte)0);
-            buf.Put((byte)1);
-            buf.Flip();
+            _buf.Clear();
+            _buf.Put(0);
+            _buf.Put(0);
+            _buf.Put(1);
+            _buf.Flip();
 
-            decoder.Decode(session, buf, session.DecoderOutput);
-            Assert.AreEqual(1, session.DecoderOutputQueue.Count);
-            Assert.AreEqual(1, session.DecoderOutputQueue.Dequeue());
-            Assert.AreEqual(buf.Limit, buf.Position);
+            _decoder.Decode(_session, _buf, _session.DecoderOutput);
+            Assert.AreEqual(1, _session.DecoderOutputQueue.Count);
+            Assert.AreEqual(1, _session.DecoderOutputQueue.Dequeue());
+            Assert.AreEqual(_buf.Limit, _buf.Position);
         }
 
         [TestMethod]
         public void TestRepeatitiveDecode()
         {
-            for (Int32 i = 0; i < 4; i++)
+            for (var i = 0; i < 4; i++)
             {
-                buf.PutInt32(i);
+                _buf.PutInt32(i);
             }
-            buf.Flip();
+            _buf.Flip();
 
-            decoder.Decode(session, buf, session.DecoderOutput);
-            Assert.AreEqual(4, session.DecoderOutputQueue.Count);
-            Assert.AreEqual(buf.Limit, buf.Position);
+            _decoder.Decode(_session, _buf, _session.DecoderOutput);
+            Assert.AreEqual(4, _session.DecoderOutputQueue.Count);
+            Assert.AreEqual(_buf.Limit, _buf.Position);
 
-            List<Object> expected = new List<Object>();
+            var expected = new List<object>();
 
-            for (Int32 i = 0; i < 4; i++)
+            for (var i = 0; i < 4; i++)
             {
-                Assert.IsTrue(session.DecoderOutputQueue.Contains(i));
+                Assert.IsTrue(_session.DecoderOutputQueue.Contains(i));
             }
         }
 
@@ -78,7 +78,7 @@ namespace Mina.Filter.Codec
         {
             try
             {
-                new WrongDecoder().Decode(session, buf, session.DecoderOutput);
+                new WrongDecoder().Decode(_session, _buf, _session.DecoderOutput);
                 Assert.Fail();
             }
             catch (InvalidOperationException)
@@ -90,18 +90,18 @@ namespace Mina.Filter.Codec
         [TestMethod]
         public void TestBufferDerivation()
         {
-            decoder = new DuplicatingIntegerDecoder();
+            _decoder = new DuplicatingIntegerDecoder();
 
-            buf.PutInt32(1);
+            _buf.PutInt32(1);
 
             // Put some extra byte to make the decoder create an internal buffer.
-            buf.Put((byte)0);
-            buf.Flip();
+            _buf.Put(0);
+            _buf.Flip();
 
-            decoder.Decode(session, buf, session.DecoderOutput);
-            Assert.AreEqual(1, session.DecoderOutputQueue.Count);
-            Assert.AreEqual(1, session.DecoderOutputQueue.Dequeue());
-            Assert.AreEqual(buf.Limit, buf.Position);
+            _decoder.Decode(_session, _buf, _session.DecoderOutput);
+            Assert.AreEqual(1, _session.DecoderOutputQueue.Count);
+            Assert.AreEqual(1, _session.DecoderOutputQueue.Dequeue());
+            Assert.AreEqual(_buf.Limit, _buf.Position);
 
             // Keep appending to the internal buffer.
             // DuplicatingIntegerDecoder will keep duplicating the internal
@@ -110,25 +110,25 @@ namespace Mina.Filter.Codec
             // Consequently, CumulativeProtocolDecoder will perform 
             // reallocation to avoid putting incoming data into
             // the internal buffer with auto-expansion disabled.
-            for (int i = 2; i < 10; i++)
+            for (var i = 2; i < 10; i++)
             {
-                buf.Clear();
-                buf.PutInt32(i);
+                _buf.Clear();
+                _buf.PutInt32(i);
                 // Put some extra byte to make the decoder keep the internal buffer.
-                buf.Put((byte)0);
-                buf.Flip();
-                buf.Position = 1;
+                _buf.Put(0);
+                _buf.Flip();
+                _buf.Position = 1;
 
-                decoder.Decode(session, buf, session.DecoderOutput);
-                Assert.AreEqual(1, session.DecoderOutputQueue.Count);
-                Assert.AreEqual(i, session.DecoderOutputQueue.Dequeue());
-                Assert.AreEqual(buf.Limit, buf.Position);
+                _decoder.Decode(_session, _buf, _session.DecoderOutput);
+                Assert.AreEqual(1, _session.DecoderOutputQueue.Count);
+                Assert.AreEqual(i, _session.DecoderOutputQueue.Dequeue());
+                Assert.AreEqual(_buf.Limit, _buf.Position);
             }
         }
 
         class IntegerDecoder : CumulativeProtocolDecoder
         {
-            protected override Boolean DoDecode(IoSession session, IoBuffer input, IProtocolDecoderOutput output)
+            protected override bool DoDecode(IOSession session, IOBuffer input, IProtocolDecoderOutput output)
             {
                 Assert.IsTrue(input.HasRemaining);
 
@@ -142,7 +142,7 @@ namespace Mina.Filter.Codec
 
         class WrongDecoder : CumulativeProtocolDecoder
         {
-            protected override Boolean DoDecode(IoSession session, IoBuffer input, IProtocolDecoderOutput output)
+            protected override bool DoDecode(IOSession session, IOBuffer input, IProtocolDecoderOutput output)
             {
                 return true;
             }
@@ -150,7 +150,7 @@ namespace Mina.Filter.Codec
 
         class DuplicatingIntegerDecoder : IntegerDecoder
         {
-            protected override Boolean DoDecode(IoSession session, IoBuffer input, IProtocolDecoderOutput output)
+            protected override bool DoDecode(IOSession session, IOBuffer input, IProtocolDecoderOutput output)
             {
                 input.Duplicate(); // Will disable auto-expansion.
                 Assert.IsFalse(input.AutoExpand);

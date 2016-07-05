@@ -1,29 +1,30 @@
 ﻿using System.Net;
+using Mina.Core.Service;
 
 namespace Mina.Core.Session
 {
     /// <summary>
     ///  A connectionless transport can recycle existing sessions by assigning an
-    ///  <see cref="IoSessionRecycler"/> to an <see cref="Core.Service.IoService"/>.
+    ///  <see cref="IOSessionRecycler"/> to an <see cref="IOService"/>.
     /// </summary>
-    public interface IoSessionRecycler
+    public interface IOSessionRecycler
     {
         /// <summary>
-        /// Called when the underlying transport creates or writes a new <see cref="IoSession"/>.
+        /// Called when the underlying transport creates or writes a new <see cref="IOSession"/>.
         /// </summary>
         /// <param name="session"></param>
-        void Put(IoSession session);
+        void Put(IOSession session);
         /// <summary>
-        /// Attempts to retrieve a recycled <see cref="IoSession"/>.
+        /// Attempts to retrieve a recycled <see cref="IOSession"/>.
         /// </summary>
-        /// <param name="remoteEP">the remote endpoint of the <see cref="IoSession"/> the transport wants to recycle</param>
-        /// <returns>a recycled <see cref="IoSession"/>, or null if one cannot be found</returns>
-        IoSession Recycle(EndPoint remoteEP);
+        /// <param name="remoteEp">the remote endpoint of the <see cref="IOSession"/> the transport wants to recycle</param>
+        /// <returns>a recycled <see cref="IOSession"/>, or null if one cannot be found</returns>
+        IOSession Recycle(EndPoint remoteEp);
         /// <summary>
-        /// Called when an <see cref="IoSession"/> is explicitly closed.
+        /// Called when an <see cref="IOSession"/> is explicitly closed.
         /// </summary>
         /// <param name="session"></param>
-        void Remove(IoSession session);
+        void Remove(IOSession session);
     }
 
     /// <summary>
@@ -31,7 +32,7 @@ namespace Mina.Core.Session
     /// Using this recycler will make all session lifecycle events
     /// to be fired for every I/O for all connectionless sessions.
     /// </summary>
-    public class NoopRecycler : IoSessionRecycler
+    public class NoopRecycler : IOSessionRecycler
     {
         /// <summary>
         /// A dummy recycler that doesn't recycle any sessions.
@@ -42,19 +43,19 @@ namespace Mina.Core.Session
         { }
 
         /// <inheritdoc/>
-        public void Put(IoSession session)
+        public void Put(IOSession session)
         {
             // do nothing
         }
 
         /// <inheritdoc/>
-        public IoSession Recycle(EndPoint remoteEP)
+        public IOSession Recycle(EndPoint remoteEp)
         {
             return null;
         }
 
         /// <inheritdoc/>
-        public void Remove(IoSession session)
+        public void Remove(IOSession session)
         {
             // do nothing
         }

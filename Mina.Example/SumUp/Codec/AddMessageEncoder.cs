@@ -8,10 +8,10 @@ namespace Mina.Example.SumUp.Codec
         where T : AddMessage
     {
         public AddMessageEncoder()
-            : base(Constants.ADD)
+            : base(Constants.Add)
         { }
 
-        protected override void EncodeBody(IoSession session, T message, IoBuffer output)
+        protected override void EncodeBody(IOSession session, T message, IOBuffer output)
         {
             output.PutInt32(message.Value);
         }

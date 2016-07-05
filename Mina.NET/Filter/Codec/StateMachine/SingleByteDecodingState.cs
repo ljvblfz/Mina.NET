@@ -1,5 +1,4 @@
-﻿using System;
-using Mina.Core.Buffer;
+﻿using Mina.Core.Buffer;
 
 namespace Mina.Filter.Codec.StateMachine
 {
@@ -8,7 +7,7 @@ namespace Mina.Filter.Codec.StateMachine
     /// </summary>
     public abstract class SingleByteDecodingState : IDecodingState
     {
-        public IDecodingState Decode(IoBuffer input, IProtocolDecoderOutput output)
+        public IDecodingState Decode(IOBuffer input, IProtocolDecoderOutput output)
         {
             if (input.HasRemaining)
                 return FinishDecode(input.Get(), output);
@@ -31,6 +30,6 @@ namespace Mina.Filter.Codec.StateMachine
         /// <code>this</code> for loop transitions) or <code>null</code> if 
         /// the state machine has reached its end.
         /// </returns>
-        protected abstract IDecodingState FinishDecode(Byte b, IProtocolDecoderOutput output);
+        protected abstract IDecodingState FinishDecode(byte b, IProtocolDecoderOutput output);
     }
 }

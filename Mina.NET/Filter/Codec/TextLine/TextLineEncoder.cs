@@ -13,7 +13,7 @@ namespace Mina.Filter.Codec.TextLine
     {
         private readonly Encoding _encoding;
         private readonly LineDelimiter _delimiter;
-        private Int32 _maxLineLength = Int32.MaxValue;
+        private int _maxLineLength = int.MaxValue;
 
         /// <summary>
         /// Instantiates with default <see cref="Encoding.Default"/> and <see cref="LineDelimiter.Unix"/>.
@@ -26,7 +26,7 @@ namespace Mina.Filter.Codec.TextLine
         /// Instantiates with default <see cref="Encoding.Default"/> and given delimiter.
         /// </summary>
         /// <param name="delimiter">the delimiter string</param>
-        public TextLineEncoder(String delimiter)
+        public TextLineEncoder(string delimiter)
             : this(new LineDelimiter(delimiter))
         { }
 
@@ -52,7 +52,7 @@ namespace Mina.Filter.Codec.TextLine
         /// </summary>
         /// <param name="encoding">the <see cref="Encoding"/></param>
         /// <param name="delimiter">the delimiter string</param>
-        public TextLineEncoder(Encoding encoding, String delimiter)
+        public TextLineEncoder(Encoding encoding, string delimiter)
             : this(encoding, new LineDelimiter(delimiter))
         { }
 
@@ -64,9 +64,9 @@ namespace Mina.Filter.Codec.TextLine
         public TextLineEncoder(Encoding encoding, LineDelimiter delimiter)
         {
             if (encoding == null)
-                throw new ArgumentNullException("encoding");
+                throw new ArgumentNullException(nameof(encoding));
             if (delimiter == null)
-                throw new ArgumentNullException("delimiter");
+                throw new ArgumentNullException(nameof(delimiter));
             if (LineDelimiter.Auto.Equals(delimiter))
                 throw new ArgumentException("AUTO delimiter is not allowed for encoder.");
 
@@ -77,7 +77,7 @@ namespace Mina.Filter.Codec.TextLine
         /// <summary>
         /// Gets or sets the allowed maximum size of the encoded line.
         /// </summary>
-        public Int32 MaxLineLength
+        public int MaxLineLength
         {
             get { return _maxLineLength; }
             set
@@ -89,21 +89,21 @@ namespace Mina.Filter.Codec.TextLine
         }
 
         /// <inheritdoc/>
-        public void Encode(IoSession session, Object message, IProtocolEncoderOutput output)
+        public void Encode(IOSession session, object message, IProtocolEncoderOutput output)
         {
-            String value = message == null ? String.Empty : message.ToString();
+            var value = message == null ? string.Empty : message.ToString();
             value += _delimiter.Value;
-            Byte[] bytes = _encoding.GetBytes(value);
+            var bytes = _encoding.GetBytes(value);
             if (bytes.Length > _maxLineLength)
                 throw new ArgumentException("Line too long: " + bytes.Length);
 
             // TODO BufferAllocator
-            IoBuffer buf = IoBuffer.Wrap(bytes);
+            var buf = IOBuffer.Wrap(bytes);
             output.Write(buf);
         }
 
         /// <inheritdoc/>
-        public void Dispose(IoSession session)
+        public void Dispose(IOSession session)
         {
             // Do nothing
         }

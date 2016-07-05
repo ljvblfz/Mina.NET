@@ -28,12 +28,12 @@ namespace Mina.Util
     class DefaultExceptionMonitor : ExceptionMonitor
     {
         public static readonly DefaultExceptionMonitor Monitor = new DefaultExceptionMonitor();
-        private static readonly ILog log = LogManager.GetLogger(typeof(DefaultExceptionMonitor));
+        private static readonly ILog Log = LogManager.GetLogger(typeof(DefaultExceptionMonitor));
 
         public override void ExceptionCaught(Exception cause)
         {
-            if (log.IsWarnEnabled)
-                log.Warn("Unexpected exception.", cause);
+            if (Log.IsWarnEnabled)
+                Log.Warn("Unexpected exception.", cause);
         }
     }
 }

@@ -7,7 +7,7 @@ using Mina.Util;
 namespace Mina.Filter.Codec
 {
     /// <summary>
-    /// A virtual <see cref="IoSession"/> that provides <see cref="IProtocolEncoderOutput"/>
+    /// A virtual <see cref="IOSession"/> that provides <see cref="IProtocolEncoderOutput"/>
     /// and <see cref="IProtocolDecoderOutput"/>.  It is useful for unit-testing
     /// codec and reusing codec for non-network-use (e.g. serialization).
     /// </summary>
@@ -24,25 +24,13 @@ namespace Mina.Filter.Codec
             _decoderOutput = new DummyProtocolDecoderOutput();
         }
 
-        public IProtocolEncoderOutput EncoderOutput
-        {
-            get { return _encoderOutput; }
-        }
+        public IProtocolEncoderOutput EncoderOutput => _encoderOutput;
 
-        public IQueue<Object> EncoderOutputQueue
-        {
-            get { return _encoderOutput.MessageQueue; }
-        }
+        public IQueue<object> EncoderOutputQueue => _encoderOutput.MessageQueue;
 
-        public IProtocolDecoderOutput DecoderOutput
-        {
-            get { return _decoderOutput; }
-        }
+        public IProtocolDecoderOutput DecoderOutput => _decoderOutput;
 
-        public IQueue<Object> DecoderOutputQueue
-        {
-            get { return _decoderOutput.MessageQueue; }
-        }
+        public IQueue<object> DecoderOutputQueue => _decoderOutput.MessageQueue;
 
         class DummyProtocolEncoderOutput : AbstractProtocolEncoderOutput
         {
@@ -61,7 +49,7 @@ namespace Mina.Filter.Codec
 
         class DummyProtocolDecoderOutput : AbstractProtocolDecoderOutput
         {
-            public override void Flush(INextFilter nextFilter, IoSession session)
+            public override void Flush(INextFilter nextFilter, IOSession session)
             {
                 // Do nothing
             }

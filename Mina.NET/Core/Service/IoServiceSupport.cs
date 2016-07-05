@@ -2,12 +2,12 @@
 
 namespace Mina.Core.Service
 {
-    interface IoServiceSupport
+    interface IOServiceSupport
     {
         void FireServiceActivated();
         void FireServiceIdle(IdleStatus idleStatus);
-        void FireSessionCreated(IoSession session);
-        void FireSessionDestroyed(IoSession session);
+        void FireSessionCreated(IOSession session);
+        void FireSessionDestroyed(IOSession session);
         void FireServiceDeactivated();
     }
 }

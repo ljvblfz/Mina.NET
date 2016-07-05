@@ -15,11 +15,11 @@ namespace Mina.Filter.KeepAlive
 
         /// <summary>
         /// </summary>
-        public KeepAliveRequestTimeoutException(String message) : base(message) { }
+        public KeepAliveRequestTimeoutException(string message) : base(message) { }
 
         /// <summary>
         /// </summary>
-        public KeepAliveRequestTimeoutException(String message, Exception inner) : base(message, inner) { }
+        public KeepAliveRequestTimeoutException(string message, Exception inner) : base(message, inner) { }
         
         /// <summary>
         /// </summary>

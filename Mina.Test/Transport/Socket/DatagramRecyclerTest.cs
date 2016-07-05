@@ -1,9 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.IO;
 using System.Net;
 using System.Text;
-using System.Text.RegularExpressions;
 using System.Threading;
 #if !NETFX_CORE
 using NUnit.Framework;
@@ -16,7 +13,6 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 #endif
 using Mina.Core.Service;
 using Mina.Core.Buffer;
-using Mina.Core.Future;
 using Mina.Core.Session;
 
 namespace Mina.Transport.Socket
@@ -24,44 +20,44 @@ namespace Mina.Transport.Socket
     [TestClass]
     public class DatagramRecyclerTest
     {
-        private AsyncDatagramAcceptor acceptor;
-        private AsyncDatagramConnector connector;
+        private AsyncDatagramAcceptor _acceptor;
+        private AsyncDatagramConnector _connector;
 
         [TestInitialize]
         public void SetUp()
         {
-            acceptor = new AsyncDatagramAcceptor();
-            connector = new AsyncDatagramConnector();
+            _acceptor = new AsyncDatagramAcceptor();
+            _connector = new AsyncDatagramConnector();
         }
 
         [TestCleanup]
         public void TearDown()
         {
-            acceptor.Dispose();
-            connector.Dispose();
+            _acceptor.Dispose();
+            _connector.Dispose();
         }
 
         [TestMethod]
         public void TestDatagramRecycler()
         {
-            int port = 1024;
-            ExpiringSessionRecycler recycler = new ExpiringSessionRecycler(1, 1);
+            var port = 1024;
+            var recycler = new ExpiringSessionRecycler(1, 1);
 
-            MockHandler acceptorHandler = new MockHandler();
-            MockHandler connectorHandler = new MockHandler();
+            var acceptorHandler = new MockHandler();
+            var connectorHandler = new MockHandler();
 
-            acceptor.Handler = acceptorHandler;
-            acceptor.SessionRecycler = recycler;
-            acceptor.Bind(new IPEndPoint(IPAddress.Loopback, port));
+            _acceptor.Handler = acceptorHandler;
+            _acceptor.SessionRecycler = recycler;
+            _acceptor.Bind(new IPEndPoint(IPAddress.Loopback, port));
 
             try
             {
-                connector.Handler = connectorHandler;
-                IConnectFuture future = connector.Connect(new IPEndPoint(IPAddress.Loopback, port));
+                _connector.Handler = connectorHandler;
+                var future = _connector.Connect(new IPEndPoint(IPAddress.Loopback, port));
                 future.Await();
 
                 // Write whatever to trigger the acceptor.
-                future.Session.Write(IoBuffer.Allocate(1)).Await();
+                future.Session.Write(IOBuffer.Allocate(1)).Await();
 
                 // Close the client-side connection.
                 // This doesn't mean that the acceptor-side connection is also closed.
@@ -71,62 +67,62 @@ namespace Mina.Transport.Socket
                 Assert.IsTrue(future.Session.CloseFuture.Closed);
 
                 // Wait until the acceptor-side connection is closed.
-                while (acceptorHandler.session == null)
+                while (acceptorHandler.Session == null)
                 {
                     Thread.Yield();
                 }
-                acceptorHandler.session.CloseFuture.Await(3000);
+                acceptorHandler.Session.CloseFuture.Await(3000);
 
                 // Is it closed?
-                Assert.IsTrue(acceptorHandler.session.CloseFuture.Closed);
+                Assert.IsTrue(acceptorHandler.Session.CloseFuture.Closed);
 
                 Thread.Sleep(1000);
 
-                Assert.AreEqual("CROPSECL", connectorHandler.result.ToString());
-                Assert.AreEqual("CROPRECL", acceptorHandler.result.ToString());
+                Assert.AreEqual("CROPSECL", connectorHandler.Result.ToString());
+                Assert.AreEqual("CROPRECL", acceptorHandler.Result.ToString());
             }
             finally
             {
-                acceptor.Unbind();
+                _acceptor.Unbind();
             }
         }
 
         [TestMethod]
         public void TestCloseRequest()
         {
-            int port = 1024;
-            ExpiringSessionRecycler recycler = new ExpiringSessionRecycler(10, 1);
+            var port = 1024;
+            var recycler = new ExpiringSessionRecycler(10, 1);
 
-            MockHandler acceptorHandler = new MockHandler();
-            MockHandler connectorHandler = new MockHandler();
+            var acceptorHandler = new MockHandler();
+            var connectorHandler = new MockHandler();
 
-            acceptor.SessionConfig.SetIdleTime(IdleStatus.ReaderIdle, 1);
-            acceptor.Handler = acceptorHandler;
-            acceptor.SessionRecycler = recycler;
-            acceptor.Bind(new IPEndPoint(IPAddress.Loopback, port));
+            _acceptor.SessionConfig.SetIdleTime(IdleStatus.ReaderIdle, 1);
+            _acceptor.Handler = acceptorHandler;
+            _acceptor.SessionRecycler = recycler;
+            _acceptor.Bind(new IPEndPoint(IPAddress.Loopback, port));
 
             try
             {
-                connector.Handler = connectorHandler;
-                IConnectFuture future = connector.Connect(new IPEndPoint(IPAddress.Loopback, port));
+                _connector.Handler = connectorHandler;
+                var future = _connector.Connect(new IPEndPoint(IPAddress.Loopback, port));
                 future.Await();
 
                 // Write whatever to trigger the acceptor.
-                future.Session.Write(IoBuffer.Allocate(1)).Await();
+                future.Session.Write(IOBuffer.Allocate(1)).Await();
 
                 // Make sure the connection is closed before recycler closes it.
-                while (acceptorHandler.session == null)
+                while (acceptorHandler.Session == null)
                 {
                     Thread.Yield();
                 }
-                acceptorHandler.session.Close(true);
-                Assert.IsTrue(acceptorHandler.session.CloseFuture.Await(3000));
+                acceptorHandler.Session.Close(true);
+                Assert.IsTrue(acceptorHandler.Session.CloseFuture.Await(3000));
 
-                IoSession oldSession = acceptorHandler.session;
+                var oldSession = acceptorHandler.Session;
 
                 // Wait until all events are processed and clear the state.
-                DateTime startTime = DateTime.Now;
-                while (acceptorHandler.result.ToString().Length < 8)
+                var startTime = DateTime.Now;
+                while (acceptorHandler.Result.ToString().Length < 8)
                 {
                     Thread.Yield();
                     if ((DateTime.Now - startTime).TotalMilliseconds > 5000)
@@ -134,77 +130,77 @@ namespace Mina.Transport.Socket
                         throw new Exception();
                     }
                 }
-                acceptorHandler.result.Clear();
-                acceptorHandler.session = null;
+                acceptorHandler.Result.Clear();
+                acceptorHandler.Session = null;
 
                 // Write whatever to trigger the acceptor again.
-                IWriteFuture wf = future.Session.Write(IoBuffer.Allocate(1)).Await();
+                var wf = future.Session.Write(IOBuffer.Allocate(1)).Await();
                 Assert.IsTrue(wf.Written);
 
                 // Make sure the connection is closed before recycler closes it.
-                while (acceptorHandler.session == null)
+                while (acceptorHandler.Session == null)
                 {
                     Thread.Yield();
                 }
-                acceptorHandler.session.Close(true);
-                Assert.IsTrue(acceptorHandler.session.CloseFuture.Await(3000));
+                acceptorHandler.Session.Close(true);
+                Assert.IsTrue(acceptorHandler.Session.CloseFuture.Await(3000));
 
                 future.Session.Close(true).Await();
 
-                Assert.AreNotSame(oldSession, acceptorHandler.session);
+                Assert.AreNotSame(oldSession, acceptorHandler.Session);
             }
             finally
             {
-                acceptor.Unbind();
+                _acceptor.Unbind();
             }
         }
 
-        class MockHandler : IoHandlerAdapter
+        class MockHandler : IOHandlerAdapter
         {
-            public volatile IoSession session;
+            public volatile IOSession Session;
 
-            public readonly StringBuilder result = new StringBuilder();
+            public readonly StringBuilder Result = new StringBuilder();
 
-            public override void ExceptionCaught(IoSession session, Exception cause)
+            public override void ExceptionCaught(IOSession session, Exception cause)
             {
-                this.session = session;
-                result.Append("CA");
+                this.Session = session;
+                Result.Append("CA");
             }
 
-            public override void MessageReceived(IoSession session, Object message)
+            public override void MessageReceived(IOSession session, object message)
             {
-                this.session = session;
-                result.Append("RE");
+                this.Session = session;
+                Result.Append("RE");
             }
 
-            public override void MessageSent(IoSession session, Object message)
+            public override void MessageSent(IOSession session, object message)
             {
-                this.session = session;
-                result.Append("SE");
+                this.Session = session;
+                Result.Append("SE");
             }
 
-            public override void SessionClosed(IoSession session)
+            public override void SessionClosed(IOSession session)
             {
-                this.session = session;
-                result.Append("CL");
+                this.Session = session;
+                Result.Append("CL");
             }
 
-            public override void SessionCreated(IoSession session)
+            public override void SessionCreated(IOSession session)
             {
-                this.session = session;
-                result.Append("CR");
+                this.Session = session;
+                Result.Append("CR");
             }
 
-            public override void SessionIdle(IoSession session, IdleStatus status)
+            public override void SessionIdle(IOSession session, IdleStatus status)
             {
-                this.session = session;
-                result.Append("ID");
+                this.Session = session;
+                Result.Append("ID");
             }
 
-            public override void SessionOpened(IoSession session)
+            public override void SessionOpened(IOSession session)
             {
-                this.session = session;
-                result.Append("OP");
+                this.Session = session;
+                Result.Append("OP");
             }
         }
     }

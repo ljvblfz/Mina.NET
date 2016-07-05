@@ -6,23 +6,27 @@ namespace Mina.Core.Buffer
     /// <summary>
     /// A byte buffer used by MINA applications.
     /// </summary>
-    public abstract class IoBuffer : Buffer
+    public abstract class IOBuffer : Buffer
     {
-        private static IoBufferAllocator allocator = ByteBufferAllocator.Instance;
+        private static IOBufferAllocator _allocator = ByteBufferAllocator.Instance;
 
         /// <summary>
         /// Gets or sets the allocator used by new buffers.
         /// </summary>
-        public static IoBufferAllocator Allocator
+        public static IOBufferAllocator Allocator
         {
-            get { return allocator; }
+            get { return _allocator; }
             set
             {
                 if (value == null)
-                    throw new ArgumentNullException("value");
-                if (allocator != null && allocator != value && allocator is IDisposable)
-                    ((IDisposable)allocator).Dispose();
-                allocator = value;
+                {
+                    throw new ArgumentNullException(nameof(value));
+                }
+                if (_allocator != null && _allocator != value && _allocator is IDisposable)
+                {
+                    ((IDisposable) _allocator).Dispose();
+                }
+                _allocator = value;
             }
         }
 
@@ -32,17 +36,17 @@ namespace Mina.Core.Buffer
         /// <param name="capacity">the capacity of the buffer</param>
         /// <returns>the allocated buffer</returns>
         /// <exception cref="ArgumentException">If the <paramref name="capacity"/> is a negative integer</exception>
-        public static IoBuffer Allocate(Int32 capacity)
+        public static IOBuffer Allocate(int capacity)
         {
-            return allocator.Allocate(capacity);
+            return _allocator.Allocate(capacity);
         }
 
         /// <summary>
         /// Wraps the specified byte array into MINA buffer.
         /// </summary>
-        public static IoBuffer Wrap(Byte[] array)
+        public static IOBuffer Wrap(byte[] array)
         {
-            return allocator.Wrap(array);
+            return _allocator.Wrap(array);
         }
 
         /// <summary>
@@ -52,30 +56,32 @@ namespace Mina.Core.Buffer
         /// If the preconditions on the <paramref name="offset"/> and <paramref name="length"/>
         /// parameters do not hold
         /// </exception>
-        public static IoBuffer Wrap(Byte[] array, Int32 offset, Int32 length)
+        public static IOBuffer Wrap(byte[] array, int offset, int length)
         {
-            return allocator.Wrap(array, offset, length);
+            return _allocator.Wrap(array, offset, length);
         }
 
         /// <summary>
         /// Normalizes the specified capacity of the buffer to power of 2, which is
         /// often helpful for optimal memory usage and performance. If it is greater
-        /// than or equal to <see cref="Int32.MaxValue"/>, it returns
-        /// <see cref="Int32.MaxValue"/>. If it is zero, it returns zero.
+        /// than or equal to <see cref="int.MaxValue"/>, it returns
+        /// <see cref="int.MaxValue"/>. If it is zero, it returns zero.
         /// </summary>
         /// <param name="requestedCapacity"></param>
         /// <returns></returns>
-        public static Int32 NormalizeCapacity(Int32 requestedCapacity)
+        public static int NormalizeCapacity(int requestedCapacity)
         {
             if (requestedCapacity < 0)
-                return Int32.MaxValue;
+            {
+                return int.MaxValue;
+            }
 
-            Int32 newCapacity = HighestOneBit(requestedCapacity);
-            newCapacity <<= (newCapacity < requestedCapacity ? 1 : 0);
-            return newCapacity < 0 ? Int32.MaxValue : newCapacity;
+            var newCapacity = HighestOneBit(requestedCapacity);
+            newCapacity <<= ((newCapacity < requestedCapacity) ? 1 : 0);
+            return newCapacity < 0 ? int.MaxValue : newCapacity;
         }
 
-        private static Int32 HighestOneBit(Int32 i)
+        private static int HighestOneBit(int i)
         {
             i |= (i >> 1);
             i |= (i >> 2);
@@ -88,14 +94,15 @@ namespace Mina.Core.Buffer
         /// <summary>
         /// 
         /// </summary>
-        protected IoBuffer(Int32 mark, Int32 pos, Int32 lim, Int32 cap)
+        protected IOBuffer(int mark, int pos, int lim, int cap)
             : base(mark, pos, lim, cap)
-        { }
+        {
+        }
 
         /// <summary>
         /// Gets the the allocator used by this buffer.
         /// </summary>
-        public abstract IoBufferAllocator BufferAllocator { get; }
+        public abstract IOBufferAllocator BufferAllocator { get; }
 
         /// <summary>
         /// Gets or sets the current byte order.
@@ -103,94 +110,88 @@ namespace Mina.Core.Buffer
         public abstract ByteOrder Order { get; set; }
 
         /// <inheritdoc/>
-        public new virtual Int32 Capacity
+        public new virtual int Capacity
         {
             get { return base.Capacity; }
             set { throw new NotSupportedException(); }
         }
 
         /// <inheritdoc/>
-        public new virtual Int32 Position
+        public new virtual int Position
         {
             get { return base.Position; }
             set { base.Position = value; }
         }
 
         /// <inheritdoc/>
-        public new virtual Int32 Limit
+        public new virtual int Limit
         {
             get { return base.Limit; }
             set { base.Limit = value; }
         }
 
         /// <inheritdoc/>
-        public new virtual Int32 Remaining
-        {
-            get { return base.Remaining; }
-        }
+        public new virtual int Remaining => base.Remaining;
 
         /// <inheritdoc/>
-        public new virtual Boolean HasRemaining
-        {
-            get { return base.HasRemaining; }
-        }
+        public new virtual bool HasRemaining => base.HasRemaining;
 
         /// <summary>
         /// Turns on or off auto-expanding.
         /// </summary>
-        public abstract Boolean AutoExpand { get; set; }
+        public abstract bool AutoExpand { get; set; }
 
         /// <summary>
         /// Turns on or off auto-shrinking.
         /// </summary>
-        public abstract Boolean AutoShrink { get; set; }
+        public abstract bool AutoShrink { get; set; }
 
         /// <summary>
         /// Checks if this buffer is derived from another buffer
         /// via <see cref="Duplicate()"/>, <see cref="Slice()"/> or <see cref="AsReadOnlyBuffer()"/>.
         /// </summary>
-        public abstract Boolean Derived { get; }
+        public abstract bool Derived { get; }
 
         /// <summary>
         /// Gets or sets the minimum capacity.
         /// </summary>
-        public abstract Int32 MinimumCapacity { get; set; }
+        public abstract int MinimumCapacity { get; set; }
 
         /// <summary>
         /// Tells whether or not this buffer is backed by an accessible byte array.
         /// </summary>
-        public abstract Boolean HasArray { get; }
+        public abstract bool HasArray { get; }
 
         /// <inheritdoc/>
-        public new virtual IoBuffer Mark()
+        public new virtual IOBuffer Mark()
         {
             base.Mark();
             return this;
         }
 
         /// <inheritdoc/>
-        public new virtual IoBuffer Reset()
+        public new virtual IOBuffer Reset()
         {
             base.Reset();
             return this;
         }
 
         /// <inheritdoc/>
-        public new virtual IoBuffer Clear()
+        public new virtual IOBuffer Clear()
         {
             base.Clear();
             return this;
         }
 
         /// <inheritdoc/>
-        public new virtual IoBuffer Flip()
+        public new virtual IOBuffer Flip()
         {
             base.Flip();
             return this;
         }
 
         /// <inheritdoc/>
-        public new virtual IoBuffer Rewind()
+        public new virtual IOBuffer Rewind()
         {
             base.Rewind();
             return this;
@@ -202,7 +203,7 @@ namespace Mina.Core.Buffer
         /// </summary>
         /// <param name="expectedRemaining">the expected remaining room</param>
         /// <returns>itself</returns>
-        public abstract IoBuffer Expand(Int32 expectedRemaining);
+        public abstract IOBuffer Expand(int expectedRemaining);
 
         /// <summary>
         /// Changes the capacity and limit of this buffer so this buffer get the
@@ -211,7 +212,7 @@ namespace Mina.Core.Buffer
         /// <param name="position">the start position</param>
         /// <param name="expectedRemaining">the expected remaining room</param>
         /// <returns>itself</returns>
-        public abstract IoBuffer Expand(Int32 position, Int32 expectedRemaining);
+        public abstract IOBuffer Expand(int position, int expectedRemaining);
 
         /// <summary>
         /// Changes the capacity of this buffer so this buffer occupies
@@ -221,62 +222,62 @@ namespace Mina.Core.Buffer
         /// The mark is discarded once the capacity changes.
         /// </summary>
         /// <returns>itself</returns>
-        public abstract IoBuffer Shrink();
+        public abstract IOBuffer Shrink();
 
         /// <summary>
         ///  Clears this buffer and fills its content with zero. The position is
         ///  set to zero, the limit is set to the capacity, and the mark is discarded.
         /// </summary>
         /// <returns>itself</returns>
-        public abstract IoBuffer Sweep();
+        public abstract IOBuffer Sweep();
 
         /// <summary>
         ///  Clears this buffer and fills its content with <paramref name="value"/>. The position is
         ///  set to zero, the limit is set to the capacity, and the mark is discarded.
         /// </summary>
         /// <returns>itself</returns>
-        public abstract IoBuffer Sweep(Byte value);
+        public abstract IOBuffer Sweep(byte value);
 
         /// <summary>
         /// Fills this buffer with zero.
         /// This method does not change buffer position.
         /// </summary>
         /// <returns>itself</returns>
-        public abstract IoBuffer FillAndReset(Int32 size);
+        public abstract IOBuffer FillAndReset(int size);
 
         /// <summary>
         /// Fills this buffer with <paramref name="value"/>.
         /// This method does not change buffer position.
         /// </summary>
         /// <returns>itself</returns>
-        public abstract IoBuffer FillAndReset(Byte value, Int32 size);
+        public abstract IOBuffer FillAndReset(byte value, int size);
 
         /// <summary>
         /// Fills this buffer with zero.
         /// This method moves buffer position forward.
         /// </summary>
         /// <returns>itself</returns>
-        public abstract IoBuffer Fill(Int32 size);
+        public abstract IOBuffer Fill(int size);
 
         /// <summary>
         /// Fills this buffer with <paramref name="value"/>.
         /// This method moves buffer position forward.
         /// </summary>
         /// <returns>itself</returns>
-        public abstract IoBuffer Fill(Byte value, Int32 size);
+        public abstract IOBuffer Fill(byte value, int size);
 
         /// <summary>
         /// Gets hexdump of this buffer.
         /// </summary>
         /// <returns>hexidecimal representation of this buffer</returns>
-        public abstract String GetHexDump();
+        public abstract string GetHexDump();
 
         /// <summary>
         /// Gets hexdump of this buffer with limited length.
         /// </summary>
         /// <param name="lengthLimit">the maximum number of bytes to dump from the current buffer</param>
         /// <returns>hexidecimal representation of this buffer</returns>
-        public abstract String GetHexDump(Int32 lengthLimit);
+        public abstract string GetHexDump(int lengthLimit);
 
         /// <summary>
         /// Returns true if this buffer contains a data which has a data
@@ -285,12 +286,12 @@ namespace Mina.Core.Buffer
         /// <remarks>
         /// Please notes that using this method can allow DoS (Denial of Service)
         /// attack in case the remote peer sends too big data length value.
-        /// It is recommended to use <see cref="PrefixedDataAvailable(Int32, Int32)"/> instead.
+        /// It is recommended to use <see cref="PrefixedDataAvailable(int, int)"/> instead.
         /// </remarks>
         /// </summary>
         /// <param name="prefixLength">the length of the prefix field (1, 2, or 4)</param>
         /// <returns>true if data available</returns>
-        public abstract Boolean PrefixedDataAvailable(Int32 prefixLength);
+        public abstract bool PrefixedDataAvailable(int prefixLength);
 
         /// <summary>
         /// Returns true if this buffer contains a data which has a data
@@ -300,7 +301,7 @@ namespace Mina.Core.Buffer
         /// <param name="prefixLength">the length of the prefix field (1, 2, or 4)</param>
         /// <param name="maxDataLength">the allowed maximum of the read data length</param>
         /// <returns>true if data available</returns>
-        public abstract Boolean PrefixedDataAvailable(Int32 prefixLength, Int32 maxDataLength);
+        public abstract bool PrefixedDataAvailable(int prefixLength, int maxDataLength);
 
         /// <summary>
         /// Returns the first occurence position of the specified byte from the
@@ -308,7 +309,7 @@ namespace Mina.Core.Buffer
         /// </summary>
         /// <param name="b">the byte to find</param>
         /// <returns>-1 if the specified byte is not found</returns>
-        public abstract Int32 IndexOf(Byte b);
+        public abstract int IndexOf(byte b);
 
         /// <summary>
         /// Reads a string which has a 16-bit length field before the actual encoded string.
@@ -316,7 +317,7 @@ namespace Mina.Core.Buffer
         /// </summary>
         /// <param name="encoding">the encoding of the string</param>
         /// <returns>the prefixed string</returns>
-        public abstract String GetPrefixedString(Encoding encoding);
+        public abstract string GetPrefixedString(Encoding encoding);
 
         /// <summary>
         /// Reads a string which has a length field before the actual encoded string.
@@ -324,7 +325,7 @@ namespace Mina.Core.Buffer
         /// <param name="prefixLength">the length of the length field (1, 2, or 4)</param>
         /// <param name="encoding">the encoding of the string</param>
         /// <returns>the prefixed string</returns>
-        public abstract String GetPrefixedString(Int32 prefixLength, Encoding encoding);
+        public abstract string GetPrefixedString(int prefixLength, Encoding encoding);
 
         /// <summary>
         /// Writes the string into this buffer which has a 16-bit length field
@@ -333,7 +334,7 @@ namespace Mina.Core.Buffer
         /// </summary>
         /// <param name="value">the string to write</param>
         /// <param name="encoding">the encoding of the string</param>
-        public abstract IoBuffer PutPrefixedString(String value, Encoding encoding);
+        public abstract IOBuffer PutPrefixedString(string value, Encoding encoding);
 
         /// <summary>
         /// Writes the string into this buffer which has a prefixLength field
@@ -342,17 +343,17 @@ namespace Mina.Core.Buffer
         /// <param name="value">the string to write</param>
         /// <param name="prefixLength">the length of the length field (1, 2, or 4)</param>
         /// <param name="encoding">the encoding of the string</param>
-        public abstract IoBuffer PutPrefixedString(String value, Int32 prefixLength, Encoding encoding);
+        public abstract IOBuffer PutPrefixedString(string value, int prefixLength, Encoding encoding);
 
         /// <summary>
         /// Reads an object from the buffer.
         /// </summary>
-        public abstract Object GetObject();
+        public abstract object GetObject();
 
         /// <summary>
         /// Writes the specified object to the buffer.
         /// </summary>
-        public abstract IoBuffer PutObject(Object o);
+        public abstract IOBuffer PutObject(object o);
 
         /// <summary>
         /// Reads the byte at this buffer's current position, and then increments the position. 
@@ -361,7 +362,8 @@ namespace Mina.Core.Buffer
         /// <exception cref="BufferUnderflowException">
         /// the buffer's current position is not smaller than its limit
         /// </exception>
-        public abstract Byte Get();
+        public abstract byte Get();
+
         /// <summary>
         /// Reads the byte at the given index.
         /// </summary>
@@ -370,7 +372,8 @@ namespace Mina.Core.Buffer
         /// <exception cref="IndexOutOfRangeException">
         /// the index is negative or not smaller than the buffer's limit
         /// </exception>
-        public abstract Byte Get(Int32 index);
+        public abstract byte Get(int index);
+
         /// <summary>
         /// Reads bytes of <paramref name="length"/> into <paramref name="dst"/> array.
         /// </summary>
@@ -384,11 +387,13 @@ namespace Mina.Core.Buffer
         /// <exception cref="BufferUnderflowException">
         /// there are fewer than length bytes remaining in this buffer
         /// </exception>
-        public abstract IoBuffer Get(Byte[] dst, Int32 offset, Int32 length);
+        public abstract IOBuffer Get(byte[] dst, int offset, int length);
+
         /// <summary>
         /// Gets all remaining bytes as an <see cref="ArraySegment&lt;Byte&gt;"/>.
         /// </summary>
-        public abstract ArraySegment<Byte> GetRemaining();
+        public abstract ArraySegment<byte> GetRemaining();
+
         /// <summary>
         /// Declares this buffer and all its derived buffers are not used anymore so
         /// that it can be reused by some implementations.
@@ -405,11 +410,11 @@ namespace Mina.Core.Buffer
         /// will be undefined.
         /// </remarks>
         /// <returns>the new buffer</returns>
-        public abstract IoBuffer Slice();
+        public abstract IOBuffer Slice();
 
-        public abstract IoBuffer GetSlice(Int32 index, Int32 length);
+        public abstract IOBuffer GetSlice(int index, int length);
 
-        public abstract IoBuffer GetSlice(Int32 length);
+        public abstract IOBuffer GetSlice(int length);
 
         /// <summary>
         /// Creates a new byte buffer that shares this buffer's content. 
@@ -418,19 +423,19 @@ namespace Mina.Core.Buffer
         /// The two buffers' position, limit, and mark values will be independent.
         /// </remarks>
         /// <returns>the new buffer</returns>
-        public abstract IoBuffer Duplicate();
+        public abstract IOBuffer Duplicate();
 
         /// <summary>
         /// Creates a new, read-only byte buffer that shares this buffer's content.
         /// </summary>
         /// <returns>the new, read-only buffer</returns>
-        public abstract IoBuffer AsReadOnlyBuffer();
+        public abstract IOBuffer AsReadOnlyBuffer();
 
         /// <summary>
         /// Forwards the position of this buffer as the specified <paramref name="size"/> bytes.
         /// </summary>
         /// <returns>itself</returns>
-        public abstract IoBuffer Skip(Int32 size);
+        public abstract IOBuffer Skip(int size);
 
         /// <summary>
         /// Writes the given byte into this buffer at the current position,
@@ -438,7 +443,7 @@ namespace Mina.Core.Buffer
         /// </summary>
         /// <param name="b">the byte to be written</param>
         /// <returns>itself</returns>
-        public abstract IoBuffer Put(Byte b);
+        public abstract IOBuffer Put(byte b);
 
         /// <summary>
         /// Writes the given byte into this buffer at the given index.
@@ -446,7 +451,7 @@ namespace Mina.Core.Buffer
         /// <param name="i">the index at which the byte will be written</param>
         /// <param name="b">the byte to be written</param>
         /// <returns>itself</returns>
-        public abstract IoBuffer Put(Int32 i, Byte b);
+        public abstract IOBuffer Put(int i, byte b);
 
         /// <summary>
         /// Writes the given array into this buffer at the current position,
@@ -461,19 +466,19 @@ namespace Mina.Core.Buffer
         /// </exception>
         /// <exception cref="OverflowException">there is insufficient space in this buffer</exception>
         /// <exception cref="InvalidOperationException">this buffer is read-only</exception>
-        public abstract IoBuffer Put(Byte[] src, Int32 offset, Int32 length);
+        public abstract IOBuffer Put(byte[] src, int offset, int length);
 
         /// <summary>
         /// Writes the content of the specified <paramref name="src"/> into this buffer.
         /// </summary>
         /// <returns>itself</returns>
-        public abstract IoBuffer Put(IoBuffer src);
+        public abstract IOBuffer Put(IOBuffer src);
 
         /// <summary>
         /// Compacts this buffer.
         /// </summary>
         /// <returns>itself</returns>
-        public abstract IoBuffer Compact();
+        public abstract IOBuffer Compact();
 
         /// <summary>
         /// Writes the given array into this buffer at the current position,
@@ -489,7 +494,7 @@ namespace Mina.Core.Buffer
         /// <returns>itself</returns>
         /// <exception cref="OverflowException">there is insufficient space in this buffer</exception>
         /// <exception cref="InvalidOperationException">this buffer is read-only</exception>
-        public abstract IoBuffer Put(Byte[] src);
+        public abstract IOBuffer Put(byte[] src);
 
         /// <summary>
         /// Writes the content of <paramref name="s"/> into this buffer using <see cref="Encoding.UTF8"/>.
@@ -497,7 +502,7 @@ namespace Mina.Core.Buffer
         /// <returns>itself</returns>
         /// <exception cref="OverflowException">there is insufficient space in this buffer</exception>
         /// <exception cref="InvalidOperationException">this buffer is read-only</exception>
-        public abstract IoBuffer PutString(String s);
+        public abstract IOBuffer PutString(string s);
 
         /// <summary>
         /// Writes the content of <paramref name="s"/> into this buffer using
@@ -508,7 +513,7 @@ namespace Mina.Core.Buffer
         /// <returns>itself</returns>
         /// <exception cref="OverflowException">there is insufficient space in this buffer</exception>
         /// <exception cref="InvalidOperationException">this buffer is read-only</exception>
-        public abstract IoBuffer PutString(String s, Encoding encoding);
+        public abstract IOBuffer PutString(string s, Encoding encoding);
 
         /// <summary>
         /// Writes the content of <paramref name="s"/> into this buffer as a
@@ -524,20 +529,20 @@ namespace Mina.Core.Buffer
         /// <param name="s"></param>
         /// <param name="fieldSize">the maximum number of bytes to write</param>
         /// <param name="encoding"></param>
-        public abstract IoBuffer PutString(String s, Int32 fieldSize, Encoding encoding);
+        public abstract IOBuffer PutString(string s, int fieldSize, Encoding encoding);
 
         /// <summary>
         /// Reads a NUL-terminated string from this buffer using the specified encoding.
         /// This method reads until the limit of this buffer if no NUL is found.
         /// </summary>
-        public abstract String GetString(Encoding encoding);
+        public abstract string GetString(Encoding encoding);
 
         /// <summary>
         /// Reads a NUL-terminated string from this buffer using the specified decoder and returns it.
         /// </summary>
         /// <param name="fieldSize">the maximum number of bytes to read</param>
         /// <param name="encoding"></param>
-        public abstract String GetString(Int32 fieldSize, Encoding encoding);
+        public abstract string GetString(int fieldSize, Encoding encoding);
 
         #region
 
@@ -548,7 +553,7 @@ namespace Mina.Core.Buffer
         /// </summary>
         /// <returns>the char value at the buffer's current position</returns>
         /// <exception cref="BufferUnderflowException">there are fewer than two bytes remaining in this buffer</exception>
-        public abstract Char GetChar();
+        public abstract char GetChar();
 
         /// <summary>
         /// Reads two bytes at the given index, composing them into a char value
@@ -557,7 +562,7 @@ namespace Mina.Core.Buffer
         /// <param name="index">the index from which the bytes will be read</param>
         /// <returns>the char value at the given index</returns>
         /// <exception cref="IndexOutOfRangeException">index is negative or not smaller than the buffer's limit, minus one</exception>
-        public abstract Char GetChar(Int32 index);
+        public abstract char GetChar(int index);
 
         /// <summary>
         /// Writes two bytes containing the given char value,
@@ -568,7 +573,7 @@ namespace Mina.Core.Buffer
         /// <returns>itself</returns>
         /// <exception cref="OverflowException">there are fewer than two bytes remaining in this buffer</exception>
         /// <exception cref="InvalidOperationException">this buffer is read-only</exception>
-        public abstract IoBuffer PutChar(Char value);
+        public abstract IOBuffer PutChar(char value);
 
         /// <summary>
         /// Writes two bytes containing the given char value, in the current byte order,
@@ -579,7 +584,7 @@ namespace Mina.Core.Buffer
         /// <returns>itself</returns>
         /// <exception cref="IndexOutOfRangeException">index is negative or not smaller than the buffer's limit, minus one</exception>
         /// <exception cref="InvalidOperationException">this buffer is read-only</exception>
-        public abstract IoBuffer PutChar(Int32 index, Char value);
+        public abstract IOBuffer PutChar(int index, char value);
 
         /// <summary>
         /// Reads the next two bytes at this buffer's current position,
@@ -588,7 +593,7 @@ namespace Mina.Core.Buffer
         /// </summary>
         /// <returns>the short value at the buffer's current position</returns>
         /// <exception cref="BufferUnderflowException">there are fewer than two bytes remaining in this buffer</exception>
-        public abstract Int16 GetInt16();
+        public abstract short GetInt16();
 
         /// <summary>
         /// Reads two bytes at the given index, composing them into a short value
@@ -597,7 +602,7 @@ namespace Mina.Core.Buffer
         /// <param name="index">the index from which the bytes will be read</param>
         /// <returns>the short value at the given index</returns>
         /// <exception cref="IndexOutOfRangeException">index is negative or not smaller than the buffer's limit, minus one</exception>
-        public abstract Int16 GetInt16(Int32 index);
+        public abstract short GetInt16(int index);
 
         /// <summary>
         /// Writes two bytes containing the given short value,
@@ -608,7 +613,7 @@ namespace Mina.Core.Buffer
         /// <returns>itself</returns>
         /// <exception cref="OverflowException">there are fewer than two bytes remaining in this buffer</exception>
         /// <exception cref="InvalidOperationException">this buffer is read-only</exception>
-        public abstract IoBuffer PutInt16(Int16 value);
+        public abstract IOBuffer PutInt16(short value);
 
         /// <summary>
         /// Writes two bytes containing the given short value,
@@ -619,7 +624,7 @@ namespace Mina.Core.Buffer
         /// <returns>itself</returns>
         /// <exception cref="IndexOutOfRangeException">index is negative or not smaller than the buffer's limit, minus one</exception>
         /// <exception cref="InvalidOperationException">this buffer is read-only</exception>
-        public abstract IoBuffer PutInt16(Int32 index, Int16 value);
+        public abstract IOBuffer PutInt16(int index, short value);
 
         /// <summary>
         /// Reads the next four bytes at this buffer's current position,
@@ -628,7 +633,7 @@ namespace Mina.Core.Buffer
         /// </summary>
         /// <returns>the int value at the buffer's current position</returns>
         /// <exception cref="BufferUnderflowException">there are fewer than four bytes remaining in this buffer</exception>
-        public abstract Int32 GetInt32();
+        public abstract int GetInt32();
 
         /// <summary>
         /// Reads four bytes at the given index, composing them into a int value
@@ -637,7 +642,7 @@ namespace Mina.Core.Buffer
         /// <param name="index">the index from which the bytes will be read</param>
         /// <returns>the int value at the given index</returns>
         /// <exception cref="IndexOutOfRangeException">index is negative or not smaller than the buffer's limit, minus three</exception>
-        public abstract Int32 GetInt32(Int32 index);
+        public abstract int GetInt32(int index);
 
         /// <summary>
         /// Writes four bytes containing the given int value,
@@ -648,7 +653,7 @@ namespace Mina.Core.Buffer
         /// <returns>itself</returns>
         /// <exception cref="OverflowException">there are fewer than four bytes remaining in this buffer</exception>
         /// <exception cref="InvalidOperationException">this buffer is read-only</exception>
-        public abstract IoBuffer PutInt32(Int32 value);
+        public abstract IOBuffer PutInt32(int value);
 
         /// <summary>
         /// Writes four bytes containing the given int value,
@@ -659,7 +664,7 @@ namespace Mina.Core.Buffer
         /// <returns>itself</returns>
         /// <exception cref="IndexOutOfRangeException">index is negative or not smaller than the buffer's limit, minus three</exception>
         /// <exception cref="InvalidOperationException">this buffer is read-only</exception>
-        public abstract IoBuffer PutInt32(Int32 index, Int32 value);
+        public abstract IOBuffer PutInt32(int index, int value);
 
         /// <summary>
         /// Reads the next eight bytes at this buffer's current position,
@@ -668,7 +673,7 @@ namespace Mina.Core.Buffer
         /// </summary>
         /// <returns>the long value at the buffer's current position</returns>
         /// <exception cref="BufferUnderflowException">there are fewer than eight bytes remaining in this buffer</exception>
-        public abstract Int64 GetInt64();
+        public abstract long GetInt64();
 
         /// <summary>
         /// Reads eight bytes at the given index, composing them into a long value
@@ -677,7 +682,7 @@ namespace Mina.Core.Buffer
         /// <param name="index">the index from which the bytes will be read</param>
         /// <returns>the long value at the given index</returns>
         /// <exception cref="IndexOutOfRangeException">index is negative or not smaller than the buffer's limit, minus seven</exception>
-        public abstract Int64 GetInt64(Int32 index);
+        public abstract long GetInt64(int index);
 
         /// <summary>
         /// Writes eight bytes containing the given long value,
@@ -688,7 +693,7 @@ namespace Mina.Core.Buffer
         /// <returns>itself</returns>
         /// <exception cref="OverflowException">there are fewer than eight bytes remaining in this buffer</exception>
         /// <exception cref="InvalidOperationException">this buffer is read-only</exception>
-        public abstract IoBuffer PutInt64(Int64 value);
+        public abstract IOBuffer PutInt64(long value);
 
         /// <summary>
         /// Writes eight bytes containing the given long value,
@@ -699,7 +704,7 @@ namespace Mina.Core.Buffer
         /// <returns>itself</returns>
         /// <exception cref="IndexOutOfRangeException">index is negative or not smaller than the buffer's limit, minus seven</exception>
         /// <exception cref="InvalidOperationException">this buffer is read-only</exception>
-        public abstract IoBuffer PutInt64(Int32 index, Int64 value);
+        public abstract IOBuffer PutInt64(int index, long value);
 
         /// <summary>
         /// Reads the next four bytes at this buffer's current position,
@@ -708,7 +713,7 @@ namespace Mina.Core.Buffer
         /// </summary>
         /// <returns>the float value at the buffer's current position</returns>
         /// <exception cref="BufferUnderflowException">there are fewer than four bytes remaining in this buffer</exception>
-        public abstract Single GetSingle();
+        public abstract float GetSingle();
 
         /// <summary>
         /// Reads four bytes at the given index, composing them into a float value
@@ -717,7 +722,7 @@ namespace Mina.Core.Buffer
         /// <param name="index">the index from which the bytes will be read</param>
         /// <returns>the float value at the given index</returns>
         /// <exception cref="IndexOutOfRangeException">index is negative or not smaller than the buffer's limit, minus three</exception>
-        public abstract Single GetSingle(Int32 index);
+        public abstract float GetSingle(int index);
 
         /// <summary>
         /// Writes four bytes containing the given float value,
@@ -728,7 +733,7 @@ namespace Mina.Core.Buffer
         /// <returns>itself</returns>
         /// <exception cref="OverflowException">there are fewer than four bytes remaining in this buffer</exception>
         /// <exception cref="InvalidOperationException">this buffer is read-only</exception>
-        public abstract IoBuffer PutSingle(Single value);
+        public abstract IOBuffer PutSingle(float value);
 
         /// <summary>
         /// Writes four bytes containing the given float value,
@@ -739,7 +744,7 @@ namespace Mina.Core.Buffer
         /// <returns>itself</returns>
         /// <exception cref="IndexOutOfRangeException">index is negative or not smaller than the buffer's limit, minus three</exception>
         /// <exception cref="InvalidOperationException">this buffer is read-only</exception>
-        public abstract IoBuffer PutSingle(Int32 index, Single value);
+        public abstract IOBuffer PutSingle(int index, float value);
 
         /// <summary>
         /// Reads the next eight bytes at this buffer's current position,
@@ -748,7 +753,7 @@ namespace Mina.Core.Buffer
         /// </summary>
         /// <returns>the double value at the buffer's current position</returns>
         /// <exception cref="BufferUnderflowException">there are fewer than eight bytes remaining in this buffer</exception>
-        public abstract Double GetDouble();
+        public abstract double GetDouble();
 
         /// <summary>
         /// Reads eight bytes at the given index, composing them into a double value
@@ -757,7 +762,7 @@ namespace Mina.Core.Buffer
         /// <param name="index">the index from which the bytes will be read</param>
         /// <returns>the double value at the given index</returns>
         /// <exception cref="IndexOutOfRangeException">index is negative or not smaller than the buffer's limit, minus seven</exception>
-        public abstract Double GetDouble(Int32 index);
+        public abstract double GetDouble(int index);
 
         /// <summary>
         /// Writes eight bytes containing the given double value,
@@ -768,7 +773,7 @@ namespace Mina.Core.Buffer
         /// <returns>itself</returns>
         /// <exception cref="OverflowException">there are fewer than eight bytes remaining in this buffer</exception>
         /// <exception cref="InvalidOperationException">this buffer is read-only</exception>
-        public abstract IoBuffer PutDouble(Double value);
+        public abstract IOBuffer PutDouble(double value);
 
         /// <summary>
         /// Writes eight bytes containing the given double value,
@@ -779,7 +784,7 @@ namespace Mina.Core.Buffer
         /// <returns>itself</returns>
         /// <exception cref="IndexOutOfRangeException">index is negative or not smaller than the buffer's limit, minus seven</exception>
         /// <exception cref="InvalidOperationException">this buffer is read-only</exception>
-        public abstract IoBuffer PutDouble(Int32 index, Double value);
+        public abstract IOBuffer PutDouble(int index, double value);
 
         #endregion
     }

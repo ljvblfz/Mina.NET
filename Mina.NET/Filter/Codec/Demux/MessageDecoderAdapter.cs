@@ -9,11 +9,11 @@ namespace Mina.Filter.Codec.Demux
     /// </summary>
     public abstract class MessageDecoderAdapter : IMessageDecoder
     {
-        public abstract MessageDecoderResult Decodable(IoSession session, IoBuffer input);
+        public abstract MessageDecoderResult Decodable(IOSession session, IOBuffer input);
 
-        public abstract MessageDecoderResult Decode(IoSession session, IoBuffer input, IProtocolDecoderOutput output);
+        public abstract MessageDecoderResult Decode(IOSession session, IOBuffer input, IProtocolDecoderOutput output);
 
-        public virtual void FinishDecode(IoSession session, IProtocolDecoderOutput output)
+        public virtual void FinishDecode(IOSession session, IProtocolDecoderOutput output)
         {
             // Do nothing
         }

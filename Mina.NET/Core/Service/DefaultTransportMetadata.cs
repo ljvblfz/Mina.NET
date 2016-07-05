@@ -7,73 +7,52 @@ namespace Mina.Core.Service
     /// </summary>
     public class DefaultTransportMetadata : ITransportMetadata
     {
-        private readonly String _providerName;
-        private readonly String _name;
-        private readonly Boolean _connectionless;
-        private readonly Boolean _hasFragmentation;
-        private readonly Type _endpointType;
-
         /// <summary>
         /// </summary>
-        public DefaultTransportMetadata(String providerName, String name,
-            Boolean connectionless, Boolean fragmentation, Type endpointType)
+        public DefaultTransportMetadata(string providerName, string name,
+            bool connectionless, bool fragmentation, Type endpointType)
         {
             if (providerName == null)
-                throw new ArgumentNullException("providerName");
+                throw new ArgumentNullException(nameof(providerName));
             if (name == null)
-                throw new ArgumentNullException("name");
+                throw new ArgumentNullException(nameof(name));
 
             providerName = providerName.Trim().ToLowerInvariant();
             if (providerName.Length == 0)
-                throw new ArgumentException("providerName is empty", "providerName");
+                throw new ArgumentException("providerName is empty", nameof(providerName));
             name = name.Trim().ToLowerInvariant();
             if (name.Length == 0)
-                throw new ArgumentException("name is empty", "name");
+                throw new ArgumentException("name is empty", nameof(name));
 
             if (endpointType == null)
-                throw new ArgumentNullException("endpointType");
+                throw new ArgumentNullException(nameof(endpointType));
 
-            _providerName = providerName;
-            _name = name;
-            _connectionless = connectionless;
-            _hasFragmentation = fragmentation;
-            _endpointType = endpointType;
+            ProviderName = providerName;
+            Name = name;
+            Connectionless = connectionless;
+            HasFragmentation = fragmentation;
+            EndPointType = endpointType;
         }
 
         /// <inheritdoc/>
-        public String ProviderName
-        {
-            get { return _providerName; }
-        }
+        public string ProviderName { get; }
 
         /// <inheritdoc/>
-        public String Name
-        {
-            get { return _name; }
-        }
+        public string Name { get; }
 
         /// <inheritdoc/>
-        public Boolean Connectionless
-        {
-            get { return _connectionless; }
-        }
+        public bool Connectionless { get; }
 
         /// <inheritdoc/>
-        public Boolean HasFragmentation
-        {
-            get { return _hasFragmentation; }
-        }
+        public bool HasFragmentation { get; }
 
         /// <inheritdoc/>
-        public Type EndPointType
-        {
-            get { return _endpointType; }
-        }
+        public Type EndPointType { get; }
 
         /// <inheritdoc/>
-        public override String ToString()
+        public override string ToString()
         {
-            return _name;
+            return Name;
         }
     }
 }

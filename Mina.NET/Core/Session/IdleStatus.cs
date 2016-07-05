@@ -1,7 +1,9 @@
-﻿namespace Mina.Core.Session
+﻿using System;
+
+namespace Mina.Core.Session
 {
     /// <summary>
-    /// Represents the type of idleness of <see cref="IoSession"/>.
+    /// Represents the type of idleness of <see cref="IOSession"/>.
     /// </summary>
     public enum IdleStatus
     {
@@ -22,23 +24,18 @@
     /// <summary>
     /// Provides data for idle events.
     /// </summary>
-    public class IdleEventArgs : System.EventArgs
+    public class IdleEventArgs : EventArgs
     {
-        private readonly IdleStatus _idleStatus;
-
         /// <summary>
         /// </summary>
         public IdleEventArgs(IdleStatus idleStatus)
         {
-            _idleStatus = idleStatus;
+            IdleStatus = idleStatus;
         }
 
         /// <summary>
         /// Gets the idle status.
         /// </summary>
-        public IdleStatus IdleStatus
-        {
-            get { return _idleStatus; }
-        }
+        public IdleStatus IdleStatus { get; }
     }
 }

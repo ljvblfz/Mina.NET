@@ -13,25 +13,25 @@ namespace Mina.Filter.Stream
         /// <summary>
         /// The default buffer size this filter uses for writing.
         /// </summary>
-        public const Int32 DefaultStreamBufferSize = 4096;
+        public const int DefaultStreamBufferSize = 4096;
 
-        private Int32 _writeBufferSize = DefaultStreamBufferSize;
-        protected readonly AttributeKey CURRENT_STREAM;
-        protected readonly AttributeKey WRITE_REQUEST_QUEUE;
-        protected readonly AttributeKey CURRENT_WRITE_REQUEST;
+        private int _writeBufferSize = DefaultStreamBufferSize;
+        protected readonly AttributeKey CurrentStream;
+        protected readonly AttributeKey WriteRequestQueue;
+        protected readonly AttributeKey CurrentWriteRequest;
 
         protected AbstractStreamWriteFilter()
         { 
-            CURRENT_STREAM = new AttributeKey(GetType(), "stream");
-            WRITE_REQUEST_QUEUE = new AttributeKey(GetType(), "queue");
-            CURRENT_WRITE_REQUEST = new AttributeKey(GetType(), "writeRequest");
+            CurrentStream = new AttributeKey(GetType(), "stream");
+            WriteRequestQueue = new AttributeKey(GetType(), "queue");
+            CurrentWriteRequest = new AttributeKey(GetType(), "writeRequest");
         }
 
         /// <summary>
         /// Gets or sets the size of the write buffer in bytes. Data will be read from the
         /// stream in chunks of this size and then written to the next filter.
         /// </summary>
-        public Int32 WriteBufferSize
+        public int WriteBufferSize
         {
             get { return _writeBufferSize; }
             set
@@ -43,24 +43,24 @@ namespace Mina.Filter.Stream
         }
 
         /// <inheritdoc/>
-        public override void OnPreAdd(IoFilterChain parent, String name, INextFilter nextFilter)
+        public override void OnPreAdd(IOFilterChain parent, string name, INextFilter nextFilter)
         {
             if (parent.Contains(GetType()))
                 throw new InvalidOperationException("Only one " + GetType().Name + " is permitted.");
         }
 
         /// <inheritdoc/>
-        public override void FilterWrite(INextFilter nextFilter, IoSession session, IWriteRequest writeRequest)
+        public override void FilterWrite(INextFilter nextFilter, IOSession session, IWriteRequest writeRequest)
         {
             // If we're already processing a stream we need to queue the WriteRequest.
-            if (session.GetAttribute(CURRENT_STREAM) != null)
+            if (session.GetAttribute(CurrentStream) != null)
             {
-                ConcurrentQueue<IWriteRequest> queue = GetWriteRequestQueue(session);
+                var queue = GetWriteRequestQueue(session);
                 queue.Enqueue(writeRequest);
                 return;
             }
 
-            T stream = writeRequest.Message as T;
+            var stream = writeRequest.Message as T;
 
             if (stream == null)
             {
@@ -68,7 +68,7 @@ namespace Mina.Filter.Stream
             }
             else
             {
-                IoBuffer buffer = GetNextBuffer(stream);
+                var buffer = GetNextBuffer(stream);
                 if (buffer == null)
                 {
                     // EOF
@@ -77,8 +77,8 @@ namespace Mina.Filter.Stream
                 }
                 else
                 {
-                    session.SetAttribute(CURRENT_STREAM, stream);
-                    session.SetAttribute(CURRENT_WRITE_REQUEST, writeRequest);
+                    session.SetAttribute(CurrentStream, stream);
+                    session.SetAttribute(CurrentWriteRequest, writeRequest);
 
                     nextFilter.FilterWrite(session, new DefaultWriteRequest(buffer));
                 }
@@ -86,9 +86,9 @@ namespace Mina.Filter.Stream
         }
 
         /// <inheritdoc/>
-        public override void MessageSent(INextFilter nextFilter, IoSession session, IWriteRequest writeRequest)
+        public override void MessageSent(INextFilter nextFilter, IOSession session, IWriteRequest writeRequest)
         {
-            T stream = session.GetAttribute(CURRENT_STREAM) as T;
+            var stream = session.GetAttribute(CurrentStream) as T;
 
             if (stream == null)
             {
@@ -96,16 +96,16 @@ namespace Mina.Filter.Stream
             }
             else
             {
-                IoBuffer buffer = GetNextBuffer(stream);
+                var buffer = GetNextBuffer(stream);
 
                 if (buffer == null)
                 {
                     // EOF
-                    session.RemoveAttribute(CURRENT_STREAM);
-                    IWriteRequest currentWriteRequest = (IWriteRequest)session.RemoveAttribute(CURRENT_WRITE_REQUEST);
+                    session.RemoveAttribute(CurrentStream);
+                    var currentWriteRequest = (IWriteRequest)session.RemoveAttribute(CurrentWriteRequest);
 
                     // Write queued WriteRequests.
-                    ConcurrentQueue<IWriteRequest> queue = RemoveWriteRequestQueue(session);
+                    var queue = RemoveWriteRequestQueue(session);
                     if (queue != null)
                     {
                         IWriteRequest wr;
@@ -125,22 +125,22 @@ namespace Mina.Filter.Stream
             }
         }
 
-        protected abstract IoBuffer GetNextBuffer(T message);
+        protected abstract IOBuffer GetNextBuffer(T message);
 
-        private ConcurrentQueue<IWriteRequest> GetWriteRequestQueue(IoSession session)
+        private ConcurrentQueue<IWriteRequest> GetWriteRequestQueue(IOSession session)
         {
-            ConcurrentQueue<IWriteRequest> queue = session.GetAttribute<ConcurrentQueue<IWriteRequest>>(WRITE_REQUEST_QUEUE);
+            var queue = session.GetAttribute<ConcurrentQueue<IWriteRequest>>(WriteRequestQueue);
             if (queue == null)
             {
                 queue = new ConcurrentQueue<IWriteRequest>();
-                session.SetAttribute(WRITE_REQUEST_QUEUE, queue);
+                session.SetAttribute(WriteRequestQueue, queue);
             }
             return queue;
         }
 
-        private ConcurrentQueue<IWriteRequest> RemoveWriteRequestQueue(IoSession session)
+        private ConcurrentQueue<IWriteRequest> RemoveWriteRequestQueue(IOSession session)
         {
-            return (ConcurrentQueue<IWriteRequest>)session.RemoveAttribute(WRITE_REQUEST_QUEUE);
+            return (ConcurrentQueue<IWriteRequest>)session.RemoveAttribute(WriteRequestQueue);
         }
     }
 }

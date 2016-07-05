@@ -5,7 +5,7 @@ namespace Mina.Filter.Executor
     /// <summary>
     /// Provides methods to execute submitted <see cref="IoEvent"/>.
     /// </summary>
-    public interface IoEventExecutor
+    public interface IOEventExecutor
     {
         /// <summary>
         /// Executes an event.

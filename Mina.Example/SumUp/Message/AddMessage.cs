@@ -5,9 +5,9 @@ namespace Mina.Example.SumUp.Message
     [Serializable]
     class AddMessage : AbstractMessage
     {
-        public Int32 Value { get; set; }
+        public int Value { get; set; }
 
-        public override String ToString()
+        public override string ToString()
         {
             return Sequence + ":ADD(" + Value + ')';
         }

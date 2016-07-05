@@ -1,13 +1,12 @@
-﻿using System;
-using Mina.Core.Session;
+﻿using Mina.Core.Session;
 
 namespace Mina.Transport.Socket
 {
     abstract class AbstractDatagramSessionConfig : AbstractIoSessionConfig, IDatagramSessionConfig
     {
-        protected override void DoSetAll(IoSessionConfig config)
+        protected override void DoSetAll(IOSessionConfig config)
         {
-            IDatagramSessionConfig cfg = config as IDatagramSessionConfig;
+            var cfg = config as IDatagramSessionConfig;
             if (cfg == null)
                 return;
 
@@ -26,17 +25,17 @@ namespace Mina.Transport.Socket
             MulticastOption = cfg.MulticastOption;
         }
 
-        public abstract Boolean? EnableBroadcast { get; set; }
+        public abstract bool? EnableBroadcast { get; set; }
 
-        public abstract Int32? ReceiveBufferSize { get; set; }
+        public abstract int? ReceiveBufferSize { get; set; }
 
-        public abstract Int32? SendBufferSize { get; set; }
+        public abstract int? SendBufferSize { get; set; }
 
-        public abstract Boolean? ReuseAddress { get; set; }
+        public abstract bool? ReuseAddress { get; set; }
 
-        public abstract Int32? TrafficClass { get; set; }
+        public abstract int? TrafficClass { get; set; }
 
-        public abstract Boolean? ExclusiveAddressUse { get; set; }
+        public abstract bool? ExclusiveAddressUse { get; set; }
 
         public abstract System.Net.Sockets.MulticastOption MulticastOption { get; set; }
     }

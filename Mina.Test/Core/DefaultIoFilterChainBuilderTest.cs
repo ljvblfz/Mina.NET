@@ -1,5 +1,4 @@
-﻿using System;
-using System.Linq;
+﻿using System.Linq;
 #if !NETFX_CORE
 using NUnit.Framework;
 using TestClass = NUnit.Framework.TestFixtureAttribute;
@@ -18,7 +17,7 @@ namespace Mina.Core
         [TestMethod]
         public void TestAdd()
         {
-            DefaultIoFilterChainBuilder builder = new DefaultIoFilterChainBuilder();
+            var builder = new DefaultIoFilterChainBuilder();
             builder.AddFirst("A", new NoopFilter());
             builder.AddLast("B", new NoopFilter());
             builder.AddFirst("C", new NoopFilter());
@@ -28,8 +27,8 @@ namespace Mina.Core
             builder.AddAfter("B", "G", new NoopFilter());
             builder.AddAfter("D", "H", new NoopFilter());
 
-            String actual = String.Empty;
-            foreach (IEntry<IoFilter, INextFilter> entry in builder.GetAll())
+            var actual = string.Empty;
+            foreach (var entry in builder.GetAll())
             {
                 actual += entry.Name;
             }
@@ -40,12 +39,12 @@ namespace Mina.Core
         [TestMethod]
         public void TestGet()
         {
-            DefaultIoFilterChainBuilder builder = new DefaultIoFilterChainBuilder(); // TODO: 初始化为适当的值
+            var builder = new DefaultIoFilterChainBuilder(); // TODO: 初始化为适当的值
 
-            IoFilter filterA = new NoopFilter();
-            IoFilter filterB = new NoopFilter();
-            IoFilter filterC = new NoopFilter();
-            IoFilter filterD = new NoopFilter();
+            IOFilter filterA = new NoopFilter();
+            IOFilter filterB = new NoopFilter();
+            IOFilter filterC = new NoopFilter();
+            IOFilter filterD = new NoopFilter();
 
             builder.AddFirst("A", filterA);
             builder.AddLast("B", filterB);
@@ -61,7 +60,7 @@ namespace Mina.Core
         [TestMethod]
         public void TestRemove()
         {
-            DefaultIoFilterChainBuilder builder = new DefaultIoFilterChainBuilder(); // TODO: 初始化为适当的值
+            var builder = new DefaultIoFilterChainBuilder(); // TODO: 初始化为适当的值
 
             builder.AddLast("A", new NoopFilter());
             builder.AddLast("B", new NoopFilter());
@@ -81,7 +80,7 @@ namespace Mina.Core
         [TestMethod]
         public void TestClear()
         {
-            DefaultIoFilterChainBuilder builder = new DefaultIoFilterChainBuilder(); // TODO: 初始化为适当的值
+            var builder = new DefaultIoFilterChainBuilder(); // TODO: 初始化为适当的值
 
             builder.AddLast("A", new NoopFilter());
             builder.AddLast("B", new NoopFilter());

@@ -2,26 +2,26 @@
 {
     static class Constants
     {
-        public static readonly int TYPE_LEN = 2;
+        public static readonly int TypeLen = 2;
 
-        public static readonly int SEQUENCE_LEN = 4;
+        public static readonly int SequenceLen = 4;
 
-        public static readonly int HEADER_LEN = TYPE_LEN + SEQUENCE_LEN;
+        public static readonly int HeaderLen = TypeLen + SequenceLen;
 
-        public static readonly int BODY_LEN = 12;
+        public static readonly int BodyLen = 12;
 
-        public static readonly int RESULT = 0;
+        public static readonly int Result = 0;
 
-        public static readonly int ADD = 1;
+        public static readonly int Add = 1;
 
-        public static readonly int RESULT_CODE_LEN = 2;
+        public static readonly int ResultCodeLen = 2;
 
-        public static readonly int RESULT_VALUE_LEN = 4;
+        public static readonly int ResultValueLen = 4;
 
-        public static readonly int ADD_BODY_LEN = 4;
+        public static readonly int AddBodyLen = 4;
 
-        public static readonly int RESULT_OK = 0;
+        public static readonly int ResultOk = 0;
 
-        public static readonly int RESULT_ERROR = 1;
+        public static readonly int ResultError = 1;
     }
 }

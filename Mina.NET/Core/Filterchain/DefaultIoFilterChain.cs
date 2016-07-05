@@ -8,37 +8,35 @@ using Mina.Core.Write;
 namespace Mina.Core.Filterchain
 {
     /// <summary>
-    /// A default implementation of <see cref="IoFilterChain"/> that provides
+    /// A default implementation of <see cref="IOFilterChain"/> that provides
     /// all operations for developers who want to implement their own
     /// transport layer once used with <see cref="AbstractIoSession"/>.
     /// </summary>
-    public class DefaultIoFilterChain : Chain<DefaultIoFilterChain, IoFilter, INextFilter>, IoFilterChain
+    public class DefaultIOFilterChain : Chain<DefaultIOFilterChain, IOFilter, INextFilter>, IOFilterChain
     {
-        public readonly static AttributeKey SessionCreatedFuture = new AttributeKey(typeof(DefaultIoFilterChain), "connectFuture");
-        private readonly static ILog log = LogManager.GetLogger(typeof(DefaultIoFilterChain));
+        public readonly static AttributeKey SessionCreatedFuture = new AttributeKey(typeof(DefaultIOFilterChain),
+            "connectFuture");
+
+        private readonly static ILog Log = LogManager.GetLogger(typeof(DefaultIOFilterChain));
 
         private readonly AbstractIoSession _session;
 
         /// <summary>
         /// </summary>
-        public DefaultIoFilterChain(AbstractIoSession session)
-            : base(
-            e => new NextFilter(e),
-            () => new HeadFilter(), () => new TailFilter()
-            )
+        public DefaultIOFilterChain(AbstractIoSession session)
+            : base(e => new NextFilter(e), () => new HeadFilter(), () => new TailFilter())
         {
             if (session == null)
-                throw new ArgumentNullException("session");
+            {
+                throw new ArgumentNullException(nameof(session));
+            }
             _session = session;
         }
 
         /// <summary>
-        /// Gets the <see cref="IoSession"/> this chain belongs to.
+        /// Gets the <see cref="IOSession"/> this chain belongs to.
         /// </summary>
-        public IoSession Session
-        {
-            get { return _session; }
-        }
+        public IOSession Session => _session;
 
         /// <inheritdoc/>
         public void FireSessionCreated()
@@ -77,11 +75,13 @@ namespace Mina.Core.Filterchain
         }
 
         /// <inheritdoc/>
-        public void FireMessageReceived(Object message)
+        public void FireMessageReceived(object message)
         {
-            IoBuffer buf = message as IoBuffer;
+            var buf = message as IOBuffer;
             if (buf != null)
+            {
                 _session.IncreaseReadBytes(buf.Remaining, DateTime.Now);
+            }
 
             CallNextMessageReceived(Head, _session, message);
         }
@@ -128,68 +128,78 @@ namespace Mina.Core.Filterchain
             CallPreviousFilterClose(Tail, _session);
         }
 
-        private void CallNext(IEntry<IoFilter, INextFilter> entry, Action<IoFilter, INextFilter> act, Action<Exception> error = null)
+        private void CallNext(IEntry<IOFilter, INextFilter> entry, Action<IOFilter, INextFilter> act,
+            Action<Exception> error = null)
         {
             try
             {
-                IoFilter filter = entry.Filter;
-                INextFilter nextFilter = entry.NextFilter;
+                var filter = entry.Filter;
+                var nextFilter = entry.NextFilter;
                 act(filter, nextFilter);
             }
             catch (Exception e)
             {
                 if (error == null)
+                {
                     FireExceptionCaught(e);
+                }
                 else
+                {
                     error(e);
+                }
             }
         }
 
-        private void CallPrevious(IEntry<IoFilter, INextFilter> entry, Action<IoFilter, INextFilter> act, Action<Exception> error = null)
+        private void CallPrevious(IEntry<IOFilter, INextFilter> entry, Action<IOFilter, INextFilter> act,
+            Action<Exception> error = null)
         {
             try
             {
-                IoFilter filter = entry.Filter;
-                INextFilter nextFilter = entry.NextFilter;
+                var filter = entry.Filter;
+                var nextFilter = entry.NextFilter;
                 act(filter, nextFilter);
             }
             catch (Exception e)
             {
                 if (error == null)
+                {
                     FireExceptionCaught(e);
+                }
                 else
+                {
                     error(e);
+                }
             }
         }
 
-        private void CallNextSessionCreated(IEntry<IoFilter, INextFilter> entry, IoSession session)
+        private void CallNextSessionCreated(IEntry<IOFilter, INextFilter> entry, IOSession session)
         {
             CallNext(entry, (filter, next) => filter.SessionCreated(next, session));
         }
 
-        private void CallNextSessionOpened(IEntry<IoFilter, INextFilter> entry, IoSession session)
+        private void CallNextSessionOpened(IEntry<IOFilter, INextFilter> entry, IOSession session)
         {
             CallNext(entry, (filter, next) => filter.SessionOpened(next, session));
         }
 
-        private void CallNextSessionClosed(IEntry<IoFilter, INextFilter> entry, IoSession session)
+        private void CallNextSessionClosed(IEntry<IOFilter, INextFilter> entry, IOSession session)
         {
             CallNext(entry, (filter, next) => filter.SessionClosed(next, session));
         }
 
-        private void CallNextSessionIdle(IEntry<IoFilter, INextFilter> entry, IoSession session, IdleStatus status)
+        private void CallNextSessionIdle(IEntry<IOFilter, INextFilter> entry, IOSession session, IdleStatus status)
         {
             CallNext(entry, (filter, next) => filter.SessionIdle(next, session, status));
         }
 
-        private void CallNextExceptionCaught(IEntry<IoFilter, INextFilter> entry, IoSession session, Exception cause)
+        private void CallNextExceptionCaught(IEntry<IOFilter, INextFilter> entry, IOSession session, Exception cause)
         {
             // Notify the related future.
-            IConnectFuture future = session.RemoveAttribute(SessionCreatedFuture) as IConnectFuture;
+            var future = session.RemoveAttribute(SessionCreatedFuture) as IConnectFuture;
             if (future == null)
             {
                 CallNext(entry, (filter, next) => filter.ExceptionCaught(next, session, cause),
-                    e => log.Warn("Unexpected exception from exceptionCaught handler.", e));
+                    e => Log.Warn("Unexpected exception from exceptionCaught handler.", e));
             }
             else
             {
@@ -200,27 +210,29 @@ namespace Mina.Core.Filterchain
             }
         }
 
-        private void CallNextInputClosed(IEntry<IoFilter, INextFilter> entry, IoSession session)
+        private void CallNextInputClosed(IEntry<IOFilter, INextFilter> entry, IOSession session)
         {
             CallNext(entry, (filter, next) => filter.InputClosed(next, session));
         }
 
-        private void CallNextMessageReceived(IEntry<IoFilter, INextFilter> entry, IoSession session, Object message)
+        private void CallNextMessageReceived(IEntry<IOFilter, INextFilter> entry, IOSession session, object message)
         {
             CallNext(entry, (filter, next) => filter.MessageReceived(next, session, message));
         }
 
-        private void CallNextMessageSent(IEntry<IoFilter, INextFilter> entry, IoSession session, IWriteRequest writeRequest)
+        private void CallNextMessageSent(IEntry<IOFilter, INextFilter> entry, IOSession session,
+            IWriteRequest writeRequest)
         {
             CallNext(entry, (filter, next) => filter.MessageSent(next, session, writeRequest));
         }
 
-        private void CallPreviousFilterClose(IEntry<IoFilter, INextFilter> entry, IoSession session)
+        private void CallPreviousFilterClose(IEntry<IOFilter, INextFilter> entry, IOSession session)
         {
             CallPrevious(entry, (filter, next) => filter.FilterClose(next, session));
         }
 
-        private void CallPreviousFilterWrite(IEntry<IoFilter, INextFilter> entry, IoSession session, IWriteRequest writeRequest)
+        private void CallPreviousFilterWrite(IEntry<IOFilter, INextFilter> entry, IOSession session,
+            IWriteRequest writeRequest)
         {
             CallPrevious(entry, (filter, next) => filter.FilterWrite(next, session, writeRequest),
                 e =>
@@ -253,7 +265,8 @@ namespace Mina.Core.Filterchain
             }
             catch (Exception e)
             {
-                throw new IoFilterLifeCycleException("OnPreAdd(): " + entry.Name + ':' + entry.Filter + " in " + Session, e);
+                throw new IoFilterLifeCycleException(
+                    "OnPreAdd(): " + entry.Name + ':' + entry.Filter + " in " + Session, e);
             }
         }
 
@@ -267,7 +280,8 @@ namespace Mina.Core.Filterchain
             catch (Exception e)
             {
                 Deregister0(entry);
-                throw new IoFilterLifeCycleException("OnPostAdd(): " + entry.Name + ':' + entry.Filter + " in " + Session, e);
+                throw new IoFilterLifeCycleException(
+                    "OnPostAdd(): " + entry.Name + ':' + entry.Filter + " in " + Session, e);
             }
         }
 
@@ -281,7 +295,7 @@ namespace Mina.Core.Filterchain
             catch (Exception e)
             {
                 throw new IoFilterLifeCycleException("OnPreRemove(): " + entry.Name + ':' + entry.Filter + " in "
-                        + Session, e);
+                                                     + Session, e);
             }
         }
 
@@ -295,12 +309,12 @@ namespace Mina.Core.Filterchain
             catch (Exception e)
             {
                 throw new IoFilterLifeCycleException("OnPostRemove(): " + entry.Name + ':' + entry.Filter + " in "
-                        + Session, e);
+                                                     + Session, e);
             }
         }
 
         /// <inheritdoc/>
-        protected override void OnPreReplace(Entry entry, IoFilter newFilter)
+        protected override void OnPreReplace(Entry entry, IOFilter newFilter)
         {
             // Call the preAdd method of the new filter
             try
@@ -314,7 +328,7 @@ namespace Mina.Core.Filterchain
         }
 
         /// <inheritdoc/>
-        protected override void OnPostReplace(Entry entry, IoFilter newFilter)
+        protected override void OnPostReplace(Entry entry, IOFilter newFilter)
         {
             // Call the postAdd method of the new filter
             try
@@ -323,37 +337,44 @@ namespace Mina.Core.Filterchain
             }
             catch (Exception e)
             {
-                throw new IoFilterLifeCycleException("OnPostAdd(): " + entry.Name + ':' + newFilter + " in " + Session, e);
+                throw new IoFilterLifeCycleException("OnPostAdd(): " + entry.Name + ':' + newFilter + " in " + Session,
+                    e);
             }
         }
 
         class HeadFilter : IoFilterAdapter
         {
-            public override void FilterWrite(INextFilter nextFilter, IoSession session, IWriteRequest writeRequest)
+            public override void FilterWrite(INextFilter nextFilter, IOSession session, IWriteRequest writeRequest)
             {
-                AbstractIoSession s = session as AbstractIoSession;
+                var s = session as AbstractIoSession;
                 if (s != null)
                 {
                     // Maintain counters.
-                    IoBuffer buffer = writeRequest.Message as IoBuffer;
+                    var buffer = writeRequest.Message as IOBuffer;
                     if (buffer != null)
                     {
                         // I/O processor implementation will call buffer.Reset()
                         // it after the write operation is finished, because
                         // the buffer will be specified with messageSent event.
                         buffer.Mark();
-                        Int32 remaining = buffer.Remaining;
+                        var remaining = buffer.Remaining;
                         if (remaining == 0)
+                        {
                             // Zero-sized buffer means the internal message delimiter
                             s.IncreaseScheduledWriteMessages();
+                        }
                         else
+                        {
                             s.IncreaseScheduledWriteBytes(remaining);
+                        }
                     }
                     else
+                    {
                         s.IncreaseScheduledWriteMessages();
+                    }
                 }
 
-                IWriteRequestQueue writeRequestQueue = session.WriteRequestQueue;
+                var writeRequestQueue = session.WriteRequestQueue;
 
                 if (session.WriteSuspended)
                 {
@@ -371,7 +392,7 @@ namespace Mina.Core.Filterchain
                 }
             }
 
-            public override void FilterClose(INextFilter nextFilter, IoSession session)
+            public override void FilterClose(INextFilter nextFilter, IOSession session)
             {
                 session.Processor.Remove(session);
             }
@@ -379,7 +400,7 @@ namespace Mina.Core.Filterchain
 
         class TailFilter : IoFilterAdapter
         {
-            public override void SessionCreated(INextFilter nextFilter, IoSession session)
+            public override void SessionCreated(INextFilter nextFilter, IOSession session)
             {
                 try
                 {
@@ -387,30 +408,38 @@ namespace Mina.Core.Filterchain
                 }
                 finally
                 {
-                    IConnectFuture future = session.RemoveAttribute(SessionCreatedFuture) as IConnectFuture;
+                    var future = session.RemoveAttribute(SessionCreatedFuture) as IConnectFuture;
                     if (future != null)
+                    {
                         future.SetSession(session);
+                    }
                 }
             }
 
-            public override void SessionOpened(INextFilter nextFilter, IoSession session)
+            public override void SessionOpened(INextFilter nextFilter, IOSession session)
             {
                 session.Handler.SessionOpened(session);
             }
 
-            public override void SessionClosed(INextFilter nextFilter, IoSession session)
+            public override void SessionClosed(INextFilter nextFilter, IOSession session)
             {
-                AbstractIoSession s = session as AbstractIoSession;
+                var s = session as AbstractIoSession;
                 try
                 {
                     session.Handler.SessionClosed(session);
                 }
                 finally
                 {
-                    try { session.WriteRequestQueue.Dispose(session); }
+                    try
+                    {
+                        session.WriteRequestQueue.Dispose(session);
+                    }
                     finally
                     {
-                        try { s.AttributeMap.Dispose(session); }
+                        try
+                        {
+                            s.AttributeMap.Dispose(session);
+                        }
                         finally
                         {
                             session.FilterChain.Clear();
@@ -420,30 +449,32 @@ namespace Mina.Core.Filterchain
                 }
             }
 
-            public override void SessionIdle(INextFilter nextFilter, IoSession session, IdleStatus status)
+            public override void SessionIdle(INextFilter nextFilter, IOSession session, IdleStatus status)
             {
                 session.Handler.SessionIdle(session, status);
             }
 
-            public override void ExceptionCaught(INextFilter nextFilter, IoSession session, Exception cause)
+            public override void ExceptionCaught(INextFilter nextFilter, IOSession session, Exception cause)
             {
                 session.Handler.ExceptionCaught(session, cause);
                 // TODO IsUseReadOperation
             }
 
-            public override void InputClosed(INextFilter nextFilter, IoSession session)
+            public override void InputClosed(INextFilter nextFilter, IOSession session)
             {
                 session.Handler.InputClosed(session);
             }
 
-            public override void MessageReceived(INextFilter nextFilter, IoSession session, Object message)
+            public override void MessageReceived(INextFilter nextFilter, IOSession session, object message)
             {
-                AbstractIoSession s = session as AbstractIoSession;
+                var s = session as AbstractIoSession;
                 if (s != null)
                 {
-                    IoBuffer buf = message as IoBuffer;
-                    if (buf == null || !buf.HasRemaining)
+                    var buf = message as IOBuffer;
+                    if ((buf == null) || !buf.HasRemaining)
+                    {
                         s.IncreaseReadMessages(DateTime.Now);
+                    }
                 }
 
                 // Update the statistics
@@ -454,9 +485,9 @@ namespace Mina.Core.Filterchain
                 // TODO IsUseReadOperation
             }
 
-            public override void MessageSent(INextFilter nextFilter, IoSession session, IWriteRequest writeRequest)
+            public override void MessageSent(INextFilter nextFilter, IOSession session, IWriteRequest writeRequest)
             {
-                AbstractIoSession s = session as AbstractIoSession;
+                var s = session as AbstractIoSession;
                 if (s != null)
                 {
                     s.IncreaseWrittenMessages(writeRequest, DateTime.Now);
@@ -472,7 +503,7 @@ namespace Mina.Core.Filterchain
 
         class NextFilter : INextFilter
         {
-            readonly DefaultIoFilterChain _chain;
+            readonly DefaultIOFilterChain _chain;
             readonly Entry _entry;
 
             public NextFilter(Entry entry)
@@ -481,57 +512,57 @@ namespace Mina.Core.Filterchain
                 _entry = entry;
             }
 
-            public void SessionCreated(IoSession session)
+            public void SessionCreated(IOSession session)
             {
                 _chain.CallNextSessionCreated(_entry.NextEntry, session);
             }
 
-            public void SessionOpened(IoSession session)
+            public void SessionOpened(IOSession session)
             {
                 _chain.CallNextSessionOpened(_entry.NextEntry, session);
             }
 
-            public void SessionClosed(IoSession session)
+            public void SessionClosed(IOSession session)
             {
                 _chain.CallNextSessionClosed(_entry.NextEntry, session);
             }
 
-            public void SessionIdle(IoSession session, IdleStatus status)
+            public void SessionIdle(IOSession session, IdleStatus status)
             {
                 _chain.CallNextSessionIdle(_entry.NextEntry, session, status);
             }
 
-            public void ExceptionCaught(IoSession session, Exception cause)
+            public void ExceptionCaught(IOSession session, Exception cause)
             {
                 _chain.CallNextExceptionCaught(_entry.NextEntry, session, cause);
             }
 
-            public void InputClosed(IoSession session)
+            public void InputClosed(IOSession session)
             {
                 _chain.CallNextInputClosed(_entry.NextEntry, session);
             }
 
-            public void MessageReceived(IoSession session, Object message)
+            public void MessageReceived(IOSession session, object message)
             {
                 _chain.CallNextMessageReceived(_entry.NextEntry, session, message);
             }
 
-            public void MessageSent(IoSession session, IWriteRequest writeRequest)
+            public void MessageSent(IOSession session, IWriteRequest writeRequest)
             {
                 _chain.CallNextMessageSent(_entry.NextEntry, session, writeRequest);
             }
 
-            public void FilterWrite(IoSession session, IWriteRequest writeRequest)
+            public void FilterWrite(IOSession session, IWriteRequest writeRequest)
             {
                 _chain.CallPreviousFilterWrite(_entry.PrevEntry, session, writeRequest);
             }
 
-            public void FilterClose(IoSession session)
+            public void FilterClose(IOSession session)
             {
                 _chain.CallPreviousFilterClose(_entry.PrevEntry, session);
             }
 
-            public override String ToString()
+            public override string ToString()
             {
                 return _entry.NextEntry == null ? "null" : _entry.NextEntry.Name;
             }

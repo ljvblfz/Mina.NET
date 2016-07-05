@@ -1,13 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Net;
 
 namespace Mina.Core.Service
 {
     /// <summary>
-    /// Accepts incoming connection, communicates with clients, and fires events to <see cref="IoHandler"/>s.
+    /// Accepts incoming connection, communicates with clients, and fires events to <see cref="IOHandler"/>s.
     /// </summary>
-    public interface IoAcceptor : IoService
+    public interface IOAcceptor : IOService
     {
         /// <summary>
         /// Gets or sets a value indicating whether all client sessions are closed
@@ -15,7 +14,7 @@ namespace Mina.Core.Service
         /// (i.e. when the service is deactivated).
         /// The default value is <code>true</code>.
         /// </summary>
-        Boolean CloseOnDeactivation { get; set; }
+        bool CloseOnDeactivation { get; set; }
         /// <summary>
         /// Gets the local endpoint which is bound currently.
         /// If more than one endpoint are bound, only one of them will be returned.
@@ -43,8 +42,8 @@ namespace Mina.Core.Service
         /// <summary>
         /// Binds to the specified local endpoint and start to accept incoming connections.
         /// </summary>
-        /// <param name="localEP">the local endpoint to bind to</param>
-        void Bind(EndPoint localEP);
+        /// <param name="localEp">the local endpoint to bind to</param>
+        void Bind(EndPoint localEp);
         /// <summary>
         /// Binds to the specified local endpoints and start to accept incoming connections.
         /// If no endpoints is given, bind on the default local endpoint(s).
@@ -68,8 +67,8 @@ namespace Mina.Core.Service
         /// All managed connections will be closed if <see cref="CloseOnDeactivation"/> is <code>true</code>.
         /// This method returns silently if no local endpoints is bound yet.
         /// </summary>
-        /// <param name="localEP">the local endpoint to unbind</param>
-        void Unbind(EndPoint localEP);
+        /// <param name="localEp">the local endpoint to unbind</param>
+        void Unbind(EndPoint localEp);
         /// <summary>
         /// Unbinds from the specified local addresses and stop to accept incoming connections.
         /// All managed connections will be closed if <see cref="CloseOnDeactivation"/> is <code>true</code>.

@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
 using System.Net;
 using Mina.Core.Future;
@@ -9,10 +8,10 @@ using Mina.Core.Session;
 namespace Mina.Transport.Loopback
 {
     /// <summary>
-    /// Binds the specified <see cref="IoHandler"/> to the specified
+    /// Binds the specified <see cref="IOHandler"/> to the specified
     /// <see cref="LoopbackEndPoint"/>.
     /// </summary>
-    public class LoopbackAcceptor : AbstractIoAcceptor
+    public class LoopbackAcceptor : AbstractIOAcceptor
     {
         internal static readonly Dictionary<EndPoint, LoopbackPipe> BoundHandlers
             = new Dictionary<EndPoint, LoopbackPipe>();
@@ -28,63 +27,57 @@ namespace Mina.Transport.Loopback
         }
 
         /// <inheritdoc/>
-        public override ITransportMetadata TransportMetadata
-        {
-            get { return LoopbackSession.Metadata; }
-        }
+        public override ITransportMetadata TransportMetadata => LoopbackSession.Metadata;
 
         /// <inheritdoc/>
         protected override IEnumerable<EndPoint> BindInternal(IEnumerable<EndPoint> localEndPoints)
         {
-            HashSet<EndPoint> newLocalEPs = new HashSet<EndPoint>();
+            var newLocalEPs = new HashSet<EndPoint>();
 
             lock (BoundHandlers)
             {
-                foreach (EndPoint ep in localEndPoints)
+                foreach (var ep in localEndPoints)
                 {
-                    LoopbackEndPoint localEP = ep as LoopbackEndPoint;
-                    if (localEP == null || localEP.Port == 0)
+                    var localEp = ep as LoopbackEndPoint;
+                    if (localEp == null || localEp.Port == 0)
                     {
-                        localEP = null;
-                        for (Int32 i = 10000; i < Int32.MaxValue; i++)
+                        localEp = null;
+                        for (var i = 10000; i < int.MaxValue; i++)
                         {
-                            LoopbackEndPoint newLocalEP = new LoopbackEndPoint(i);
-                            if (!BoundHandlers.ContainsKey(newLocalEP) && !newLocalEPs.Contains(newLocalEP))
+                            var newLocalEp = new LoopbackEndPoint(i);
+                            if (!BoundHandlers.ContainsKey(newLocalEp) && !newLocalEPs.Contains(newLocalEp))
                             {
-                                localEP = newLocalEP;
+                                localEp = newLocalEp;
                                 break;
                             }
                         }
 
-                        if (localEP == null)
+                        if (localEp == null)
                             throw new IOException("No port available.");
                     }
-                    else if (localEP.Port < 0)
+                    else if (localEp.Port < 0)
                     {
                         throw new IOException("Bind port number must be 0 or above.");
                     }
-                    else if (BoundHandlers.ContainsKey(localEP))
+                    else if (BoundHandlers.ContainsKey(localEp))
                     {
-                        throw new IOException("Address already bound: " + localEP);
+                        throw new IOException("Address already bound: " + localEp);
                     }
 
-                    newLocalEPs.Add(localEP);
+                    newLocalEPs.Add(localEp);
                 }
 
-                foreach (LoopbackEndPoint localEP in newLocalEPs)
+                foreach (LoopbackEndPoint localEp in newLocalEPs)
                 {
-                    if (BoundHandlers.ContainsKey(localEP))
+                    if (BoundHandlers.ContainsKey(localEp))
                     {
                         foreach (LoopbackEndPoint ep in newLocalEPs)
                         {
                             BoundHandlers.Remove(ep);
                         }
-                        throw new IOException("Duplicate local address: " + localEP);
+                        throw new IOException("Duplicate local address: " + localEp);
                     }
-                    else
-                    {
-                        BoundHandlers[localEP] = new LoopbackPipe(this, localEP, Handler);
-                    }
+                    BoundHandlers[localEp] = new LoopbackPipe(this, localEp, Handler);
                 }
             }
 
@@ -98,7 +91,7 @@ namespace Mina.Transport.Loopback
         {
             lock (BoundHandlers)
             {
-                foreach (EndPoint ep in localEndPoints)
+                foreach (var ep in localEndPoints)
                 {
                     BoundHandlers.Remove(ep);
                 }
@@ -111,7 +104,7 @@ namespace Mina.Transport.Loopback
         }
 
         /// <inheritdoc/>
-        protected override void Dispose(Boolean disposing)
+        protected override void Dispose(bool disposing)
         {
             if (disposing)
             {
@@ -120,7 +113,7 @@ namespace Mina.Transport.Loopback
             base.Dispose(disposing);
         }
 
-        internal void DoFinishSessionInitialization(IoSession session, IoFuture future)
+        internal void DoFinishSessionInitialization(IOSession session, IOFuture future)
         {
             InitSession(session, future, null);
         }

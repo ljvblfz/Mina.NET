@@ -4,47 +4,51 @@ using System.Text;
 namespace Mina.Core.Buffer
 {
     /// <summary>
-    /// Provides utility methods to dump an <see cref="IoBuffer"/> into a hex formatted string.
+    /// Provides utility methods to dump an <see cref="IOBuffer"/> into a hex formatted string.
     /// </summary>
-    static class IoBufferHexDumper
+    public static class IOBufferHexDumper
     {
-        private static readonly Char[] highDigits;
-        private static readonly Char[] lowDigits;
+        private static readonly char[] HighDigits;
+        private static readonly char[] LowDigits;
 
-        static IoBufferHexDumper()
+        static IOBufferHexDumper()
         {
-            Char[] digits = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F' };
+            char[] digits = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F'};
 
-            Char[] high = new Char[256];
-            Char[] low = new Char[256];
+            var high = new char[256];
+            var low = new char[256];
 
-            for (Int32 i = 0; i < 256; i++)
+            for (var i = 0; i < 256; i++)
             {
                 high[i] = digits[i >> 4];
                 low[i] = digits[i & 0x0F];
             }
 
-            highDigits = high;
-            lowDigits = low;
+            HighDigits = high;
+            LowDigits = low;
         }
 
-        public static String GetHexdump(IoBuffer buf, Int32 lengthLimit)
+        public static string GetHexdump(IOBuffer buf, int lengthLimit)
         {
             if (lengthLimit <= 0)
+            {
                 throw new ArgumentException("lengthLimit: " + lengthLimit + " (expected: 1+)");
-            Boolean truncate = buf.Remaining > lengthLimit;
-            Int32 size = truncate ? lengthLimit : buf.Remaining;
+            }
+            var truncate = buf.Remaining > lengthLimit;
+            var size = truncate ? lengthLimit : buf.Remaining;
 
             if (size == 0)
+            {
                 return "empty";
+            }
 
-            StringBuilder sb = new StringBuilder(size * 3 + 3);
-            Int32 oldPos = buf.Position;
+            var sb = new StringBuilder(size*3 + 3);
+            var oldPos = buf.Position;
 
             // fill the first
-            Int32 byteValue = buf.Get() & 0xFF;
-            sb.Append((char)highDigits[byteValue]);
-            sb.Append((char)lowDigits[byteValue]);
+            var byteValue = buf.Get() & 0xFF;
+            sb.Append(HighDigits[byteValue]);
+            sb.Append(LowDigits[byteValue]);
             size--;
 
             // and the others, too
@@ -52,14 +56,16 @@ namespace Mina.Core.Buffer
             {
                 sb.Append(' ');
                 byteValue = buf.Get() & 0xFF;
-                sb.Append((char)highDigits[byteValue]);
-                sb.Append((char)lowDigits[byteValue]);
+                sb.Append(HighDigits[byteValue]);
+                sb.Append(LowDigits[byteValue]);
             }
 
             buf.Position = oldPos;
 
             if (truncate)
+            {
                 sb.Append("...");
+            }
 
             return sb.ToString();
         }

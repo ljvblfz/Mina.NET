@@ -11,10 +11,10 @@ namespace Mina.Filter.Codec
     {
         public RecoverableProtocolDecoderException() { }
 
-        public RecoverableProtocolDecoderException(String message)
+        public RecoverableProtocolDecoderException(string message)
             : base(message) { }
 
-        public RecoverableProtocolDecoderException(String message, Exception innerException)
+        public RecoverableProtocolDecoderException(string message, Exception innerException)
             : base(message, innerException) { }
 
         protected RecoverableProtocolDecoderException(

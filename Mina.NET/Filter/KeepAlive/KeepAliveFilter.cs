@@ -6,20 +6,20 @@ using Mina.Core.Write;
 namespace Mina.Filter.KeepAlive
 {
     /// <summary>
-    /// An <see cref="IoFilter"/> that sends a keep-alive request on <see cref="IoEventType.SessionIdle"/>
+    /// An <see cref="IOFilter"/> that sends a keep-alive request on <see cref="IoEventType.SessionIdle"/>
     /// and sends back the response for the sent keep-alive request. 
     /// </summary>
     public class KeepAliveFilter : IoFilterAdapter
     {
-        private readonly AttributeKey WAITING_FOR_RESPONSE;
-        private readonly AttributeKey IGNORE_READER_IDLE_ONCE;
+        private readonly AttributeKey _waitingForResponse;
+        private readonly AttributeKey _ignoreReaderIdleOnce;
 
         private readonly IKeepAliveMessageFactory _messageFactory;
         private readonly IdleStatus _interestedIdleStatus;
         private volatile IKeepAliveRequestTimeoutHandler _requestTimeoutHandler;
-        private volatile Int32 _requestInterval;
-        private volatile Int32 _requestTimeout;
-        private volatile Boolean _forwardEvent;
+        private volatile int _requestInterval;
+        private volatile int _requestTimeout;
+        private volatile bool _forwardEvent;
 
         /// <summary>
         /// Creates a new instance with the default properties.
@@ -87,15 +87,15 @@ namespace Mina.Filter.KeepAlive
         /// <param name="keepAliveRequestInterval">the interval to send a keep-alive request</param>
         /// <param name="keepAliveRequestTimeout">the time to wait for a keep-alive response before timed out</param>
         public KeepAliveFilter(IKeepAliveMessageFactory messageFactory, IdleStatus interestedIdleStatus,
-            IKeepAliveRequestTimeoutHandler strategy, Int32 keepAliveRequestInterval, Int32 keepAliveRequestTimeout)
+            IKeepAliveRequestTimeoutHandler strategy, int keepAliveRequestInterval, int keepAliveRequestTimeout)
         {
             if (messageFactory == null)
-                throw new ArgumentNullException("messageFactory");
+                throw new ArgumentNullException(nameof(messageFactory));
             if (strategy == null)
-                throw new ArgumentNullException("strategy");
+                throw new ArgumentNullException(nameof(strategy));
 
-            WAITING_FOR_RESPONSE = new AttributeKey(GetType(), "waitingForResponse");
-            IGNORE_READER_IDLE_ONCE = new AttributeKey(GetType(), "ignoreReaderIdleOnce");
+            _waitingForResponse = new AttributeKey(GetType(), "waitingForResponse");
+            _ignoreReaderIdleOnce = new AttributeKey(GetType(), "ignoreReaderIdleOnce");
             _messageFactory = messageFactory;
             _interestedIdleStatus = interestedIdleStatus;
             _requestTimeoutHandler = strategy;
@@ -106,7 +106,7 @@ namespace Mina.Filter.KeepAlive
         /// <summary>
         /// Gets or sets the interval to send a keep-alive request.
         /// </summary>
-        public Int32 RequestInterval
+        public int RequestInterval
         {
             get { return _requestInterval; }
             set
@@ -120,7 +120,7 @@ namespace Mina.Filter.KeepAlive
         /// <summary>
         /// Gets or sets the time to wait for a keep-alive response before timed out.
         /// </summary>
-        public Int32 RequestTimeout
+        public int RequestTimeout
         {
             get { return _requestTimeout; }
             set
@@ -136,7 +136,7 @@ namespace Mina.Filter.KeepAlive
         /// an <see cref="IoEventType.SessionIdle"/> event to the next filter.
         /// The default value is <code>false</code>.
         /// </summary>
-        public Boolean ForwardEvent
+        public bool ForwardEvent
         {
             get { return _forwardEvent; }
             set { _forwardEvent = value; }
@@ -148,13 +148,13 @@ namespace Mina.Filter.KeepAlive
             set
             {
                 if (value == null)
-                    throw new ArgumentNullException("value");
+                    throw new ArgumentNullException(nameof(value));
                 _requestTimeoutHandler = value;
             }
         }
 
         /// <inheritdoc/>
-        public override void OnPreAdd(IoFilterChain parent, String name, INextFilter nextFilter)
+        public override void OnPreAdd(IOFilterChain parent, string name, INextFilter nextFilter)
         {
             if (parent.Contains(this))
                 throw new ArgumentException("You can't add the same filter instance more than once. "
@@ -162,25 +162,25 @@ namespace Mina.Filter.KeepAlive
         }
 
         /// <inheritdoc/>
-        public override void OnPostAdd(IoFilterChain parent, String name, INextFilter nextFilter)
+        public override void OnPostAdd(IOFilterChain parent, string name, INextFilter nextFilter)
         {
             ResetStatus(parent.Session);
         }
 
         /// <inheritdoc/>
-        public override void OnPostRemove(IoFilterChain parent, String name, INextFilter nextFilter)
+        public override void OnPostRemove(IOFilterChain parent, string name, INextFilter nextFilter)
         {
             ResetStatus(parent.Session);
         }
 
         /// <inheritdoc/>
-        public override void MessageReceived(INextFilter nextFilter, IoSession session, Object message)
+        public override void MessageReceived(INextFilter nextFilter, IOSession session, object message)
         {
             try
             {
                 if (_messageFactory.IsRequest(session, message))
                 {
-                    Object pongMessage = _messageFactory.GetResponse(session, message);
+                    var pongMessage = _messageFactory.GetResponse(session, message);
 
                     if (pongMessage != null)
                         nextFilter.FilterWrite(session, new DefaultWriteRequest(pongMessage));
@@ -197,21 +197,21 @@ namespace Mina.Filter.KeepAlive
         }
 
         /// <inheritdoc/>
-        public override void MessageSent(INextFilter nextFilter, IoSession session, IWriteRequest writeRequest)
+        public override void MessageSent(INextFilter nextFilter, IOSession session, IWriteRequest writeRequest)
         {
-            Object message = writeRequest.Message;
+            var message = writeRequest.Message;
             if (!IsKeepAliveMessage(session, message))
                 nextFilter.MessageSent(session, writeRequest);
         }
 
         /// <inheritdoc/>
-        public override void SessionIdle(INextFilter nextFilter, IoSession session, IdleStatus status)
+        public override void SessionIdle(INextFilter nextFilter, IOSession session, IdleStatus status)
         {
             if (status == _interestedIdleStatus)
             {
-                if (!session.ContainsAttribute(WAITING_FOR_RESPONSE))
+                if (!session.ContainsAttribute(_waitingForResponse))
                 {
-                    Object pingMessage = _messageFactory.GetRequest(session);
+                    var pingMessage = _messageFactory.GetRequest(session);
                     if (pingMessage != null)
                     {
                         nextFilter.FilterWrite(session, new DefaultWriteRequest(pingMessage));
@@ -223,7 +223,7 @@ namespace Mina.Filter.KeepAlive
                             MarkStatus(session);
                             if (_interestedIdleStatus == IdleStatus.BothIdle)
                             {
-                                session.SetAttribute(IGNORE_READER_IDLE_ONCE);
+                                session.SetAttribute(_ignoreReaderIdleOnce);
                             }
                         }
                         else
@@ -239,9 +239,9 @@ namespace Mina.Filter.KeepAlive
             }
             else if (status == IdleStatus.ReaderIdle)
             {
-                if (session.RemoveAttribute(IGNORE_READER_IDLE_ONCE) == null)
+                if (session.RemoveAttribute(_ignoreReaderIdleOnce) == null)
                 {
-                    if (session.ContainsAttribute(WAITING_FOR_RESPONSE))
+                    if (session.ContainsAttribute(_waitingForResponse))
                     {
                         HandlePingTimeout(session);
                     }
@@ -252,33 +252,33 @@ namespace Mina.Filter.KeepAlive
                 nextFilter.SessionIdle(session, status);
         }
 
-        private void ResetStatus(IoSession session)
+        private void ResetStatus(IOSession session)
         {
             session.Config.ReaderIdleTime = 0;
             session.Config.WriterIdleTime = 0;
             session.Config.SetIdleTime(_interestedIdleStatus, RequestInterval);
-            session.RemoveAttribute(WAITING_FOR_RESPONSE);
+            session.RemoveAttribute(_waitingForResponse);
         }
 
-        private Boolean IsKeepAliveMessage(IoSession session, Object message)
+        private bool IsKeepAliveMessage(IOSession session, object message)
         {
             return _messageFactory.IsRequest(session, message) || _messageFactory.IsResponse(session, message);
         }
 
-        private void HandlePingTimeout(IoSession session)
+        private void HandlePingTimeout(IOSession session)
         {
             ResetStatus(session);
-            IKeepAliveRequestTimeoutHandler handler = _requestTimeoutHandler;
+            var handler = _requestTimeoutHandler;
             if (handler == KeepAliveRequestTimeoutHandler.DeafSpeaker)
                 return;
             handler.KeepAliveRequestTimedOut(this, session);
         }
 
-        private void MarkStatus(IoSession session)
+        private void MarkStatus(IOSession session)
         {
             session.Config.SetIdleTime(_interestedIdleStatus, 0);
             session.Config.ReaderIdleTime = RequestTimeout;
-            session.SetAttribute(WAITING_FOR_RESPONSE);
+            session.SetAttribute(_waitingForResponse);
         }
     }
 }

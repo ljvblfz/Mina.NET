@@ -1,7 +1,9 @@
-﻿using System;
-
+﻿
 namespace Mina.Core.Session
 {
+    using System;
+    using System.Runtime.Serialization;
+
     /// <summary>
     /// An exception that is thrown when the type of the message cannot be determined.
     /// </summary>
@@ -14,17 +16,17 @@ namespace Mina.Core.Session
 
         /// <summary>
         /// </summary>
-        public UnknownMessageTypeException(String message) : base(message) { }
+        public UnknownMessageTypeException(string message)
+            : base(message) { }
 
         /// <summary>
         /// </summary>
-        public UnknownMessageTypeException(String message, Exception inner) : base(message, inner) { }
-        
+        public UnknownMessageTypeException(string message, Exception inner)
+            : base(message, inner) { }
+
         /// <summary>
         /// </summary>
-        protected UnknownMessageTypeException(
-          System.Runtime.Serialization.SerializationInfo info,
-          System.Runtime.Serialization.StreamingContext context)
+        protected UnknownMessageTypeException(SerializationInfo info, StreamingContext context)
             : base(info, context) { }
     }
 }

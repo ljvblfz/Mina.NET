@@ -6,17 +6,17 @@ using Mina.Core.Write;
 namespace Mina.Filter.Util
 {
     /// <summary>
-    /// An <see cref="IoFilter"/> wrapper that keeps track of the number of usages of this filter and will call init/destroy
+    /// An <see cref="IOFilter"/> wrapper that keeps track of the number of usages of this filter and will call init/destroy
     /// when the filter is not in use.
     /// </summary>
     public class ReferenceCountingFilter : IoFilterAdapter
     {
-        private readonly IoFilter _filter;
-        private Int32 _count = 0;
+        private readonly IOFilter _filter;
+        private int _count;
 
         /// <summary>
         /// </summary>
-        public ReferenceCountingFilter(IoFilter filter)
+        public ReferenceCountingFilter(IOFilter filter)
         {
             _filter = filter;
         }
@@ -34,7 +34,7 @@ namespace Mina.Filter.Util
         }
 
         /// <inheritdoc/>
-        public override void OnPreAdd(IoFilterChain parent, String name, INextFilter nextFilter)
+        public override void OnPreAdd(IOFilterChain parent, string name, INextFilter nextFilter)
         {
             if (_count == 0)
                 _filter.Init();
@@ -43,7 +43,7 @@ namespace Mina.Filter.Util
         }
 
         /// <inheritdoc/>
-        public override void OnPostRemove(IoFilterChain parent, String name, INextFilter nextFilter)
+        public override void OnPostRemove(IOFilterChain parent, string name, INextFilter nextFilter)
         {
             _filter.OnPostRemove(parent, name, nextFilter);
             _count--;
@@ -52,67 +52,67 @@ namespace Mina.Filter.Util
         }
 
         /// <inheritdoc/>
-        public override void OnPostAdd(IoFilterChain parent, String name, INextFilter nextFilter)
+        public override void OnPostAdd(IOFilterChain parent, string name, INextFilter nextFilter)
         {
             _filter.OnPostAdd(parent, name, nextFilter);
         }
 
         /// <inheritdoc/>
-        public override void OnPreRemove(IoFilterChain parent, String name, INextFilter nextFilter)
+        public override void OnPreRemove(IOFilterChain parent, string name, INextFilter nextFilter)
         {
             _filter.OnPreRemove(parent, name, nextFilter);
         }
 
         /// <inheritdoc/>
-        public override void SessionCreated(INextFilter nextFilter, IoSession session)
+        public override void SessionCreated(INextFilter nextFilter, IOSession session)
         {
             _filter.SessionCreated(nextFilter, session);
         }
 
         /// <inheritdoc/>
-        public override void SessionOpened(INextFilter nextFilter, IoSession session)
+        public override void SessionOpened(INextFilter nextFilter, IOSession session)
         {
             _filter.SessionOpened(nextFilter, session);
         }
 
         /// <inheritdoc/>
-        public override void SessionClosed(INextFilter nextFilter, IoSession session)
+        public override void SessionClosed(INextFilter nextFilter, IOSession session)
         {
             _filter.SessionClosed(nextFilter, session);
         }
 
         /// <inheritdoc/>
-        public override void SessionIdle(INextFilter nextFilter, IoSession session, IdleStatus status)
+        public override void SessionIdle(INextFilter nextFilter, IOSession session, IdleStatus status)
         {
             _filter.SessionIdle(nextFilter, session, status);
         }
 
         /// <inheritdoc/>
-        public override void ExceptionCaught(INextFilter nextFilter, IoSession session, Exception cause)
+        public override void ExceptionCaught(INextFilter nextFilter, IOSession session, Exception cause)
         {
             _filter.ExceptionCaught(nextFilter, session, cause);
         }
 
         /// <inheritdoc/>
-        public override void MessageReceived(INextFilter nextFilter, IoSession session, Object message)
+        public override void MessageReceived(INextFilter nextFilter, IOSession session, object message)
         {
             _filter.MessageReceived(nextFilter, session, message);
         }
 
         /// <inheritdoc/>
-        public override void MessageSent(INextFilter nextFilter, IoSession session, IWriteRequest writeRequest)
+        public override void MessageSent(INextFilter nextFilter, IOSession session, IWriteRequest writeRequest)
         {
             _filter.MessageSent(nextFilter, session, writeRequest);
         }
 
         /// <inheritdoc/>
-        public override void FilterClose(INextFilter nextFilter, IoSession session)
+        public override void FilterClose(INextFilter nextFilter, IOSession session)
         {
             _filter.FilterClose(nextFilter, session);
         }
 
         /// <inheritdoc/>
-        public override void FilterWrite(INextFilter nextFilter, IoSession session, IWriteRequest writeRequest)
+        public override void FilterWrite(INextFilter nextFilter, IOSession session, IWriteRequest writeRequest)
         {
             _filter.FilterWrite(nextFilter, session, writeRequest);
         }

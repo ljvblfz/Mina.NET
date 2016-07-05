@@ -1,15 +1,17 @@
-﻿namespace Mina.Core.Filterchain
+﻿using Mina.Core.Session;
+
+namespace Mina.Core.Filterchain
 {
     /// <summary>
-    /// An interface that builds <see cref="IoFilterChain"/> in predefined way
-    /// when <see cref="Core.Session.IoSession"/> is created.
+    /// An interface that builds <see cref="IOFilterChain"/> in predefined way
+    /// when <see cref="IOSession"/> is created.
     /// </summary>
-    public interface IoFilterChainBuilder
+    public interface IOFilterChainBuilder
     {
         /// <summary>
         /// Builds the specified <paramref name="chain"/>.
         /// </summary>
         /// <param name="chain">the chain to build</param>
-        void BuildFilterChain(IoFilterChain chain);
+        void BuildFilterChain(IOFilterChain chain);
     }
 }

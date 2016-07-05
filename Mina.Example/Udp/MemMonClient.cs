@@ -4,7 +4,6 @@ using System.Threading;
 using Mina.Core.Buffer;
 using Mina.Core.Future;
 using Mina.Core.Service;
-using Mina.Core.Session;
 using Mina.Transport.Socket;
 
 namespace Mina.Example.Udp
@@ -16,7 +15,7 @@ namespace Mina.Example.Udp
     {
         static void Main(string[] args)
         {
-            IoConnector connector = new AsyncDatagramConnector();
+            IOConnector connector = new AsyncDatagramConnector();
 
             connector.ExceptionCaught += (s, e) =>
             {
@@ -47,21 +46,21 @@ namespace Mina.Example.Udp
                 Console.WriteLine("Session idle...");
             };
 
-            IConnectFuture connFuture = connector.Connect(new IPEndPoint(IPAddress.Loopback, MemoryMonitor.port));
+            var connFuture = connector.Connect(new IPEndPoint(IPAddress.Loopback, MemoryMonitor.Port));
             connFuture.Await();
 
             connFuture.Complete += (s, e) =>
             {
-                IConnectFuture f = (IConnectFuture)e.Future;
+                var f = (IConnectFuture)e.Future;
                 if (f.Connected)
                 {
                     Console.WriteLine("...connected");
-                    IoSession session = f.Session;
+                    var session = f.Session;
 
-                    for (int i = 0; i < 30; i++)
+                    for (var i = 0; i < 30; i++)
                     {
-                        Int64 memory = GC.GetTotalMemory(false);
-                        IoBuffer buffer = IoBuffer.Allocate(8);
+                        var memory = GC.GetTotalMemory(false);
+                        var buffer = IOBuffer.Allocate(8);
                         buffer.PutInt64(memory);
                         buffer.Flip();
                         session.Write(buffer);

@@ -9,91 +9,77 @@ namespace Mina.Core.Session
     /// </summary>
     public class IoEvent
     {
-        private readonly IoEventType _eventType;
-        private readonly IoSession _session;
-        private readonly Object _parameter;
-
         /// <summary>
         /// </summary>
-        public IoEvent(IoEventType eventType, IoSession session, Object parameter)
+        public IoEvent(IoEventType eventType, IOSession session, object parameter)
         {
             if (session == null)
-                throw new ArgumentNullException("session");
-            _eventType = eventType;
-            _session = session;
-            _parameter = parameter;
+                throw new ArgumentNullException(nameof(session));
+            EventType = eventType;
+            Session = session;
+            Parameter = parameter;
         }
 
         /// <summary>
         /// Gets the <see cref="IoEventType"/> of this event.
         /// </summary>
-        public IoEventType EventType
-        {
-            get { return _eventType; }
-        }
+        public IoEventType EventType { get; }
 
         /// <summary>
-        /// Gets the <see cref="IoSession"/> of this event.
+        /// Gets the <see cref="IOSession"/> of this event.
         /// </summary>
-        public IoSession Session
-        {
-            get { return _session; }
-        }
+        public IOSession Session { get; }
 
         /// <summary>
         /// Gets the parameter of this event.
         /// </summary>
-        public Object Parameter
-        {
-            get { return _parameter; }
-        }
+        public object Parameter { get; }
 
         /// <summary>
         /// Fires this event.
         /// </summary>
         public virtual void Fire()
         {
-            switch (_eventType)
+            switch (EventType)
             {
                 case IoEventType.MessageReceived:
-                    _session.FilterChain.FireMessageReceived(_parameter);
+                    Session.FilterChain.FireMessageReceived(Parameter);
                     break;
                 case IoEventType.MessageSent:
-                    _session.FilterChain.FireMessageSent((IWriteRequest)_parameter);
+                    Session.FilterChain.FireMessageSent((IWriteRequest)Parameter);
                     break;
                 case IoEventType.Write:
-                    _session.FilterChain.FireFilterWrite((IWriteRequest)_parameter);
+                    Session.FilterChain.FireFilterWrite((IWriteRequest)Parameter);
                     break;
                 case IoEventType.Close:
-                    _session.FilterChain.FireFilterClose();
+                    Session.FilterChain.FireFilterClose();
                     break;
                 case IoEventType.ExceptionCaught:
-                    _session.FilterChain.FireExceptionCaught((Exception)_parameter);
+                    Session.FilterChain.FireExceptionCaught((Exception)Parameter);
                     break;
                 case IoEventType.SessionIdle:
-                    _session.FilterChain.FireSessionIdle((IdleStatus)_parameter);
+                    Session.FilterChain.FireSessionIdle((IdleStatus)Parameter);
                     break;
                 case IoEventType.SessionCreated:
-                    _session.FilterChain.FireSessionCreated();
+                    Session.FilterChain.FireSessionCreated();
                     break;
                 case IoEventType.SessionOpened:
-                    _session.FilterChain.FireSessionOpened();
+                    Session.FilterChain.FireSessionOpened();
                     break;
                 case IoEventType.SessionClosed:
-                    _session.FilterChain.FireSessionClosed();
+                    Session.FilterChain.FireSessionClosed();
                     break;
                 default:
-                    throw new InvalidOperationException("Unknown event type: " + _eventType);
+                    throw new InvalidOperationException("Unknown event type: " + EventType);
             }
         }
 
         /// <inheritdoc/>
-        public override String ToString()
+        public override string ToString()
         {
-            if (_parameter == null)
-                return "[" + _session + "] " + _eventType;
-            else
-                return "[" + _session + "] " + _eventType + ": " + _parameter;
+            if (Parameter == null)
+                return "[" + Session + "] " + EventType;
+            return "[" + Session + "] " + EventType + ": " + Parameter;
         }
     }
 }

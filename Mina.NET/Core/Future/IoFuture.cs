@@ -4,18 +4,18 @@ using Mina.Core.Session;
 namespace Mina.Core.Future
 {
     /// <summary>
-    /// Represents the completion of an asynchronous I/O operation on an <see cref="IoSession"/>.
+    /// Represents the completion of an asynchronous I/O operation on an <see cref="IOSession"/>.
     /// </summary>
-    public interface IoFuture
+    public interface IOFuture
     {
         /// <summary>
-        /// Gets the <see cref="IoSession"/> which is associated with this future.
+        /// Gets the <see cref="IOSession"/> which is associated with this future.
         /// </summary>
-        IoSession Session { get; }
+        IOSession Session { get; }
         /// <summary>
         /// Returns if the asynchronous operation is completed.
         /// </summary>
-        Boolean Done { get; }
+        bool Done { get; }
         /// <summary>
         /// Event that this future is completed.
         /// If the listener is added after the completion, the listener is directly notified.
@@ -25,34 +25,29 @@ namespace Mina.Core.Future
         /// Wait for the asynchronous operation to complete.
         /// </summary>
         /// <returns>self</returns>
-        IoFuture Await();
+        IOFuture Await();
         /// <summary>
         /// Wait for the asynchronous operation to complete with the specified timeout.
         /// </summary>
         /// <returns><tt>true</tt> if the operation is completed</returns>
-        Boolean Await(Int32 millisecondsTimeout);
+        bool Await(int millisecondsTimeout);
     }
 
     /// <summary>
-    /// Contains data for events of <see cref="IoFuture"/>.
+    /// Contains data for events of <see cref="IOFuture"/>.
     /// </summary>
     public class IoFutureEventArgs : EventArgs
     {
-        private readonly IoFuture _future;
-
         /// <summary>
         /// </summary>
-        public IoFutureEventArgs(IoFuture future)
+        public IoFutureEventArgs(IOFuture future)
         {
-            _future = future;
+            Future = future;
         }
 
         /// <summary>
         /// Gets the associated future.
         /// </summary>
-        public IoFuture Future
-        {
-            get { return _future; }
-        }
+        public IOFuture Future { get; }
     }
 }

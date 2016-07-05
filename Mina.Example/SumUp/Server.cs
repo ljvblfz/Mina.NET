@@ -12,17 +12,17 @@ namespace Mina.Example.SumUp
 {
     class Server
     {
-        private static readonly int SERVER_PORT = 8080;
-        private static readonly String SUM_KEY = "sum";
+        private static readonly int ServerPort = 8080;
+        private static readonly string SumKey = "sum";
 
         // Set this to false to use object serialization instead of custom codec.
-        private static readonly Boolean USE_CUSTOM_CODEC = false;
+        private static readonly bool UseCustomCodec = false;
 
         static void Main(string[] args)
         {
-            AsyncSocketAcceptor acceptor = new AsyncSocketAcceptor();
+            var acceptor = new AsyncSocketAcceptor();
 
-            if (USE_CUSTOM_CODEC)
+            if (UseCustomCodec)
             {
                 acceptor.FilterChain.AddLast("codec",
                     new ProtocolCodecFilter(new SumUpProtocolCodecFactory(true)));
@@ -38,7 +38,7 @@ namespace Mina.Example.SumUp
             acceptor.SessionOpened += (s, e) =>
             {
                 e.Session.Config.SetIdleTime(IdleStatus.BothIdle, 60);
-                e.Session.SetAttribute(SUM_KEY, 0);
+                e.Session.SetAttribute(SumKey, 0);
             };
 
             acceptor.SessionIdle += (s, e) =>
@@ -56,38 +56,38 @@ namespace Mina.Example.SumUp
             {
                 // client only sends AddMessage. otherwise, we will have to identify
                 // its type using instanceof operator.
-                AddMessage am = (AddMessage)e.Message;
+                var am = (AddMessage)e.Message;
 
                 // add the value to the current sum.
-                Int32 sum = e.Session.GetAttribute<Int32>(SUM_KEY);
-                Int32 value = am.Value;
-                Int64 expectedSum = (Int64)sum + value;
-                if (expectedSum > Int32.MaxValue || expectedSum < Int32.MinValue)
+                var sum = e.Session.GetAttribute<int>(SumKey);
+                var value = am.Value;
+                var expectedSum = (long)sum + value;
+                if (expectedSum > int.MaxValue || expectedSum < int.MinValue)
                 {
                     // if the sum overflows or underflows, return error message
-                    ResultMessage rm = new ResultMessage();
+                    var rm = new ResultMessage();
                     rm.Sequence = am.Sequence; // copy sequence
-                    rm.OK = false;
+                    rm.Ok = false;
                     e.Session.Write(rm);
                 }
                 else
                 {
                     // sum up
                     sum = (int)expectedSum;
-                    e.Session.SetAttribute(SUM_KEY, sum);
+                    e.Session.SetAttribute(SumKey, sum);
 
                     // return the result message
-                    ResultMessage rm = new ResultMessage();
+                    var rm = new ResultMessage();
                     rm.Sequence = am.Sequence; // copy sequence
-                    rm.OK = true;
+                    rm.Ok = true;
                     rm.Value = sum;
                     e.Session.Write(rm);
                 }
             };
 
-            acceptor.Bind(new IPEndPoint(IPAddress.Any, SERVER_PORT));
+            acceptor.Bind(new IPEndPoint(IPAddress.Any, ServerPort));
 
-            Console.WriteLine("Listening on port " + SERVER_PORT);
+            Console.WriteLine("Listening on port " + ServerPort);
             Console.ReadLine();
         }
     }

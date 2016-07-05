@@ -8,55 +8,44 @@ using Mina.Core.Session;
 namespace Mina.Handler.Stream
 {
     /// <summary>
-    /// A <see cref="IoHandler"/> that adapts asynchronous MINA events to stream I/O.
+    /// A <see cref="IOHandler"/> that adapts asynchronous MINA events to stream I/O.
     /// </summary>
-    public abstract class StreamIoHandler : IoHandlerAdapter
+    public abstract class StreamIoHandler : IOHandlerAdapter
     {
-        private static readonly ILog log = LogManager.GetLogger(typeof(StreamIoHandler));
-        private static readonly AttributeKey KEY_IN = new AttributeKey(typeof(StreamIoHandler), "in");
-        private static readonly AttributeKey KEY_OUT = new AttributeKey(typeof(StreamIoHandler), "out");
-
-        private Int32 _readTimeout;
-        private Int32 _writeTimeout;
+        private static readonly ILog Log = LogManager.GetLogger(typeof(StreamIoHandler));
+        private static readonly AttributeKey KeyIn = new AttributeKey(typeof(StreamIoHandler), "in");
+        private static readonly AttributeKey KeyOut = new AttributeKey(typeof(StreamIoHandler), "out");
 
         /// <summary>
         /// Gets or sets read timeout in seconds.
         /// </summary>
-        public Int32 ReadTimeout
-        {
-            get { return _readTimeout; }
-            set { _readTimeout = value; }
-        }
+        public int ReadTimeout { get; set; }
 
         /// <summary>
         /// Gets or sets write timeout in seconds.
         /// </summary>
-        public Int32 WriteTimeout
-        {
-            get { return _writeTimeout; }
-            set { _writeTimeout = value; }
-        }
+        public int WriteTimeout { get; set; }
 
         /// <inheritdoc/>
-        public override void SessionOpened(IoSession session)
+        public override void SessionOpened(IOSession session)
         {
             // Set timeouts
-            session.Config.WriteTimeout = _writeTimeout;
-            session.Config.SetIdleTime(IdleStatus.ReaderIdle, _readTimeout);
+            session.Config.WriteTimeout = WriteTimeout;
+            session.Config.SetIdleTime(IdleStatus.ReaderIdle, ReadTimeout);
 
             // Create streams
-            IoSessionStream input = new IoSessionStream();
-            IoSessionStream output = new IoSessionStream(session);
-            session.SetAttribute(KEY_IN, input);
-            session.SetAttribute(KEY_OUT, output);
+            var input = new IoSessionStream();
+            var output = new IoSessionStream(session);
+            session.SetAttribute(KeyIn, input);
+            session.SetAttribute(KeyOut, output);
             ProcessStreamIo(session, input, output);
         }
 
         /// <inheritdoc/>
-        public override void SessionClosed(IoSession session)
+        public override void SessionClosed(IOSession session)
         {
-            IoSessionStream input = session.GetAttribute<IoSessionStream>(KEY_IN);
-            IoSessionStream output = session.GetAttribute<IoSessionStream>(KEY_OUT);
+            var input = session.GetAttribute<IoSessionStream>(KeyIn);
+            var output = session.GetAttribute<IoSessionStream>(KeyOut);
             try
             {
                 input.Close();
@@ -68,19 +57,19 @@ namespace Mina.Handler.Stream
         }
 
         /// <inheritdoc/>
-        public override void MessageReceived(IoSession session, Object message)
+        public override void MessageReceived(IOSession session, object message)
         {
-            IoSessionStream input = session.GetAttribute<IoSessionStream>(KEY_IN);
-            input.Write((IoBuffer)message);
+            var input = session.GetAttribute<IoSessionStream>(KeyIn);
+            input.Write((IOBuffer)message);
         }
 
         /// <inheritdoc/>
-        public override void ExceptionCaught(IoSession session, Exception cause)
+        public override void ExceptionCaught(IOSession session, Exception cause)
         {
-            IOException ioe = cause as IOException;
+            var ioe = cause as IOException;
             if (ioe != null)
             {
-                IoSessionStream input = session.GetAttribute<IoSessionStream>(KEY_IN);
+                var input = session.GetAttribute<IoSessionStream>(KeyIn);
                 if (input != null)
                 {
                     input.Exception = ioe;
@@ -88,13 +77,13 @@ namespace Mina.Handler.Stream
                 }
             }
 
-            if (log.IsWarnEnabled)
-                log.Warn("Unexpected exception.", cause);
+            if (Log.IsWarnEnabled)
+                Log.Warn("Unexpected exception.", cause);
             session.Close(true);
         }
 
         /// <inheritdoc/>
-        public override void SessionIdle(IoSession session, IdleStatus status)
+        public override void SessionIdle(IOSession session, IdleStatus status)
         {
             if (status == IdleStatus.ReaderIdle)
                 throw new IOException("Read timeout");
@@ -106,6 +95,6 @@ namespace Mina.Handler.Stream
         /// <param name="session"></param>
         /// <param name="input"></param>
         /// <param name="output"></param>
-        protected abstract void ProcessStreamIo(IoSession session, System.IO.Stream input, System.IO.Stream output);
+        protected abstract void ProcessStreamIo(IOSession session, System.IO.Stream input, System.IO.Stream output);
     }
 }

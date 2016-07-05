@@ -12,31 +12,31 @@ namespace Mina.Transport.Socket
             _socket = socket;
         }
 
-        public override Boolean? EnableBroadcast
+        public override bool? EnableBroadcast
         {
             get { return _socket.EnableBroadcast; }
             set { if (value.HasValue) _socket.EnableBroadcast = value.Value; }
         }
 
-        public override Int32? ReceiveBufferSize
+        public override int? ReceiveBufferSize
         {
             get { return _socket.ReceiveBufferSize; }
             set { if (value.HasValue) _socket.ReceiveBufferSize = value.Value; }
         }
 
-        public override Int32? SendBufferSize
+        public override int? SendBufferSize
         {
             get { return _socket.SendBufferSize; }
             set { if (value.HasValue) _socket.SendBufferSize = value.Value; }
         }
 
-        public override Boolean? ExclusiveAddressUse
+        public override bool? ExclusiveAddressUse
         {
             get { return _socket.ExclusiveAddressUse; }
             set { if (value.HasValue) _socket.ExclusiveAddressUse = value.Value; }
         }
 
-        public override Boolean? ReuseAddress
+        public override bool? ReuseAddress
         {
             get
             {
@@ -50,7 +50,7 @@ namespace Mina.Transport.Socket
             }
         }
 
-        public override Int32? TrafficClass
+        public override int? TrafficClass
         {
             get
             {

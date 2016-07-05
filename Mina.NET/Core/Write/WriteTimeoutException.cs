@@ -1,11 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using Mina.Core.Session;
 
 namespace Mina.Core.Write
 {
     /// <summary>
     /// An exception which is thrown when write buffer is not flushed for
-    /// <see cref="Core.Session.IoSessionConfig.WriteTimeout"/> seconds.
+    /// <see cref="IOSessionConfig.WriteTimeout"/> seconds.
     /// </summary>
     [Serializable]
     public class WriteTimeoutException : WriteException

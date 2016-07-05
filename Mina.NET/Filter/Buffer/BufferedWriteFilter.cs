@@ -9,13 +9,13 @@ using Mina.Core.Write;
 namespace Mina.Filter.Buffer
 {
     /// <summary>
-    /// An <see cref="IoFilter"/> implementation used to buffer outgoing <see cref="IWriteRequest"/>.
+    /// An <see cref="IOFilter"/> implementation used to buffer outgoing <see cref="IWriteRequest"/>.
     /// Using this filter allows to be less dependent from network latency.
     /// It is also useful when a session is generating very small messages
     /// too frequently and consequently generating unnecessary traffic overhead.
     /// <remarks>
     /// Please note that it should always be placed before the <see cref="Filter.Codec.ProtocolCodecFilter"/> 
-    /// as it only handles <see cref="IWriteRequest"/>s carrying <see cref="IoBuffer"/> objects.
+    /// as it only handles <see cref="IWriteRequest"/>s carrying <see cref="IOBuffer"/> objects.
     /// </remarks>
     /// </summary>
     public class BufferedWriteFilter : IoFilterAdapter
@@ -23,18 +23,17 @@ namespace Mina.Filter.Buffer
         /// <summary>
         /// Default buffer size value in bytes.
         /// </summary>
-        public const Int32 DefaultBufferSize = 8192;
+        public const int DefaultBufferSize = 8192;
 
-        static readonly ILog log = LogManager.GetLogger(typeof(BufferedWriteFilter));
+        static readonly ILog Log = LogManager.GetLogger(typeof(BufferedWriteFilter));
 
-        private Int32 _bufferSize;
-        private ConcurrentDictionary<IoSession, Lazy<IoBuffer>> _buffersMap;
+        private ConcurrentDictionary<IOSession, Lazy<IOBuffer>> _buffersMap;
 
         public BufferedWriteFilter()
             : this(DefaultBufferSize, null)
         { }
 
-        public BufferedWriteFilter(Int32 bufferSize)
+        public BufferedWriteFilter(int bufferSize)
             : this(bufferSize, null)
         { }
 
@@ -43,49 +42,44 @@ namespace Mina.Filter.Buffer
 #else
         public
 #endif
-        BufferedWriteFilter(Int32 bufferSize, ConcurrentDictionary<IoSession, Lazy<IoBuffer>> buffersMap)
+        BufferedWriteFilter(int bufferSize, ConcurrentDictionary<IOSession, Lazy<IOBuffer>> buffersMap)
         {
-            _bufferSize = bufferSize;
+            BufferSize = bufferSize;
             _buffersMap = buffersMap == null ?
-                new ConcurrentDictionary<IoSession, Lazy<IoBuffer>>() : buffersMap;
+                new ConcurrentDictionary<IOSession, Lazy<IOBuffer>>() : buffersMap;
         }
 
         /// <summary>
         /// Gets or sets the buffer size (only for the newly created buffers).
         /// </summary>
-        public Int32 BufferSize
-        {
-            get { return _bufferSize; }
-            set { _bufferSize = value; }
-        }
+        public int BufferSize { get; set; }
 
         /// <inheritdoc/>
-        public override void FilterWrite(INextFilter nextFilter, IoSession session, IWriteRequest writeRequest)
+        public override void FilterWrite(INextFilter nextFilter, IOSession session, IWriteRequest writeRequest)
         {
-            IoBuffer buf = writeRequest.Message as IoBuffer;
+            var buf = writeRequest.Message as IOBuffer;
             if (buf == null)
                 throw new ArgumentException("This filter should only buffer IoBuffer objects");
-            else
-                Write(session, buf);
+            Write(session, buf);
         }
 
         /// <inheritdoc/>
-        public override void SessionClosed(INextFilter nextFilter, IoSession session)
+        public override void SessionClosed(INextFilter nextFilter, IOSession session)
         {
             Free(session);
             base.SessionClosed(nextFilter, session);
         }
 
         /// <inheritdoc/>
-        public override void ExceptionCaught(INextFilter nextFilter, IoSession session, Exception cause)
+        public override void ExceptionCaught(INextFilter nextFilter, IOSession session, Exception cause)
         {
             Free(session);
             base.ExceptionCaught(nextFilter, session, cause);
         }
 
-        public void Flush(IoSession session)
+        public void Flush(IOSession session)
         {
-            Lazy<IoBuffer> lazy;
+            Lazy<IOBuffer> lazy;
             _buffersMap.TryGetValue(session, out lazy);
             try
             {
@@ -97,25 +91,25 @@ namespace Mina.Filter.Buffer
             }
         }
 
-        private void Write(IoSession session, IoBuffer data)
+        private void Write(IOSession session, IOBuffer data)
         {
-            Lazy<IoBuffer> dest = _buffersMap.GetOrAdd(session,
-                new Lazy<IoBuffer>(() => IoBuffer.Allocate(_bufferSize)));
+            var dest = _buffersMap.GetOrAdd(session,
+                new Lazy<IOBuffer>(() => IOBuffer.Allocate(BufferSize)));
             Write(session, data, dest.Value);
         }
 
-        private void Write(IoSession session, IoBuffer data, IoBuffer buf)
+        private void Write(IOSession session, IOBuffer data, IOBuffer buf)
         {
             try
             {
-                Int32 len = data.Remaining;
+                var len = data.Remaining;
                 if (len >= buf.Capacity)
                 {
                     /*
                      * If the request length exceeds the size of the output buffer,
                      * flush the output buffer and then write the data directly.
                      */
-                    INextFilter nextFilter = session.FilterChain.GetNextFilter(this);
+                    var nextFilter = session.FilterChain.GetNextFilter(this);
                     InternalFlush(nextFilter, session, buf);
                     nextFilter.FilterWrite(session, new DefaultWriteRequest(data));
                     return;
@@ -136,23 +130,23 @@ namespace Mina.Filter.Buffer
             }
         }
 
-        private void InternalFlush(INextFilter nextFilter, IoSession session, IoBuffer buf)
+        private void InternalFlush(INextFilter nextFilter, IOSession session, IOBuffer buf)
         {
-            IoBuffer tmp = null;
+            IOBuffer tmp = null;
             lock (buf)
             {
                 buf.Flip();
                 tmp = buf.Duplicate();
                 buf.Clear();
             }
-            if (log.IsDebugEnabled)
-                log.Debug("Flushing buffer: " + tmp);
+            if (Log.IsDebugEnabled)
+                Log.Debug("Flushing buffer: " + tmp);
             nextFilter.FilterWrite(session, new DefaultWriteRequest(tmp));
         }
 
-        private void Free(IoSession session)
+        private void Free(IOSession session)
         {
-            Lazy<IoBuffer> lazy;
+            Lazy<IOBuffer> lazy;
             if (_buffersMap.TryRemove(session, out lazy))
             {
                 lazy.Value.Free();

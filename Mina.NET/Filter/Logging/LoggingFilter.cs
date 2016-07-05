@@ -11,7 +11,6 @@ namespace Mina.Filter.Logging
     /// </summary>
     public class LoggingFilter : IoFilterAdapter
     {
-        private readonly String _name;
         private readonly ILog _log;
 
         /// <summary>
@@ -33,10 +32,10 @@ namespace Mina.Filter.Logging
         /// Create a new LoggingFilter using a name
         /// </summary>
         /// <param name="name">the name used to create the logger. If null, will default to "LoggingFilter"</param>
-        public LoggingFilter(String name)
+        public LoggingFilter(string name)
         {
-            _name = name ?? typeof(LoggingFilter).Name;
-            _log = LogManager.GetLogger(_name);
+            Name = name ?? typeof(LoggingFilter).Name;
+            _log = LogManager.GetLogger(Name);
 
             ExceptionCaughtLevel = LogLevel.Warn;
             MessageReceivedLevel = LogLevel.Info;
@@ -50,10 +49,7 @@ namespace Mina.Filter.Logging
         /// <summary>
         /// Gets the logger's name
         /// </summary>
-        public String Name
-        {
-            get { return _name; }
-        }
+        public string Name { get; }
 
         /// <summary>
         /// Gets or sets the LogLevel for the ExceptionCaught event.
@@ -91,55 +87,55 @@ namespace Mina.Filter.Logging
         public LogLevel SessionClosedLevel { get; set; }
 
         /// <inheritdoc/>
-        public override void ExceptionCaught(INextFilter nextFilter, IoSession session, Exception cause)
+        public override void ExceptionCaught(INextFilter nextFilter, IOSession session, Exception cause)
         {
             Log(ExceptionCaughtLevel, "EXCEPTION :", cause);
             base.ExceptionCaught(nextFilter, session, cause);
         }
 
         /// <inheritdoc/>
-        public override void MessageReceived(INextFilter nextFilter, IoSession session, Object message)
+        public override void MessageReceived(INextFilter nextFilter, IOSession session, object message)
         {
             Log(MessageReceivedLevel, "RECEIVED: {0}", message);
             base.MessageReceived(nextFilter, session, message);
         }
 
         /// <inheritdoc/>
-        public override void MessageSent(INextFilter nextFilter, IoSession session, IWriteRequest writeRequest)
+        public override void MessageSent(INextFilter nextFilter, IOSession session, IWriteRequest writeRequest)
         {
             Log(MessageSentLevel, "SENT: {0}", writeRequest.OriginalRequest.Message);
             base.MessageSent(nextFilter, session, writeRequest);
         }
 
         /// <inheritdoc/>
-        public override void SessionCreated(INextFilter nextFilter, IoSession session)
+        public override void SessionCreated(INextFilter nextFilter, IOSession session)
         {
             Log(SessionCreatedLevel, "CREATED");
             base.SessionCreated(nextFilter, session);
         }
 
         /// <inheritdoc/>
-        public override void SessionOpened(INextFilter nextFilter, IoSession session)
+        public override void SessionOpened(INextFilter nextFilter, IOSession session)
         {
             Log(SessionOpenedLevel, "OPENED");
             base.SessionOpened(nextFilter, session);
         }
 
         /// <inheritdoc/>
-        public override void SessionIdle(INextFilter nextFilter, IoSession session, IdleStatus status)
+        public override void SessionIdle(INextFilter nextFilter, IOSession session, IdleStatus status)
         {
             Log(SessionIdleLevel, "IDLE"); 
             base.SessionIdle(nextFilter, session, status);
         }
 
         /// <inheritdoc/>
-        public override void SessionClosed(INextFilter nextFilter, IoSession session)
+        public override void SessionClosed(INextFilter nextFilter, IOSession session)
         {
             Log(SessionClosedLevel, "CLOSED"); 
             base.SessionClosed(nextFilter, session);
         }
 
-        private void Log(LogLevel level, String message, Exception cause)
+        private void Log(LogLevel level, string message, Exception cause)
         {
             switch (level)
             {
@@ -163,7 +159,7 @@ namespace Mina.Filter.Logging
             }
         }
 
-        private void Log(LogLevel level, String message, params Object[] args)
+        private void Log(LogLevel level, string message, params object[] args)
         {
             switch (level)
             {

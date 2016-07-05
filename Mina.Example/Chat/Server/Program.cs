@@ -11,14 +11,14 @@ namespace Mina.Example.Chat.Server
 {
     class Program
     {
-        private static readonly int port = 1234;
-        private static readonly Boolean ssl = true;
+        private static readonly int Port = 1234;
+        private static readonly bool Ssl = true;
 
         static void Main(string[] args)
         {
-            IoAcceptor acceptor = new AsyncSocketAcceptor();
+            IOAcceptor acceptor = new AsyncSocketAcceptor();
 
-            if (ssl)
+            if (Ssl)
             {
                 acceptor.FilterChain.AddLast("ssl", new SslFilter(AppDomain.CurrentDomain.BaseDirectory + "\\TempCert.cer"));
                 Console.WriteLine("SSL ON");
@@ -29,7 +29,7 @@ namespace Mina.Example.Chat.Server
 
             acceptor.Handler = new ChatProtocolHandler();
 
-            acceptor.Bind(new IPEndPoint(IPAddress.Any, port));
+            acceptor.Bind(new IPEndPoint(IPAddress.Any, Port));
 
             Console.WriteLine("Listening on " + acceptor.LocalEndPoint);
 

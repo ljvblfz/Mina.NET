@@ -1,5 +1,4 @@
-﻿using System;
-using Mina.Core.Session;
+﻿using Mina.Core.Session;
 
 namespace Mina.Filter.Codec
 {
@@ -11,10 +10,10 @@ namespace Mina.Filter.Codec
         /// <summary>
         /// Encodes higher-level message objects into binary or protocol-specific data.
         /// </summary>
-        void Encode(IoSession session, Object message, IProtocolEncoderOutput output);
+        void Encode(IOSession session, object message, IProtocolEncoderOutput output);
         /// <summary>
         /// Releases all resources related with this encoder.
         /// </summary>
-        void Dispose(IoSession session);
+        void Dispose(IOSession session);
     }
 }

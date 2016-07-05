@@ -19,17 +19,17 @@ namespace Mina.Core
         [TestMethod]
         public void TestCloseFuture()
         {
-            DefaultCloseFuture future = new DefaultCloseFuture(null);
+            var future = new DefaultCloseFuture(null);
             Assert.IsFalse(future.Done);
             Assert.IsFalse(future.Closed);
 
-            TestThread thread = new TestThread(future);
+            var thread = new TestThread(future);
             thread.Start();
 
             future.Closed = true;
             thread.Join();
 
-            Assert.IsTrue(thread.success);
+            Assert.IsTrue(thread.Success);
             Assert.IsTrue(future.Done);
             Assert.IsTrue(future.Closed);
         }
@@ -37,21 +37,21 @@ namespace Mina.Core
         [TestMethod]
         public void TestConnectFuture()
         {
-            DefaultConnectFuture future = new DefaultConnectFuture();
+            var future = new DefaultConnectFuture();
             Assert.IsFalse(future.Done);
             Assert.IsFalse(future.Connected);
             Assert.IsNull(future.Session);
             Assert.IsNull(future.Exception);
 
-            TestThread thread = new TestThread(future);
+            var thread = new TestThread(future);
             thread.Start();
 
-            IoSession session = new DummySession();
+            IOSession session = new DummySession();
 
             future.SetSession(session);
             thread.Join();
 
-            Assert.IsTrue(thread.success);
+            Assert.IsTrue(thread.Success);
             Assert.IsTrue(future.Done);
             Assert.IsTrue(future.Connected);
             Assert.AreSame(session, future.Session);
@@ -63,14 +63,14 @@ namespace Mina.Core
             future.Exception = new IOException();
             thread.Join();
 
-            Assert.IsTrue(thread.success);
+            Assert.IsTrue(thread.Success);
             Assert.IsTrue(future.Done);
             Assert.IsFalse(future.Connected);
             Assert.IsTrue(future.Exception is IOException);
 
             try
             {
-                IoSession s = future.Session;
+                var s = future.Session;
                 Assert.Fail("IOException should be thrown.");
             }
             catch (Exception)
@@ -83,17 +83,17 @@ namespace Mina.Core
         [TestMethod]
         public void TestWriteFuture()
         {
-            DefaultWriteFuture future = new DefaultWriteFuture(null);
+            var future = new DefaultWriteFuture(null);
             Assert.IsFalse(future.Done);
             Assert.IsFalse(future.Written);
 
-            TestThread thread = new TestThread(future);
+            var thread = new TestThread(future);
             thread.Start();
 
             future.Written = true;
             thread.Join();
 
-            Assert.IsTrue(thread.success);
+            Assert.IsTrue(thread.Success);
             Assert.IsTrue(future.Done);
             Assert.IsTrue(future.Written);
 
@@ -104,7 +104,7 @@ namespace Mina.Core
             future.Exception = new Exception();
             thread.Join();
 
-            Assert.IsTrue(thread.success);
+            Assert.IsTrue(thread.Success);
             Assert.IsTrue(future.Done);
             Assert.IsFalse(future.Written);
             Assert.IsTrue(future.Exception.GetType() == typeof(Exception));
@@ -113,22 +113,22 @@ namespace Mina.Core
         [TestMethod]
         public void TestAddListener()
         {
-            DefaultCloseFuture future = new DefaultCloseFuture(null);
+            var future = new DefaultCloseFuture(null);
             Assert.IsFalse(future.Done);
             Assert.IsFalse(future.Closed);
 
-            IoFuture f1 = null, f2 = null;
+            IOFuture f1 = null, f2 = null;
 
             future.Complete += (s, e) => f1 = e.Future;
             future.Complete += (s, e) => f2 = e.Future;
 
-            TestThread thread = new TestThread(future);
+            var thread = new TestThread(future);
             thread.Start();
 
             future.Closed = true;
             thread.Join();
 
-            Assert.IsTrue(thread.success);
+            Assert.IsTrue(thread.Success);
             Assert.IsTrue(future.Done);
             Assert.IsTrue(future.Closed);
 
@@ -139,21 +139,21 @@ namespace Mina.Core
         [TestMethod]
         public void TestLateAddListener()
         {
-            DefaultCloseFuture future = new DefaultCloseFuture(null);
+            var future = new DefaultCloseFuture(null);
             Assert.IsFalse(future.Done);
             Assert.IsFalse(future.Closed);
 
-            TestThread thread = new TestThread(future);
+            var thread = new TestThread(future);
             thread.Start();
 
             future.Closed = true;
             thread.Join();
 
-            Assert.IsTrue(thread.success);
+            Assert.IsTrue(thread.Success);
             Assert.IsTrue(future.Done);
             Assert.IsTrue(future.Closed);
 
-            IoFuture f1 = null;
+            IOFuture f1 = null;
             future.Complete += (s, e) => f1 = e.Future;
             Assert.AreSame(future, f1);
         }
@@ -161,11 +161,11 @@ namespace Mina.Core
         [TestMethod]
         public void TestRemoveListener1()
         {
-            DefaultCloseFuture future = new DefaultCloseFuture(null);
+            var future = new DefaultCloseFuture(null);
             Assert.IsFalse(future.Done);
             Assert.IsFalse(future.Closed);
 
-            IoFuture f1 = null, f2 = null;
+            IOFuture f1 = null, f2 = null;
             EventHandler<IoFutureEventArgs> listener1 = (s, e) => f1 = e.Future;
             EventHandler<IoFutureEventArgs> listener2 = (s, e) => f2 = e.Future;
 
@@ -173,13 +173,13 @@ namespace Mina.Core
             future.Complete += listener2;
             future.Complete -= listener1;
 
-            TestThread thread = new TestThread(future);
+            var thread = new TestThread(future);
             thread.Start();
 
             future.Closed = true;
             thread.Join();
 
-            Assert.IsTrue(thread.success);
+            Assert.IsTrue(thread.Success);
             Assert.IsTrue(future.Done);
             Assert.IsTrue(future.Closed);
 
@@ -190,11 +190,11 @@ namespace Mina.Core
         [TestMethod]
         public void TestRemoveListener2()
         {
-            DefaultCloseFuture future = new DefaultCloseFuture(null);
+            var future = new DefaultCloseFuture(null);
             Assert.IsFalse(future.Done);
             Assert.IsFalse(future.Closed);
 
-            IoFuture f1 = null, f2 = null;
+            IOFuture f1 = null, f2 = null;
             EventHandler<IoFutureEventArgs> listener1 = (s, e) => f1 = e.Future;
             EventHandler<IoFutureEventArgs> listener2 = (s, e) => f2 = e.Future;
 
@@ -202,13 +202,13 @@ namespace Mina.Core
             future.Complete += listener2;
             future.Complete -= listener2;
 
-            TestThread thread = new TestThread(future);
+            var thread = new TestThread(future);
             thread.Start();
 
             future.Closed = true;
             thread.Join();
 
-            Assert.IsTrue(thread.success);
+            Assert.IsTrue(thread.Success);
             Assert.IsTrue(future.Done);
             Assert.IsTrue(future.Closed);
 
@@ -218,29 +218,29 @@ namespace Mina.Core
 
         private class TestThread
         {
-            public Boolean success;
-            readonly IoFuture future;
-            readonly Thread t;
+            public bool Success;
+            readonly IOFuture _future;
+            readonly Thread _t;
 
-            public TestThread(IoFuture future)
+            public TestThread(IOFuture future)
             {
-                this.future = future;
-                this.t = new Thread(Run);
+                this._future = future;
+                _t = new Thread(Run);
             }
 
             public void Start()
             {
-                t.Start();
+                _t.Start();
             }
 
             public void Join()
             {
-                t.Join();
+                _t.Join();
             }
 
             public void Run()
             {
-                success = future.Await(10000);
+                Success = _future.Await(10000);
             }
         }
     }

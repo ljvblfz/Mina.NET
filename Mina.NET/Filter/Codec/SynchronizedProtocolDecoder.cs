@@ -20,11 +20,11 @@ namespace Mina.Filter.Codec
         public SynchronizedProtocolDecoder(IProtocolDecoder decoder)
         {
             if (decoder == null)
-                throw new ArgumentNullException("decoder");
+                throw new ArgumentNullException(nameof(decoder));
             _decoder = decoder;
         } 
 
-        public void Decode(IoSession session, IoBuffer input, IProtocolDecoderOutput output)
+        public void Decode(IOSession session, IOBuffer input, IProtocolDecoderOutput output)
         {
             lock (_decoder)
             {
@@ -32,7 +32,7 @@ namespace Mina.Filter.Codec
             }
         }
 
-        public void FinishDecode(IoSession session, IProtocolDecoderOutput output)
+        public void FinishDecode(IOSession session, IProtocolDecoderOutput output)
         {
             lock (_decoder)
             {
@@ -40,7 +40,7 @@ namespace Mina.Filter.Codec
             }
         }
 
-        public void Dispose(IoSession session)
+        public void Dispose(IOSession session)
         {
             lock (_decoder)
             {

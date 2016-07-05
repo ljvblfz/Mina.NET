@@ -1,5 +1,4 @@
-﻿using System;
-using System.Text;
+﻿using System.Text;
 #if !NETFX_CORE
 using NUnit.Framework;
 using TestClass = NUnit.Framework.TestFixtureAttribute;
@@ -17,19 +16,19 @@ namespace Mina.Filter.Codec.TextLine
         [TestMethod]
         public void TestEncode()
         {
-            TextLineEncoder encoder = new TextLineEncoder(Encoding.UTF8, LineDelimiter.Windows);
-            ProtocolCodecSession session = new ProtocolCodecSession();
-            IProtocolEncoderOutput output = session.EncoderOutput;
+            var encoder = new TextLineEncoder(Encoding.UTF8, LineDelimiter.Windows);
+            var session = new ProtocolCodecSession();
+            var output = session.EncoderOutput;
 
             encoder.Encode(session, "ABC", output);
             Assert.AreEqual(1, session.EncoderOutputQueue.Count);
-            IoBuffer buf = (IoBuffer)session.EncoderOutputQueue.Dequeue();
+            var buf = (IOBuffer)session.EncoderOutputQueue.Dequeue();
             Assert.AreEqual(5, buf.Remaining);
-            Assert.AreEqual((Byte)'A', buf.Get());
-            Assert.AreEqual((Byte)'B', buf.Get());
-            Assert.AreEqual((Byte)'C', buf.Get());
-            Assert.AreEqual((Byte)'\r', buf.Get());
-            Assert.AreEqual((Byte)'\n', buf.Get());
+            Assert.AreEqual((byte)'A', buf.Get());
+            Assert.AreEqual((byte)'B', buf.Get());
+            Assert.AreEqual((byte)'C', buf.Get());
+            Assert.AreEqual((byte)'\r', buf.Get());
+            Assert.AreEqual((byte)'\n', buf.Get());
         }
     }
 }

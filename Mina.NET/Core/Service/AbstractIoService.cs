@@ -11,21 +11,16 @@ using Mina.Util;
 namespace Mina.Core.Service
 {
     /// <summary>
-    /// Base implementation of <see cref="IoService"/>s.
+    /// Base implementation of <see cref="IOService"/>s.
     /// </summary>
-    public abstract class AbstractIoService : IoService, IoServiceSupport, IDisposable
+    public abstract class AbstractIOService : IOService, IOServiceSupport, IDisposable
     {
-        private Int32 _active = 0;
-        private DateTime _activationTime;
-        private IoHandler _handler;
-        private Boolean _hasHandler;
-        private readonly IoSessionConfig _sessionConfig;
-        private readonly IoServiceStatistics _stats;
-        private IoFilterChainBuilder _filterChainBuilder = new DefaultIoFilterChainBuilder();
-        private IoSessionDataStructureFactory _sessionDataStructureFactory = new DefaultIoSessionDataStructureFactory();
-        private Boolean _disposed;
+        private int _active;
+        private IOHandler _handler;
+        private bool _hasHandler;
+        private IOSessionDataStructureFactory _sessionDataStructureFactory = new DefaultIoSessionDataStructureFactory();
 
-        private ConcurrentDictionary<Int64, IoSession> _managedSessions = new ConcurrentDictionary<Int64, IoSession>();
+        private ConcurrentDictionary<long, IOSession> _managedSessions = new ConcurrentDictionary<long, IOSession>();
 
         /// <inheritdoc/>
         public event EventHandler Activated;
@@ -54,94 +49,72 @@ namespace Mina.Core.Service
 
         /// <summary>
         /// </summary>
-        protected AbstractIoService(IoSessionConfig sessionConfig)
+        protected AbstractIOService(IOSessionConfig sessionConfig)
         {
-            _sessionConfig = sessionConfig;
+            SessionConfig = sessionConfig;
             _handler = new InnerHandler(this);
-            _stats = new IoServiceStatistics(this);
+            Statistics = new IOServiceStatistics(this);
         }
 
         /// <inheritdoc/>
         public abstract ITransportMetadata TransportMetadata { get; }
 
         /// <inheritdoc/>
-        public Boolean Disposed { get { return _disposed; } }
+        public bool Disposed { get; private set; }
 
         /// <inheritdoc/>
-        public IoHandler Handler
+        public IOHandler Handler
         {
             get { return _handler; }
             set
             {
                 if (value == null)
-                    throw new ArgumentNullException("value");
+                    throw new ArgumentNullException(nameof(value));
                 _handler = value;
                 _hasHandler = true;
             }
         }
 
         /// <inheritdoc/>
-        public IDictionary<Int64, IoSession> ManagedSessions
-        {
-            get { return _managedSessions; }
-        }
+        public IDictionary<long, IOSession> ManagedSessions => _managedSessions;
 
         /// <inheritdoc/>
-        public IoSessionConfig SessionConfig
-        {
-            get { return _sessionConfig; }
-        }
+        public IOSessionConfig SessionConfig { get; }
 
         /// <inheritdoc/>
-        public IoFilterChainBuilder FilterChainBuilder
-        {
-            get { return _filterChainBuilder; }
-            set { _filterChainBuilder = value; }
-        }
+        public IOFilterChainBuilder FilterChainBuilder { get; set; } = new DefaultIoFilterChainBuilder();
 
         /// <inheritdoc/>
-        public DefaultIoFilterChainBuilder FilterChain
-        {
-            get { return _filterChainBuilder as DefaultIoFilterChainBuilder; }
-        }
+        public DefaultIoFilterChainBuilder FilterChain => FilterChainBuilder as DefaultIoFilterChainBuilder;
 
         /// <inheritdoc/>
-        public IoSessionDataStructureFactory SessionDataStructureFactory
+        public IOSessionDataStructureFactory SessionDataStructureFactory
         {
             get { return _sessionDataStructureFactory; }
             set
             {
                 if (value == null)
-                    throw new ArgumentNullException("value");
-                else if (Active)
+                    throw new ArgumentNullException(nameof(value));
+                if (Active)
                     throw new InvalidOperationException();
                 _sessionDataStructureFactory = value;
             }
         }
 
         /// <inheritdoc/>
-        public Boolean Active
-        {
-            get { return _active > 0; }
-        }
+        public bool Active => _active > 0;
 
         /// <inheritdoc/>
-        public DateTime ActivationTime
-        {
-            get { return _activationTime; }
-        }
+        public DateTime ActivationTime { get; private set; }
 
         /// <inheritdoc/>
-        public IoServiceStatistics Statistics
-        {
-            get { return _stats; }
-        }
+        public IOServiceStatistics Statistics { get; }
 
         /// <inheritdoc/>
-        public IEnumerable<IWriteFuture> Broadcast(Object message)
+        public IEnumerable<IWriteFuture> Broadcast(object message)
         {
-            List<IWriteFuture> answer = new List<IWriteFuture>(_managedSessions.Count);
-            IoBuffer buf = message as IoBuffer;
+            var answer = new List<IWriteFuture>(_managedSessions.Count);
+            var buf = message as IOBuffer;
             if (buf == null)
             {
                 foreach (var session in _managedSessions.Values)
@@ -171,10 +144,10 @@ namespace Mina.Core.Service
         /// <summary>
         /// Initializes sessions.
         /// </summary>
-        protected void InitSession<TFuture>(IoSession session, TFuture future, Action<IoSession, TFuture> initializeSession)
-            where TFuture : IoFuture
+        protected void InitSession<TFuture>(IOSession session, TFuture future, Action<IOSession, TFuture> initializeSession)
+            where TFuture : IOFuture
         {
-            AbstractIoSession s = session as AbstractIoSession;
+            var s = session as AbstractIoSession;
             if (s != null)
             {
                 s.AttributeMap = s.Service.SessionDataStructureFactory.GetAttributeMap(session);
@@ -182,7 +155,7 @@ namespace Mina.Core.Service
             }
 
             if (future != null && future is IConnectFuture)
-                session.SetAttribute(DefaultIoFilterChain.SessionCreatedFuture, future);
+                session.SetAttribute(DefaultIOFilterChain.SessionCreatedFuture, future);
 
             if (initializeSession != null)
                 initializeSession(session, future);
@@ -194,7 +167,7 @@ namespace Mina.Core.Service
         /// Implement this method to perform additional tasks required for session
         /// initialization. Do not call this method directly.
         /// </summary>
-        protected virtual void FinishSessionInitialization0(IoSession session, IoFuture future)
+        protected virtual void FinishSessionInitialization0(IOSession session, IOFuture future)
         {
             // Do nothing. Extended class might add some specific code 
         }
@@ -202,14 +175,14 @@ namespace Mina.Core.Service
         /// <summary>
         /// Disposes resources.
         /// </summary>
-        protected virtual void Dispose(Boolean disposing)
+        protected virtual void Dispose(bool disposing)
         {
-            _disposed = true;
+            Disposed = true;
         }
 
         private void DisconnectSessions()
         {
-            IoAcceptor acceptor = this as IoAcceptor;
+            var acceptor = this as IOAcceptor;
             if (acceptor == null)
                 // We don't disconnect sessions for anything but an IoAcceptor
                 return;
@@ -217,8 +190,8 @@ namespace Mina.Core.Service
             if (!acceptor.CloseOnDeactivation)
                 return;
 
-            List<ICloseFuture> closeFutures = new List<ICloseFuture>(_managedSessions.Count);
-            foreach (IoSession s in _managedSessions.Values)
+            var closeFutures = new List<ICloseFuture>(_managedSessions.Count);
+            foreach (var s in _managedSessions.Values)
             {
                 closeFutures.Add(s.Close(true));
             }
@@ -228,31 +201,31 @@ namespace Mina.Core.Service
 
         #region IoServiceSupport
         
-        void IoServiceSupport.FireServiceActivated()
+        void IOServiceSupport.FireServiceActivated()
         {
             if (Interlocked.CompareExchange(ref _active, 1, 0) > 0)
                 // The instance is already active
                 return;
-            _activationTime = DateTime.Now;
-            _stats.LastReadTime = _activationTime;
-            _stats.LastWriteTime = _activationTime;
-            _stats.LastThroughputCalculationTime = _activationTime;
+            ActivationTime = DateTime.Now;
+            Statistics.LastReadTime = ActivationTime;
+            Statistics.LastWriteTime = ActivationTime;
+            Statistics.LastThroughputCalculationTime = ActivationTime;
             DelegateUtils.SafeInvoke(Activated, this);
         }
 
-        void IoServiceSupport.FireServiceIdle(IdleStatus idleStatus)
+        void IOServiceSupport.FireServiceIdle(IdleStatus idleStatus)
         {
             DelegateUtils.SafeInvoke(Idle, this, new IdleEventArgs(idleStatus));
         }
 
-        void IoServiceSupport.FireSessionCreated(IoSession session)
+        void IOServiceSupport.FireSessionCreated(IOSession session)
         {
             // If already registered, ignore.
             if (!_managedSessions.TryAdd(session.Id, session))
                 return;
 
             // Fire session events.
-            IoFilterChain filterChain = session.FilterChain;
+            var filterChain = session.FilterChain;
             filterChain.FireSessionCreated();
             filterChain.FireSessionOpened();
 
@@ -260,9 +233,9 @@ namespace Mina.Core.Service
                 DelegateUtils.SafeInvoke(SessionCreated, this, new IoSessionEventArgs(session));
         }
 
-        void IoServiceSupport.FireSessionDestroyed(IoSession session)
+        void IOServiceSupport.FireSessionDestroyed(IOSession session)
         {
-            IoSession s;
+            IOSession s;
             if (!_managedSessions.TryRemove(session.Id, out s))
                 return;
 
@@ -272,15 +245,15 @@ namespace Mina.Core.Service
             DelegateUtils.SafeInvoke(SessionDestroyed, this, new IoSessionEventArgs(session));
 
             // Fire a virtual service deactivation event for the last session of the connector.
-            if (session.Service is IoConnector)
+            if (session.Service is IOConnector)
             {
-                Boolean lastSession = _managedSessions.IsEmpty;
+                var lastSession = _managedSessions.IsEmpty;
                 if (lastSession)
-                    ((IoServiceSupport)this).FireServiceDeactivated();
+                    ((IOServiceSupport)this).FireServiceDeactivated();
             }
         }
 
-        void IoServiceSupport.FireServiceDeactivated()
+        void IOServiceSupport.FireServiceDeactivated()
         {
             if (Interlocked.CompareExchange(ref _active, 0, 1) == 0)
                 // The instance is already desactivated
@@ -291,67 +264,67 @@ namespace Mina.Core.Service
 
         #endregion
 
-        class InnerHandler : IoHandler
+        class InnerHandler : IOHandler
         {
-            private readonly AbstractIoService _service;
+            private readonly AbstractIOService _service;
 
-            public InnerHandler(AbstractIoService service)
+            public InnerHandler(AbstractIOService service)
             {
                 _service = service;
             }
 
-            public void SessionCreated(IoSession session)
+            public void SessionCreated(IOSession session)
             {
-                EventHandler<IoSessionEventArgs> act = _service.SessionCreated;
+                var act = _service.SessionCreated;
                 if (act != null)
                     act(_service, new IoSessionEventArgs(session));
             }
 
-            void IoHandler.SessionOpened(IoSession session)
+            void IOHandler.SessionOpened(IOSession session)
             {
-                EventHandler<IoSessionEventArgs> act = _service.SessionOpened;
+                var act = _service.SessionOpened;
                 if (act != null)
                     act(_service, new IoSessionEventArgs(session));
             }
 
-            void IoHandler.SessionClosed(IoSession session)
+            void IOHandler.SessionClosed(IOSession session)
             {
-                EventHandler<IoSessionEventArgs> act = _service.SessionClosed;
+                var act = _service.SessionClosed;
                 if (act != null)
                     act(_service, new IoSessionEventArgs(session));
             }
 
-            void IoHandler.SessionIdle(IoSession session, IdleStatus status)
+            void IOHandler.SessionIdle(IOSession session, IdleStatus status)
             {
-                EventHandler<IoSessionIdleEventArgs> act = _service.SessionIdle;
+                var act = _service.SessionIdle;
                 if (act != null)
                     act(_service, new IoSessionIdleEventArgs(session, status));
             }
 
-            void IoHandler.ExceptionCaught(IoSession session, Exception cause)
+            void IOHandler.ExceptionCaught(IOSession session, Exception cause)
             {
-                EventHandler<IoSessionExceptionEventArgs> act = _service.ExceptionCaught;
+                var act = _service.ExceptionCaught;
                 if (act != null)
                     act(_service, new IoSessionExceptionEventArgs(session, cause));
             }
 
-            void IoHandler.MessageReceived(IoSession session, Object message)
+            void IOHandler.MessageReceived(IOSession session, object message)
             {
-                EventHandler<IoSessionMessageEventArgs> act = _service.MessageReceived;
+                var act = _service.MessageReceived;
                 if (act != null)
                     act(_service, new IoSessionMessageEventArgs(session, message));
             }
 
-            void IoHandler.MessageSent(IoSession session, Object message)
+            void IOHandler.MessageSent(IOSession session, object message)
             {
-                EventHandler<IoSessionMessageEventArgs> act = _service.MessageSent;
+                var act = _service.MessageSent;
                 if (act != null)
                     act(_service, new IoSessionMessageEventArgs(session, message));
             }
 
-            void IoHandler.InputClosed(IoSession session)
+            void IOHandler.InputClosed(IOSession session)
             {
-                EventHandler<IoSessionEventArgs> act = _service.InputClosed;
+                var act = _service.InputClosed;
                 if (act != null)
                     act(_service, new IoSessionEventArgs(session));
                 else

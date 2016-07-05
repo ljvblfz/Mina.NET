@@ -3,8 +3,8 @@
 namespace Mina.Core.Filterchain
 {
     /// <summary>
-    /// An exception thrown when <see cref="IoFilter.Init()"/> or
-    /// <see cref="IoFilter.OnPostAdd(IoFilterChain, String, INextFilter)"/> failed.
+    /// An exception thrown when <see cref="IOFilter.Init()"/> or
+    /// <see cref="IOFilter.OnPostAdd(IOFilterChain, string, INextFilter)"/> failed.
     /// </summary>
     [Serializable]
     public class IoFilterLifeCycleException : Exception
@@ -16,13 +16,13 @@ namespace Mina.Core.Filterchain
 
         /// <summary>
         /// </summary>
-        public IoFilterLifeCycleException(String message)
+        public IoFilterLifeCycleException(string message)
             : base(message)
         { }
 
         /// <summary>
         /// </summary>
-        public IoFilterLifeCycleException(String message, Exception innerException)
+        public IoFilterLifeCycleException(string message, Exception innerException)
             : base(message, innerException)
         { }
 

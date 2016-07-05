@@ -5,13 +5,11 @@ using Mina.Core.Session;
 namespace Mina.Handler.Chain
 {
     /// <summary>
-    /// An <see cref="IoHandler"/> which executes an <see cref="IoHandlerChain"/>
+    /// An <see cref="IOHandler"/> which executes an <see cref="IoHandlerChain"/>
     /// on a <tt>messageReceived</tt> event.
     /// </summary>
-    public class ChainedIoHandler : IoHandlerAdapter
+    public class ChainedIoHandler : IOHandlerAdapter
     {
-        private readonly IoHandlerChain _chain;
-
         /// <summary>
         /// </summary>
         public ChainedIoHandler()
@@ -23,22 +21,19 @@ namespace Mina.Handler.Chain
         public ChainedIoHandler(IoHandlerChain chain)
         {
             if (chain == null)
-                throw new ArgumentNullException("chain");
-            _chain = chain;
+                throw new ArgumentNullException(nameof(chain));
+            Chain = chain;
         }
 
         /// <summary>
         /// Gets the associated <see cref="IoHandlerChain"/>.
         /// </summary>
-        public IoHandlerChain Chain
-        {
-            get { return _chain; }
-        }
+        public IoHandlerChain Chain { get; }
 
         /// <inheritdoc/>
-        public override void MessageReceived(IoSession session, Object message)
+        public override void MessageReceived(IOSession session, object message)
         {
-            _chain.Execute(null, session, message);
+            Chain.Execute(null, session, message);
         }
     }
 }

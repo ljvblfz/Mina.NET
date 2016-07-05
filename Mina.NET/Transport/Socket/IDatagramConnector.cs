@@ -4,9 +4,9 @@ using Mina.Core.Service;
 namespace Mina.Transport.Socket
 {
     /// <summary>
-    /// <see cref="IoConnector"/> for socket transport (UDP/IP)
+    /// <see cref="IOConnector"/> for socket transport (UDP/IP)
     /// </summary>
-    public interface IDatagramConnector : IoConnector
+    public interface IDatagramConnector : IOConnector
     {
         /// <inheritdoc/>
         new IDatagramSessionConfig SessionConfig { get; }

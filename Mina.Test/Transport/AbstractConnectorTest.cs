@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.IO;
 using System.Net;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -15,9 +13,7 @@ using TestCleanup = NUnit.Framework.TearDownAttribute;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 #endif
 using Mina.Core.Service;
-using Mina.Core.Buffer;
 using Mina.Core.Future;
-using Mina.Core.Session;
 
 namespace Mina.Transport
 {
@@ -27,19 +23,19 @@ namespace Mina.Transport
         [TestMethod]
         public void TestConnectFutureSuccessTiming()
         {
-            Int32 port = 12345;
-            IoAcceptor acceptor = CreateAcceptor();
+            var port = 12345;
+            var acceptor = CreateAcceptor();
             acceptor.Bind(CreateEndPoint(port));
 
-            StringBuilder buf = new StringBuilder();
+            var buf = new StringBuilder();
             try
             {
-                IoConnector connector = CreateConnector();
+                var connector = CreateConnector();
                 connector.SessionCreated += (s, e) => buf.Append("1");
                 connector.SessionOpened += (s, e) => buf.Append("2");
                 connector.ExceptionCaught += (s, e) => buf.Append("X");
 
-                IConnectFuture future = connector.Connect(CreateEndPoint(port));
+                var future = connector.Connect(CreateEndPoint(port));
                 future.Await();
                 buf.Append("3");
                 future.Session.Close(true);
@@ -57,17 +53,17 @@ namespace Mina.Transport
         [TestMethod]
         public virtual void TestConnectFutureFailureTiming()
         {
-            Int32 port = 12345;
-            StringBuilder buf = new StringBuilder();
+            var port = 12345;
+            var buf = new StringBuilder();
 
-            IoConnector connector = CreateConnector();
+            var connector = CreateConnector();
             connector.SessionCreated += (s, e) => buf.Append("X");
             connector.SessionOpened += (s, e) => buf.Append("Y");
             connector.ExceptionCaught += (s, e) => buf.Append("Z");
 
             try
             {
-                IConnectFuture future = connector.Connect(CreateEndPoint(port));
+                var future = connector.Connect(CreateEndPoint(port));
                 future.Await();
                 buf.Append("1");
                 try
@@ -91,17 +87,17 @@ namespace Mina.Transport
         [TestMethod]
         public void TestSessionCallbackInvocation()
         {
-            Int32 callbackInvoked = 0;
-            Int32 sessionCreatedInvoked = 1;
-            Int32 sessionCreatedInvokedBeforeCallback = 2;
-            Boolean[] assertions = { false, false, false };
-            CountdownEvent countdown = new CountdownEvent(2);
-            IConnectFuture[] callbackFuture = new IConnectFuture[1];
+            var callbackInvoked = 0;
+            var sessionCreatedInvoked = 1;
+            var sessionCreatedInvokedBeforeCallback = 2;
+            bool[] assertions = { false, false, false };
+            var countdown = new CountdownEvent(2);
+            var callbackFuture = new IConnectFuture[1];
 
-            Int32 port = 12345;
+            var port = 12345;
 
-            IoAcceptor acceptor = CreateAcceptor();
-            IoConnector connector = CreateConnector();
+            var acceptor = CreateAcceptor();
+            var connector = CreateConnector();
 
             try
             {
@@ -114,7 +110,7 @@ namespace Mina.Transport
                     countdown.Signal();
                 };
 
-                IConnectFuture future = connector.Connect(CreateEndPoint(port), (s, f) =>
+                var future = connector.Connect(CreateEndPoint(port), (s, f) =>
                 {
                     assertions[callbackInvoked] = true;
                     callbackFuture[0] = f;
@@ -140,8 +136,8 @@ namespace Mina.Transport
             }
         }
 
-        protected abstract IoAcceptor CreateAcceptor();
-        protected abstract IoConnector CreateConnector();
-        protected abstract EndPoint CreateEndPoint(Int32 port);
+        protected abstract IOAcceptor CreateAcceptor();
+        protected abstract IOConnector CreateConnector();
+        protected abstract EndPoint CreateEndPoint(int port);
     }
 }

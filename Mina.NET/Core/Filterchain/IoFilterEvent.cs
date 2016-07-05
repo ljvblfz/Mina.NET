@@ -6,74 +6,69 @@ using Mina.Core.Write;
 namespace Mina.Core.Filterchain
 {
     /// <summary>
-    /// An I/O event or an I/O request that MINA provides for <see cref="IoFilter"/>s.
+    /// An I/O event or an I/O request that MINA provides for <see cref="IOFilter"/>s.
     /// It is usually used by internal components to store I/O events.
     /// </summary>
     public class IoFilterEvent : IoEvent
     {
-        static readonly ILog log = LogManager.GetLogger(typeof(IoFilterEvent));
-
-        private readonly INextFilter _nextFilter;
+        static readonly ILog Log = LogManager.GetLogger(typeof(IoFilterEvent));
 
         /// <summary>
         /// </summary>
-        public IoFilterEvent(INextFilter nextFilter, IoEventType eventType, IoSession session, Object parameter)
+        public IoFilterEvent(INextFilter nextFilter, IoEventType eventType, IOSession session, object parameter)
             : base(eventType, session, parameter)
         {
             if (nextFilter == null)
-                throw new ArgumentNullException("nextFilter");
-            _nextFilter = nextFilter;
+                throw new ArgumentNullException(nameof(nextFilter));
+            NextFilter = nextFilter;
         }
 
         /// <summary>
         /// Gets the next filter.
         /// </summary>
-        public INextFilter NextFilter
-        {
-            get { return _nextFilter; }
-        }
+        public INextFilter NextFilter { get; }
 
         /// <inheritdoc/>
         public override void Fire()
         {
-            if (log.IsDebugEnabled)
-                log.DebugFormat("Firing a {0} event for session {1}", EventType, Session.Id);
+            if (Log.IsDebugEnabled)
+                Log.DebugFormat("Firing a {0} event for session {1}", EventType, Session.Id);
 
             switch (EventType)
             {
                 case IoEventType.MessageReceived:
-                    _nextFilter.MessageReceived(Session, Parameter);
+                    NextFilter.MessageReceived(Session, Parameter);
                     break;
                 case IoEventType.MessageSent:
-                    _nextFilter.MessageSent(Session, (IWriteRequest)Parameter);
+                    NextFilter.MessageSent(Session, (IWriteRequest)Parameter);
                     break;
                 case IoEventType.Write:
-                    _nextFilter.FilterWrite(Session, (IWriteRequest)Parameter);
+                    NextFilter.FilterWrite(Session, (IWriteRequest)Parameter);
                     break;
                 case IoEventType.Close:
-                    _nextFilter.FilterClose(Session);
+                    NextFilter.FilterClose(Session);
                     break;
                 case IoEventType.ExceptionCaught:
-                    _nextFilter.ExceptionCaught(Session, (Exception)Parameter);
+                    NextFilter.ExceptionCaught(Session, (Exception)Parameter);
                     break;
                 case IoEventType.SessionIdle:
-                    _nextFilter.SessionIdle(Session, (IdleStatus)Parameter);
+                    NextFilter.SessionIdle(Session, (IdleStatus)Parameter);
                     break;
                 case IoEventType.SessionCreated:
-                    _nextFilter.SessionCreated(Session);
+                    NextFilter.SessionCreated(Session);
                     break;
                 case IoEventType.SessionOpened:
-                    _nextFilter.SessionOpened(Session);
+                    NextFilter.SessionOpened(Session);
                     break;
                 case IoEventType.SessionClosed:
-                    _nextFilter.SessionClosed(Session);
+                    NextFilter.SessionClosed(Session);
                     break;
                 default:
                     throw new InvalidOperationException("Unknown event type: " + EventType);
             }
 
-            if (log.IsDebugEnabled)
-                log.DebugFormat("Event {0} has been fired for session {1}", EventType, Session.Id);
+            if (Log.IsDebugEnabled)
+                Log.DebugFormat("Event {0} has been fired for session {1}", EventType, Session.Id);
         }
     }
 }

@@ -1,5 +1,4 @@
-﻿using System;
-#if !NETFX_CORE
+﻿#if !NETFX_CORE
 using NUnit.Framework;
 using TestClass = NUnit.Framework.TestFixtureAttribute;
 #else
@@ -17,19 +16,19 @@ namespace Mina.Transport.Loopback
             : base(new LoopbackAcceptor())
         { }
 
-        protected override System.Net.EndPoint CreateServerEndPoint(Int32 port)
+        protected override System.Net.EndPoint CreateServerEndPoint(int port)
         {
             return new LoopbackEndPoint(port);
         }
 
-        protected override Int32 GetPort(System.Net.EndPoint ep)
+        protected override int GetPort(System.Net.EndPoint ep)
         {
             return ((LoopbackEndPoint)ep).Port;
         }
 
-        protected override IConnectFuture Connect(Int32 port, IoHandler handler)
+        protected override IConnectFuture Connect(int port, IOHandler handler)
         {
-            IoConnector connector = new LoopbackConnector();
+            IOConnector connector = new LoopbackConnector();
             connector.Handler = handler;
             return connector.Connect(new LoopbackEndPoint(port));
         }

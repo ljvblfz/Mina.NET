@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Net;
 using System.Windows.Forms;
-using Mina.Core.Future;
 using Mina.Core.Service;
 using Mina.Core.Session;
 using Mina.Filter.Codec;
@@ -14,8 +13,8 @@ namespace Mina.Example.Chat.Client
 {
     public partial class FormChat : Form
     {
-        IoConnector connector = new AsyncSocketConnector();
-        IoSession session;
+        IOConnector _connector = new AsyncSocketConnector();
+        IOSession _session;
 
         public FormChat()
         {
@@ -23,35 +22,35 @@ namespace Mina.Example.Chat.Client
 
             textBoxUser.Text = "user" + Math.Round(new Random().NextDouble() * 10);
 
-            connector.FilterChain.AddLast("logger", new LoggingFilter());
-            connector.FilterChain.AddLast("codec", new ProtocolCodecFilter(new TextLineCodecFactory()));
+            _connector.FilterChain.AddLast("logger", new LoggingFilter());
+            _connector.FilterChain.AddLast("codec", new ProtocolCodecFilter(new TextLineCodecFactory()));
 
-            connector.SessionClosed += (o, e) => Append("Connection closed.");
-            connector.MessageReceived += OnMessageReceived;
+            _connector.SessionClosed += (o, e) => Append("Connection closed.");
+            _connector.MessageReceived += OnMessageReceived;
 
             SetState(false);
         }
 
         private void OnMessageReceived(object sender, IoSessionMessageEventArgs e)
         {
-            String theMessage = (String)e.Message;
-            String[] result = theMessage.Split(new Char[] { ' ' }, 3);
-            String status = result[1];
-            String theCommand = result[0];
+            var theMessage = (string)e.Message;
+            var result = theMessage.Split(new char[] { ' ' }, 3);
+            var status = result[1];
+            var theCommand = result[0];
 
             if ("OK".Equals(status))
             {
-                if (String.Equals("BROADCAST", theCommand, StringComparison.OrdinalIgnoreCase))
+                if (string.Equals("BROADCAST", theCommand, StringComparison.OrdinalIgnoreCase))
                 {
                     if (result.Length == 3)
                         Append(result[2]);
                 }
-                else if (String.Equals("LOGIN", theCommand, StringComparison.OrdinalIgnoreCase))
+                else if (string.Equals("LOGIN", theCommand, StringComparison.OrdinalIgnoreCase))
                 {
                     SetState(true);
                     Append("You have joined the chat session.");
                 }
-                else if (String.Equals("QUIT", theCommand, StringComparison.OrdinalIgnoreCase))
+                else if (string.Equals("QUIT", theCommand, StringComparison.OrdinalIgnoreCase))
                 {
                     SetState(false);
                     Append("You have left the chat session.");
@@ -66,11 +65,11 @@ namespace Mina.Example.Chat.Client
             }
         }
 
-        private void SetState(Boolean loggedIn)
+        private void SetState(bool loggedIn)
         {
             if (this.InvokeRequired)
             {
-                this.Invoke(new Action<Boolean>(SetState), loggedIn);
+                this.Invoke(new Action<bool>(SetState), loggedIn);
                 return;
             }
             buttonConnect.Enabled = textBoxUser.Enabled = textBoxServer.Enabled = !loggedIn;
@@ -79,37 +78,37 @@ namespace Mina.Example.Chat.Client
 
         private void buttonConnect_Click(object sender, EventArgs e)
         {
-            String server = textBoxServer.Text;
-            if (String.IsNullOrEmpty(server))
+            var server = textBoxServer.Text;
+            if (string.IsNullOrEmpty(server))
                 return;
 
             if (checkBoxSSL.Checked)
             {
-                if (!connector.FilterChain.Contains("ssl"))
-                    connector.FilterChain.AddFirst("ssl", new SslFilter("TempCert", null));
+                if (!_connector.FilterChain.Contains("ssl"))
+                    _connector.FilterChain.AddFirst("ssl", new SslFilter("TempCert", null));
             }
-            else if (connector.FilterChain.Contains("ssl"))
+            else if (_connector.FilterChain.Contains("ssl"))
             {
-                connector.FilterChain.Remove("ssl");
+                _connector.FilterChain.Remove("ssl");
             }
 
             IPEndPoint ep;
-            String[] parts = server.Trim().Split(':');
+            var parts = server.Trim().Split(':');
             if (parts.Length > 0)
             {
-                ep = new IPEndPoint(IPAddress.Parse(parts[0]), Int32.Parse(parts[1]));
+                ep = new IPEndPoint(IPAddress.Parse(parts[0]), int.Parse(parts[1]));
             }
             else
             {
-                ep = new IPEndPoint(IPAddress.Loopback, Int32.Parse(parts[0]));
+                ep = new IPEndPoint(IPAddress.Loopback, int.Parse(parts[0]));
             }
 
-            IConnectFuture future = connector.Connect(ep).Await();
+            var future = _connector.Connect(ep).Await();
 
             if (future.Connected)
             {
-                session = future.Session;
-                session.Write("LOGIN " + textBoxUser.Text);
+                _session = future.Session;
+                _session.Write("LOGIN " + textBoxUser.Text);
             }
             else
             {
@@ -129,35 +128,35 @@ namespace Mina.Example.Chat.Client
 
         private void buttonQuit_Click(object sender, EventArgs e)
         {
-            this.Close();
+            Close();
         }
 
         private void FormChat_FormClosing(object sender, FormClosingEventArgs e)
         {
-            connector.Dispose();
+            _connector.Dispose();
         }
 
-        public void Broadcast(String message)
+        public void Broadcast(string message)
         {
-            if (session != null)
-                session.Write("BROADCAST " + message);
+            if (_session != null)
+                _session.Write("BROADCAST " + message);
         }
 
         public void Quit()
         {
-            if (session != null)
+            if (_session != null)
             {
-                session.Write("QUIT");
+                _session.Write("QUIT");
                 // session will be closed by the server
-                session = null;
+                _session = null;
             }
         }
 
-        public void Append(String line)
+        public void Append(string line)
         {
             if (textBoxChat.InvokeRequired)
             {
-                textBoxChat.Invoke(new Action<String>(Append), line);
+                textBoxChat.Invoke(new Action<string>(Append), line);
                 return;
             }
 

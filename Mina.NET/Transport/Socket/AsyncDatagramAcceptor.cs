@@ -4,6 +4,7 @@ using System.Net;
 using System.Net.Sockets;
 using System.Threading;
 using Mina.Core.Buffer;
+using Mina.Core.Filterchain;
 using Mina.Core.Future;
 using Mina.Core.Service;
 using Mina.Core.Session;
@@ -13,15 +14,15 @@ using Mina.Util;
 namespace Mina.Transport.Socket
 {
     /// <summary>
-    /// <see cref="IoAcceptor"/> for datagram transport (UDP/IP).
+    /// <see cref="IOAcceptor"/> for datagram transport (UDP/IP).
     /// </summary>
-    public partial class AsyncDatagramAcceptor : AbstractIoAcceptor, IDatagramAcceptor, IoProcessor<AsyncDatagramSession>
+    public partial class AsyncDatagramAcceptor : AbstractIOAcceptor, IDatagramAcceptor, IIoProcessor<AsyncDatagramSession>
     {
-        private static readonly IoSessionRecycler DefaultRecycler = new ExpiringSessionRecycler();
+        private static readonly IOSessionRecycler DefaultRecycler = new ExpiringSessionRecycler();
 
         private readonly IdleStatusChecker _idleStatusChecker;
-        private Boolean _disposed;
-        private IoSessionRecycler _sessionRecycler = DefaultRecycler;
+        private bool _disposed;
+        private IOSessionRecycler _sessionRecycler = DefaultRecycler;
         private readonly Dictionary<EndPoint, SocketContext> _listenSockets = new Dictionary<EndPoint, SocketContext>();
 
         /// <summary>
@@ -35,16 +36,10 @@ namespace Mina.Transport.Socket
         }
 
         /// <inheritdoc/>
-        public new IDatagramSessionConfig SessionConfig
-        {
-            get { return (IDatagramSessionConfig)base.SessionConfig; }
-        }
+        public new IDatagramSessionConfig SessionConfig => (IDatagramSessionConfig)base.SessionConfig;
 
         /// <inheritdoc/>
-        public new IPEndPoint LocalEndPoint
-        {
-            get { return (IPEndPoint)base.LocalEndPoint; }
-        }
+        public new IPEndPoint LocalEndPoint => (IPEndPoint)base.LocalEndPoint;
 
         /// <inheritdoc/>
         public new IPEndPoint DefaultLocalEndPoint
@@ -54,32 +49,29 @@ namespace Mina.Transport.Socket
         }
 
         /// <inheritdoc/>
-        public override ITransportMetadata TransportMetadata
-        {
-            get { return AsyncDatagramSession.Metadata; }
-        }
+        public override ITransportMetadata TransportMetadata => AsyncDatagramSession.Metadata;
 
         /// <summary>
         /// Gets or sets a value indicating whether to reuse the read buffer
         /// sent to <see cref="SocketSession.FilterChain"/> by
-        /// <see cref="Core.Filterchain.IoFilterChain.FireMessageReceived(Object)"/>.
+        /// <see cref="IOFilterChain.FireMessageReceived(object)"/>.
         /// </summary>
         /// <remarks>
         /// If any thread model, i.e. an <see cref="Filter.Executor.ExecutorFilter"/>,
-        /// is added before filters that process the incoming <see cref="Core.Buffer.IoBuffer"/>
-        /// in <see cref="Core.Filterchain.IoFilter.MessageReceived(Core.Filterchain.INextFilter, IoSession, Object)"/>,
+        /// is added before filters that process the incoming <see cref="Core.Buffer.IOBuffer"/>
+        /// in <see cref="IOFilter.MessageReceived(Core.FilterchIOSessionFilter, IoSession, object)"/>,
         /// this must be set to <code>false</code> to avoid undetermined state
         /// of the read buffer. The default value is <code>true</code>.
         /// </remarks>
-        public Boolean ReuseBuffer { get; set; }
+        public bool ReuseBuffer { get; set; }
 
         /// <inheritdoc/>
-        public IoSessionRecycler SessionRecycler
+        public IOSessionRecycler SessionRecycler
         {
             get { return _sessionRecycler; }
             set
             {
-                lock (_bindLock)
+                lock (BindLock)
                 {
                     if (Active)
                         throw new InvalidOperationException("SessionRecycler can't be set while the acceptor is bound.");
@@ -89,38 +81,38 @@ namespace Mina.Transport.Socket
             }
         }
 
-        public IoSession NewSession(EndPoint remoteEP, EndPoint localEP)
+        public IOSession NewSession(EndPoint remoteEp, EndPoint localEp)
         {
             if (Disposed)
                 throw new ObjectDisposedException("AsyncDatagramAcceptor");
-            if (remoteEP == null)
-                throw new ArgumentNullException("remoteEP");
+            if (remoteEp == null)
+                throw new ArgumentNullException(nameof(remoteEp));
 
             SocketContext ctx;
-            if (!_listenSockets.TryGetValue(localEP, out ctx))
-                throw new ArgumentException("Unknown local endpoint: " + localEP, "localEP");
+            if (!_listenSockets.TryGetValue(localEp, out ctx))
+                throw new ArgumentException("Unknown local endpoint: " + localEp, nameof(localEp));
 
-            lock (_bindLock)
+            lock (BindLock)
             {
                 if (!Active)
                     throw new InvalidOperationException("Can't create a session from a unbound service.");
-                return NewSessionWithoutLock(remoteEP, ctx);
+                return NewSessionWithoutLock(remoteEp, ctx);
             }
         }
 
         /// <inheritdoc/>
         protected override IEnumerable<EndPoint> BindInternal(IEnumerable<EndPoint> localEndPoints)
         {
-            Dictionary<EndPoint, System.Net.Sockets.Socket> newListeners = new Dictionary<EndPoint, System.Net.Sockets.Socket>();
+            var newListeners = new Dictionary<EndPoint, System.Net.Sockets.Socket>();
             try
             {
                 // Process all the addresses
-                foreach (EndPoint localEP in localEndPoints)
+                foreach (var localEp in localEndPoints)
                 {
-                    EndPoint ep = localEP;
+                    var ep = localEp;
                     if (ep == null)
                         ep = new IPEndPoint(IPAddress.Any, 0);
-                    System.Net.Sockets.Socket listenSocket = new System.Net.Sockets.Socket(ep.AddressFamily, SocketType.Dgram, ProtocolType.Udp);
+                    var listenSocket = new System.Net.Sockets.Socket(ep.AddressFamily, SocketType.Dgram, ProtocolType.Udp);
                     new DatagramSessionConfigImpl(listenSocket).SetAll(SessionConfig);
                     listenSocket.Bind(ep);
                     newListeners[listenSocket.LocalEndPoint] = listenSocket;
@@ -129,7 +121,7 @@ namespace Mina.Transport.Socket
             catch (Exception)
             {
                 // Roll back if failed to bind all addresses
-                foreach (System.Net.Sockets.Socket listenSocket in newListeners.Values)
+                foreach (var listenSocket in newListeners.Values)
                 {
                     try
                     {
@@ -144,9 +136,9 @@ namespace Mina.Transport.Socket
                 throw;
             }
 
-            foreach (KeyValuePair<EndPoint, System.Net.Sockets.Socket> pair in newListeners)
+            foreach (var pair in newListeners)
             {
-                SocketContext ctx = new SocketContext(pair.Value, SessionConfig);
+                var ctx = new SocketContext(pair.Value, SessionConfig);
                 _listenSockets[pair.Key] = ctx;
                 BeginReceive(ctx);
             }
@@ -159,7 +151,7 @@ namespace Mina.Transport.Socket
         /// <inheritdoc/>
         protected override void UnbindInternal(IEnumerable<EndPoint> localEndPoints)
         {
-            foreach (EndPoint ep in localEndPoints)
+            foreach (var ep in localEndPoints)
             {
                 SocketContext ctx;
                 if (!_listenSockets.TryGetValue(ep, out ctx))
@@ -175,7 +167,7 @@ namespace Mina.Transport.Socket
         }
 
         /// <inheritdoc/>
-        protected override void Dispose(Boolean disposing)
+        protected override void Dispose(bool disposing)
         {
             if (!_disposed)
             {
@@ -183,7 +175,7 @@ namespace Mina.Transport.Socket
                 {
                     if (_listenSockets.Count > 0)
                     {
-                        foreach (SocketContext ctx in _listenSockets.Values)
+                        foreach (var ctx in _listenSockets.Values)
                         {
                             ctx.Close();
                             ((IDisposable)ctx.Socket).Dispose();
@@ -196,35 +188,35 @@ namespace Mina.Transport.Socket
             base.Dispose(disposing);
         }
 
-        private void EndReceive(SocketContext ctx, IoBuffer buf, EndPoint remoteEP)
+        private void EndReceive(SocketContext ctx, IOBuffer buf, EndPoint remoteEp)
         {
-            IoSession session = NewSessionWithoutLock(remoteEP, ctx);
+            var session = NewSessionWithoutLock(remoteEp, ctx);
             session.FilterChain.FireMessageReceived(buf);
             BeginReceive(ctx);
         }
 
-        private IoSession NewSessionWithoutLock(EndPoint remoteEP, SocketContext ctx)
+        private IOSession NewSessionWithoutLock(EndPoint remoteEp, SocketContext ctx)
         {
-            IoSession session;
+            IOSession session;
             lock (_sessionRecycler)
             {
-                session = _sessionRecycler.Recycle(remoteEP);
+                session = _sessionRecycler.Recycle(remoteEp);
 
                 if (session != null)
                     return session;
 
                 // If a new session needs to be created.
-                session = new AsyncDatagramSession(this, this, ctx, remoteEP, ReuseBuffer);
+                session = new AsyncDatagramSession(this, this, ctx, remoteEp, ReuseBuffer);
                 _sessionRecycler.Put(session);
             }
 
-            InitSession<IoFuture>(session, null, null);
+            InitSession<IOFuture>(session, null, null);
 
             try
             {
                 FilterChainBuilder.BuildFilterChain(session.FilterChain);
 
-                IoServiceSupport serviceSupport = session.Service as IoServiceSupport;
+                var serviceSupport = session.Service as IOServiceSupport;
                 if (serviceSupport != null)
                     serviceSupport.FireSessionCreated(session);
             }
@@ -240,9 +232,9 @@ namespace Mina.Transport.Socket
         {
             public readonly System.Net.Sockets.Socket _socket;
             private readonly ConcurrentQueue<AsyncDatagramSession> _flushingSessions = new ConcurrentQueue<AsyncDatagramSession>();
-            private Int32 _writing;
+            private int _writing;
 
-            public System.Net.Sockets.Socket Socket { get { return _socket; } }
+            public System.Net.Sockets.Socket Socket => _socket;
 
             public void Flush(AsyncDatagramSession session)
             {
@@ -250,17 +242,14 @@ namespace Mina.Transport.Socket
                     Flush();
             }
 
-            private Boolean ScheduleFlush(AsyncDatagramSession session)
+            private bool ScheduleFlush(AsyncDatagramSession session)
             {
                 if (session.ScheduledForFlush())
                 {
                     _flushingSessions.Enqueue(session);
                     return true;
                 }
-                else
-                {
-                    return false;
-                }
+                return false;
             }
 
             private void Flush()
@@ -300,14 +289,14 @@ namespace Mina.Transport.Socket
                     break;
                 }
 
-                IoBuffer buf = req.Message as IoBuffer;
+                var buf = req.Message as IOBuffer;
                 if (buf == null)
                     EndSend(session, new InvalidOperationException("Don't know how to handle message of type '"
                             + req.Message.GetType().Name + "'.  Are you missing a protocol encoder?"));
 
                 if (buf.HasRemaining)
                 {
-                    EndPoint destination = req.Destination;
+                    var destination = req.Destination;
                     if (destination == null)
                         destination = session.RemoteEndPoint;
                     BeginSend(session, buf, destination);
@@ -318,14 +307,14 @@ namespace Mina.Transport.Socket
                 }
             }
 
-            private void EndSend(AsyncDatagramSession session, Int32 bytesTransferred)
+            private void EndSend(AsyncDatagramSession session, int bytesTransferred)
             {
                 session.IncreaseWrittenBytes(bytesTransferred, DateTime.Now);
 
-                IWriteRequest req = session.CurrentWriteRequest;
+                var req = session.CurrentWriteRequest;
                 if (req != null)
                 {
-                    IoBuffer buf = req.Message as IoBuffer;
+                    var buf = req.Message as IOBuffer;
                     if (buf == null)
                     {
                         // we only send buffers and files so technically it shouldn't happen
@@ -333,7 +322,7 @@ namespace Mina.Transport.Socket
                     else
                     {
                         // Buffer has been sent, clear the current request.
-                        Int32 pos = buf.Position;
+                        var pos = buf.Position;
                         buf.Reset();
 
                         session.CurrentWriteRequest = null;
@@ -356,7 +345,7 @@ namespace Mina.Transport.Socket
 
             private void EndSend(AsyncDatagramSession session, Exception ex)
             {
-                IWriteRequest req = session.CurrentWriteRequest;
+                var req = session.CurrentWriteRequest;
                 if (req != null)
                     req.Future.Exception = ex;
                 session.FilterChain.FireExceptionCaught(ex);
@@ -389,7 +378,7 @@ namespace Mina.Transport.Socket
         public void Remove(AsyncDatagramSession session)
         {
             SessionRecycler.Remove(session);
-            IoServiceSupport support = session.Service as IoServiceSupport;
+            var support = session.Service as IOServiceSupport;
             if (support != null)
                 support.FireSessionDestroyed(session);
         }
@@ -400,27 +389,27 @@ namespace Mina.Transport.Socket
             throw new NotSupportedException();
         }
 
-        void IoProcessor.Write(IoSession session, IWriteRequest writeRequest)
+        void IOProcessor.Write(IOSession session, IWriteRequest writeRequest)
         {
             Write((AsyncDatagramSession)session, writeRequest);
         }
 
-        void IoProcessor.Flush(IoSession session)
+        void IOProcessor.Flush(IOSession session)
         {
             Flush((AsyncDatagramSession)session);
         }
 
-        void IoProcessor.Add(IoSession session)
+        void IOProcessor.Add(IOSession session)
         {
             Add((AsyncDatagramSession)session);
         }
 
-        void IoProcessor.Remove(IoSession session)
+        void IOProcessor.Remove(IOSession session)
         {
             Remove((AsyncDatagramSession)session);
         }
 
-        void IoProcessor.UpdateTrafficControl(IoSession session)
+        void IOProcessor.UpdateTrafficControl(IOSession session)
         {
             UpdateTrafficControl((AsyncDatagramSession)session);
         }

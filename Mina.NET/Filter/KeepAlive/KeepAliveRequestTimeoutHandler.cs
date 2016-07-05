@@ -15,42 +15,27 @@ namespace Mina.Filter.KeepAlive
         /// <summary>
         /// Do nothing.
         /// </summary>
-        public static IKeepAliveRequestTimeoutHandler Noop
-        {
-            get { return NoopHandler.Instance; }
-        }
+        public static IKeepAliveRequestTimeoutHandler Noop => NoopHandler.Instance;
 
         /// <summary>
         /// Logs a warning message, but doesn't do anything else.
         /// </summary>
-        public static IKeepAliveRequestTimeoutHandler Log
-        {
-            get { return LogHandler.Instance; }
-        }
+        public static IKeepAliveRequestTimeoutHandler Log => LogHandler.Instance;
 
         /// <summary>
         /// Throws a <see cref="KeepAliveRequestTimeoutException"/>.
         /// </summary>
-        public static IKeepAliveRequestTimeoutHandler Exception
-        {
-            get { return ExceptionHandler.Instance; }
-        }
+        public static IKeepAliveRequestTimeoutHandler Exception => ExceptionHandler.Instance;
 
         /// <summary>
         /// Closes the connection after logging.
         /// </summary>
-        public static IKeepAliveRequestTimeoutHandler Close
-        {
-            get { return CloseHandler.Instance; }
-        }
+        public static IKeepAliveRequestTimeoutHandler Close => CloseHandler.Instance;
 
         /// <summary>
         /// A special handler for the 'deaf speaker' mode.
         /// </summary>
-        public static IKeepAliveRequestTimeoutHandler DeafSpeaker
-        {
-            get { return DeafSpeakerHandler.Instance; }
-        }
+        public static IKeepAliveRequestTimeoutHandler DeafSpeaker => DeafSpeakerHandler.Instance;
 
         class NoopHandler : IKeepAliveRequestTimeoutHandler
         {
@@ -58,7 +43,7 @@ namespace Mina.Filter.KeepAlive
 
             private NoopHandler() { }
 
-            public void KeepAliveRequestTimedOut(KeepAliveFilter filter, IoSession session)
+            public void KeepAliveRequestTimedOut(KeepAliveFilter filter, IOSession session)
             {
                 // do nothing
             }
@@ -70,7 +55,7 @@ namespace Mina.Filter.KeepAlive
 
             private LogHandler() { }
 
-            public void KeepAliveRequestTimedOut(KeepAliveFilter filter, IoSession session)
+            public void KeepAliveRequestTimedOut(KeepAliveFilter filter, IOSession session)
             {
                 if (log.IsWarnEnabled)
                     log.WarnFormat("A keep-alive response message was not received within {0} second(s).",
@@ -84,7 +69,7 @@ namespace Mina.Filter.KeepAlive
 
             private ExceptionHandler() { }
 
-            public void KeepAliveRequestTimedOut(KeepAliveFilter filter, IoSession session)
+            public void KeepAliveRequestTimedOut(KeepAliveFilter filter, IOSession session)
             {
                 throw new KeepAliveRequestTimeoutException("A keep-alive response message was not received within "
                    + filter.RequestTimeout + " second(s).");
@@ -97,7 +82,7 @@ namespace Mina.Filter.KeepAlive
 
             private CloseHandler() { }
 
-            public void KeepAliveRequestTimedOut(KeepAliveFilter filter, IoSession session)
+            public void KeepAliveRequestTimedOut(KeepAliveFilter filter, IOSession session)
             {
                 if (log.IsWarnEnabled)
                     log.WarnFormat("Closing the session because a keep-alive response message was not received within {0} second(s).",
@@ -112,7 +97,7 @@ namespace Mina.Filter.KeepAlive
 
             private DeafSpeakerHandler() { }
 
-            public void KeepAliveRequestTimedOut(KeepAliveFilter filter, IoSession session)
+            public void KeepAliveRequestTimedOut(KeepAliveFilter filter, IOSession session)
             {
                 throw new ApplicationException("Shouldn't be invoked.  Please file a bug report.");
             }

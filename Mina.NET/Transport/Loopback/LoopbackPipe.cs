@@ -4,30 +4,17 @@ namespace Mina.Transport.Loopback
 {
     class LoopbackPipe
     {
-        private readonly LoopbackAcceptor _acceptor;
-        private readonly LoopbackEndPoint _endpoint;
-        private readonly IoHandler _handler;
-
-        public LoopbackPipe(LoopbackAcceptor acceptor, LoopbackEndPoint endpoint, IoHandler handler)
+        public LoopbackPipe(LoopbackAcceptor acceptor, LoopbackEndPoint endpoint, IOHandler handler)
         {
-            _acceptor = acceptor;
-            _endpoint = endpoint;
-            _handler = handler;
+            Acceptor = acceptor;
+            Endpoint = endpoint;
+            Handler = handler;
         }
 
-        public LoopbackAcceptor Acceptor
-        {
-            get { return _acceptor; }
-        }
+        public LoopbackAcceptor Acceptor { get; }
 
-        public LoopbackEndPoint Endpoint
-        {
-            get { return _endpoint; }
-        }
+        public LoopbackEndPoint Endpoint { get; }
 
-        public IoHandler Handler
-        {
-            get { return _handler; }
-        }
+        public IOHandler Handler { get; }
     }
 }
