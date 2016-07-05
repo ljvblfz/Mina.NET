@@ -207,7 +207,7 @@
     <Compile Include="Handler\Chain\ChainedIOHandler.cs" />
     <Compile Include="Handler\Chain\INextCommand.cs" />
     <Compile Include="Handler\Chain\IOHandlerChain.cs" />
-    <Compile Include="Handler\Chain\IoHandlerCommand.cs" />
+    <Compile Include="Handler\Chain\IOHandlerCommand.cs" />
     <Compile Include="Handler\Demux\DemuxingIoHandler.cs" />
     <Compile Include="Handler\Demux\ExceptionHandler.cs" />
     <Compile Include="Handler\Demux\IExceptionHandler.cs" />
