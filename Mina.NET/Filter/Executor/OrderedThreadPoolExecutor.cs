@@ -20,7 +20,7 @@ namespace Mina.Filter.Executor
         private readonly AttributeKey _tasksQueue = new AttributeKey(typeof(OrderedThreadPoolExecutor), "tasksQueue");
 
         /// <summary>
-        /// Instantiates with a <see cref="NoopIoEventQueueHandler"/>.
+        /// Instantiates with a <see cref="NoopIOEventQueueHandler"/>.
         /// </summary>
         public OrderedThreadPoolExecutor()
             : this(null)
