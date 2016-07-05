@@ -195,7 +195,7 @@
     <Compile Include="Core\Service\IOHandler.cs" />
     <Compile Include="Core\Service\IOHandlerAdapter.cs" />
     <Compile Include="Core\Session\AbstractIOSession.cs" />
-    <Compile Include="Core\Session\AbstractIoSessionConfig.cs" />
+    <Compile Include="Core\Session\AbstractIOSessionConfig.cs" />
     <Compile Include="Core\Session\DummySession.cs" />
     <Compile Include="Core\Session\IdleStatus.cs" />
     <Compile Include="Core\Session\IoSession.cs" />

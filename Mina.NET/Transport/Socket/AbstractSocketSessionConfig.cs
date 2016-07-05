@@ -2,7 +2,7 @@
 
 namespace Mina.Transport.Socket
 {
-    abstract class AbstractSocketSessionConfig : AbstractIoSessionConfig, ISocketSessionConfig
+    abstract class AbstractSocketSessionConfig : AbstractIOSessionConfig, ISocketSessionConfig
     {
         protected override void DoSetAll(IOSessionConfig config)
         {

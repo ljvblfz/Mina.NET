@@ -157,7 +157,7 @@ namespace Mina.Core.Session
             }
         }
 
-        class DummyConfig : AbstractIoSessionConfig
+        class DummyConfig : AbstractIOSessionConfig
         {
             protected override void DoSetAll(IOSessionConfig config)
             {

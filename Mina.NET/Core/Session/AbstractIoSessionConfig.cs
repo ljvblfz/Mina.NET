@@ -5,7 +5,7 @@ namespace Mina.Core.Session
     /// <summary>
     /// A base implementation of <see cref="IOSessionConfig"/>.
     /// </summary>
-    public abstract class AbstractIoSessionConfig : IOSessionConfig
+    public abstract class AbstractIOSessionConfig : IOSessionConfig
     {
         private int _idleTimeForRead;
         private int _idleTimeForWrite;

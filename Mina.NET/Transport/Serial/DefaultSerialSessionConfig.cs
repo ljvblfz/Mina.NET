@@ -6,7 +6,7 @@ namespace Mina.Transport.Serial
     /// <summary>
     /// The default configuration for a serial session 
     /// </summary>
-    class DefaultSerialSessionConfig : AbstractIoSessionConfig, ISerialSessionConfig
+    class DefaultSerialSessionConfig : AbstractIOSessionConfig, ISerialSessionConfig
     {
         public DefaultSerialSessionConfig()
         {
