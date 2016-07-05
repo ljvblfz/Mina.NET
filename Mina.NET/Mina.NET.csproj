@@ -71,7 +71,7 @@
     <Compile Include="Core\Filterchain\IOFilter.cs" />
     <Compile Include="Core\Filterchain\IOFilterAdapter.cs" />
     <Compile Include="Core\Filterchain\IOFilterChain.cs" />
-    <Compile Include="Core\Filterchain\IoFilterChainBuilder.cs" />
+    <Compile Include="Core\Filterchain\IOFilterChainBuilder.cs" />
     <Compile Include="Core\Filterchain\IoFilterEvent.cs" />
     <Compile Include="Core\Filterchain\IoFilterLifeCycleException.cs" />
     <Compile Include="Core\Filterchain\VirtualDefaultIoFilterChain.cs" />
