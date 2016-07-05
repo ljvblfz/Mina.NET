@@ -21,11 +21,11 @@ namespace Mina.Filter.Executor
         int EstimateSize(IOEvent ioe);
     }
 
-    class DefaultIoEventSizeEstimator : IOEventSizeEstimator
+    class DefaultIOEventSizeEstimator : IOEventSizeEstimator
     {
         static readonly Dictionary<Type, int> Type2Size = new Dictionary<Type, int>();
 
-        static DefaultIoEventSizeEstimator()
+        static DefaultIOEventSizeEstimator()
         {
             Type2Size[typeof(bool)] = sizeof(bool);
             Type2Size[typeof(bool)] = sizeof(bool);

@@ -19,11 +19,11 @@ namespace Mina.Filter.Executor
         private int _waiters;
 
         public IOEventQueueThrottle()
-            : this(new DefaultIoEventSizeEstimator(), 65536)
+            : this(new DefaultIOEventSizeEstimator(), 65536)
         { }
 
         public IOEventQueueThrottle(int threshold)
-            : this(new DefaultIoEventSizeEstimator(), threshold)
+            : this(new DefaultIOEventSizeEstimator(), threshold)
         { }
 
         public IOEventQueueThrottle(IOEventSizeEstimator sizeEstimator, int threshold)

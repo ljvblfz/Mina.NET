@@ -164,7 +164,7 @@
     <Compile Include="Filter\Executor\IOEventExecutor.cs" />
     <Compile Include="Filter\Executor\IOEventQueueHandler.cs" />
     <Compile Include="Filter\Executor\IOEventQueueThrottle.cs" />
-    <Compile Include="Filter\Executor\IoEventSizeEstimator.cs" />
+    <Compile Include="Filter\Executor\IOEventSizeEstimator.cs" />
     <Compile Include="Filter\Executor\OrderedThreadPoolExecutor.cs" />
     <Compile Include="Filter\Executor\ThreadPoolExecutor.cs" />
     <Compile Include="Filter\Executor\UnorderedThreadPoolExecutor.cs" />
