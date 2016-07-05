@@ -7,25 +7,25 @@ namespace Mina.Core.Filterchain
 {
     /// <summary>
     /// The default implementation of <see cref="IOFilterChainBuilder"/> which is useful
-    /// in most cases.  <see cref="DefaultIoFilterChainBuilder"/> has an identical interface
+    /// in most cases.  <see cref="DefaultIOFilterChainBuilder"/> has an identical interface
     /// with <see cref="IOFilter"/>; it contains a list of <see cref="IOFilter"/>s that you can
     /// modify. The <see cref="IOFilter"/>s which are added to this builder will be appended
     /// to the <see cref="IOFilterChain"/> when BuildFilterChain(IoFilterChain) is
     /// invoked.
     /// However, the identical interface doesn't mean that it behaves in an exactly
-    /// same way with <see cref="IOFilterChain"/>.  <see cref="DefaultIoFilterChainBuilder"/>
+    /// same way with <see cref="IOFilterChain"/>.  <see cref="DefaultIOFilterChainBuilder"/>
     /// doesn't manage the life cycle of the <see cref="IOFilter"/>s at all, and the
     /// existing <see cref="IOSession"/>s won't get affected by the changes in this builder.
     /// <see cref="IOFilterChainBuilder"/>s affect only newly created <see cref="IOSession"/>s.
     /// </summary>
-    public class DefaultIoFilterChainBuilder : IOFilterChainBuilder
+    public class DefaultIOFilterChainBuilder : IOFilterChainBuilder
     {
         private readonly List<EntryImpl> _entries;
         private readonly object _syncRoot;
 
         /// <summary>
         /// </summary>
-        public DefaultIoFilterChainBuilder()
+        public DefaultIOFilterChainBuilder()
         {
             _entries = new List<EntryImpl>();
             _syncRoot = ((ICollection)_entries).SyncRoot;
@@ -33,7 +33,7 @@ namespace Mina.Core.Filterchain
 
         /// <summary>
         /// </summary>
-        public DefaultIoFilterChainBuilder(DefaultIoFilterChainBuilder filterChain)
+        public DefaultIOFilterChainBuilder(DefaultIOFilterChainBuilder filterChain)
         {
             if (filterChain == null)
                 throw new ArgumentNullException(nameof(filterChain));
@@ -225,9 +225,9 @@ namespace Mina.Core.Filterchain
 
         class EntryImpl : IEntry<IOFilter, INextFilter>
         {
-            private readonly DefaultIoFilterChainBuilder _chain;
+            private readonly DefaultIOFilterChainBuilder _chain;
 
-            public EntryImpl(DefaultIoFilterChainBuilder chain, string name, IOFilter filter)
+            public EntryImpl(DefaultIOFilterChainBuilder chain, string name, IOFilter filter)
             {
                 if (name == null)
                     throw new ArgumentNullException(nameof(name));

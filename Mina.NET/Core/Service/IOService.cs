@@ -49,7 +49,7 @@ namespace Mina.Core.Service
         /// <summary>
         /// A shortcut for <tt>( ( DefaultIoFilterChainBuilder ) </tt><see cref="FilterChainBuilder"/><tt> )</tt>.
         /// </summary>
-        DefaultIoFilterChainBuilder FilterChain { get; }
+        DefaultIOFilterChainBuilder FilterChain { get; }
         /// <summary>
         /// Gets or sets the <see cref="IOSessionDataStructureFactory"/> that provides
         /// related data structures for a new session created by this service.

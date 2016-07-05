@@ -82,10 +82,10 @@ namespace Mina.Core.Service
         public IOSessionConfig SessionConfig { get; }
 
         /// <inheritdoc/>
-        public IOFilterChainBuilder FilterChainBuilder { get; set; } = new DefaultIoFilterChainBuilder();
+        public IOFilterChainBuilder FilterChainBuilder { get; set; } = new DefaultIOFilterChainBuilder();
 
         /// <inheritdoc/>
-        public DefaultIoFilterChainBuilder FilterChain => FilterChainBuilder as DefaultIoFilterChainBuilder;
+        public DefaultIOFilterChainBuilder FilterChain => FilterChainBuilder as DefaultIOFilterChainBuilder;
 
         /// <inheritdoc/>
         public IOSessionDataStructureFactory SessionDataStructureFactory

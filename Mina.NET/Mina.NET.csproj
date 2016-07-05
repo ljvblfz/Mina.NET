@@ -64,11 +64,11 @@
     <Compile Include="Core\File\FileInfoFileRegion.cs" />
     <Compile Include="Core\File\IFileRegion.cs" />
     <Compile Include="Core\Filterchain\DefaultIOFilterChain.cs" />
-    <Compile Include="Core\Filterchain\DefaultIoFilterChainBuilder.cs" />
+    <Compile Include="Core\Filterchain\DefaultIOFilterChainBuilder.cs" />
     <Compile Include="Core\Filterchain\IEntry.cs" />
     <Compile Include="Core\Filterchain\INextFilter.cs" />
     <Compile Include="Core\Filterchain\Chain.cs" />
-    <Compile Include="Core\Filterchain\IoFilter.cs" />
+    <Compile Include="Core\Filterchain\IOFilter.cs" />
     <Compile Include="Core\Filterchain\IoFilterAdapter.cs" />
     <Compile Include="Core\Filterchain\IoFilterChain.cs" />
     <Compile Include="Core\Filterchain\IoFilterChainBuilder.cs" />
