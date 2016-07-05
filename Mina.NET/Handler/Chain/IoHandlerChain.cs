@@ -8,7 +8,7 @@ namespace Mina.Handler.Chain
     /// <summary>
     /// A chain of <see cref="IOHandlerCommand"/>s.
     /// </summary>
-    public class IoHandlerChain : Chain<IoHandlerChain, IOHandlerCommand, INextCommand>, IOHandlerCommand
+    public class IOHandlerChain : Chain<IOHandlerChain, IOHandlerCommand, INextCommand>, IOHandlerCommand
     {
         private static volatile int _nextId;
 
@@ -17,11 +17,11 @@ namespace Mina.Handler.Chain
 
         /// <summary>
         /// </summary>
-        public IoHandlerChain()
+        public IOHandlerChain()
             : base(
             e => new NextCommand(e),
             () => new HeadCommand(),
-            () => new TailCommand(typeof(IoHandlerChain).Name + "." + Guid.NewGuid() + ".nextCommand")
+            () => new TailCommand(typeof(IOHandlerChain).Name + "." + Guid.NewGuid() + ".nextCommand")
             )
         {
             _nextCommandKey = ((TailCommand)Tail.Filter).NextCommandKey;
