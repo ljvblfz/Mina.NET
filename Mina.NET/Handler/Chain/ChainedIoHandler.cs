@@ -8,17 +8,17 @@ namespace Mina.Handler.Chain
     /// An <see cref="IOHandler"/> which executes an <see cref="IoHandlerChain"/>
     /// on a <tt>messageReceived</tt> event.
     /// </summary>
-    public class ChainedIoHandler : IOHandlerAdapter
+    public class ChainedIOHandler : IOHandlerAdapter
     {
         /// <summary>
         /// </summary>
-        public ChainedIoHandler()
+        public ChainedIOHandler()
             : this(new IoHandlerChain())
         { }
 
         /// <summary>
         /// </summary>
-        public ChainedIoHandler(IoHandlerChain chain)
+        public ChainedIOHandler(IoHandlerChain chain)
         {
             if (chain == null)
                 throw new ArgumentNullException(nameof(chain));

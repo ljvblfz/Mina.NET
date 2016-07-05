@@ -204,7 +204,7 @@
     <Compile Include="Core\Write\IWriteRequest.cs" />
     <Compile Include="Filter\Util\ReferenceCountingFilter.cs" />
     <Compile Include="Filter\Util\SessionAttributeInitializingFilter.cs" />
-    <Compile Include="Handler\Chain\ChainedIoHandler.cs" />
+    <Compile Include="Handler\Chain\ChainedIOHandler.cs" />
     <Compile Include="Handler\Chain\INextCommand.cs" />
     <Compile Include="Handler\Chain\IoHandlerChain.cs" />
     <Compile Include="Handler\Chain\IoHandlerCommand.cs" />
