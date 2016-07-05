@@ -196,7 +196,7 @@ namespace Mina.Core.Service
                 closeFutures.Add(s.Close(true));
             }
 
-            new CompositeIoFuture<ICloseFuture>(closeFutures).Await();
+            new CompositeIOFuture<ICloseFuture>(closeFutures).Await();
         }
 
         #region IoServiceSupport

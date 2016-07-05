@@ -7,7 +7,7 @@ namespace Mina.Core.Future
     /// An <see cref="IOFuture"/> of <see cref="IOFuture"/>s.
     /// It is useful when you want to get notified when all <see cref="IOFuture"/>s are complete.
     /// </summary>
-    public class CompositeIoFuture<TFuture> : DefaultIoFuture
+    public class CompositeIOFuture<TFuture> : DefaultIoFuture
         where TFuture : IOFuture
     {
         private int _unnotified;
@@ -15,7 +15,7 @@ namespace Mina.Core.Future
 
         /// <summary>
         /// </summary>
-        public CompositeIoFuture(IEnumerable<TFuture> children)
+        public CompositeIOFuture(IEnumerable<TFuture> children)
             : base(null)
         {
             foreach (var f in children)
