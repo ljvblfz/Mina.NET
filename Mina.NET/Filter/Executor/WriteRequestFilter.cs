@@ -12,7 +12,7 @@ namespace Mina.Filter.Executor
     public class WriteRequestFilter : IOFilterAdapter
     {
         /// <summary>
-        /// Instantiates with an <see cref="IoEventQueueThrottle"/>.
+        /// Instantiates with an <see cref="IOEventQueueThrottle"/>.
         /// </summary>
         public WriteRequestFilter()
             : this(new IOEventQueueThrottle())

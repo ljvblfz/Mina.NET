@@ -11,7 +11,7 @@ namespace Mina.Filter.Executor
     public class UnorderedThreadPoolExecutor : ThreadPoolExecutor, IOEventExecutor
     {
         /// <summary>
-        /// Instantiates with a <see cref="NoopIoEventQueueHandler"/>.
+        /// Instantiates with a <see cref="NoopIOEventQueueHandler"/>.
         /// </summary>
         public UnorderedThreadPoolExecutor()
             : this(null)
