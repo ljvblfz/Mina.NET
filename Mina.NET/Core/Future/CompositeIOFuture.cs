@@ -7,7 +7,7 @@ namespace Mina.Core.Future
     /// An <see cref="IOFuture"/> of <see cref="IOFuture"/>s.
     /// It is useful when you want to get notified when all <see cref="IOFuture"/>s are complete.
     /// </summary>
-    public class CompositeIOFuture<TFuture> : DefaultIoFuture
+    public class CompositeIOFuture<TFuture> : DefaultIOFuture
         where TFuture : IOFuture
     {
         private int _unnotified;

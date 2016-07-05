@@ -6,7 +6,7 @@ namespace Mina.Core.Future
     /// <summary>
     /// A default implementation of <see cref="IWriteFuture"/>.
     /// </summary>
-    public class DefaultWriteFuture : DefaultIoFuture, IWriteFuture
+    public class DefaultWriteFuture : DefaultIOFuture, IWriteFuture
     {
         /// <summary>
         /// Returns a new <see cref="DefaultWriteFuture"/> which is already marked as 'written'.

@@ -186,7 +186,7 @@
     <Compile Include="Filter\Stream\StreamWriteFilter.cs" />
     <Compile Include="Filter\Util\CommonEventFilter.cs" />
     <Compile Include="Filter\Util\NoopFilter.cs" />
-    <Compile Include="Core\Future\DefaultIoFuture.cs" />
+    <Compile Include="Core\Future\DefaultIOFuture.cs" />
     <Compile Include="Core\Future\DefaultWriteFuture.cs" />
     <Compile Include="Core\Future\IoFuture.cs" />
     <Compile Include="Core\Future\IWriteFuture.cs" />

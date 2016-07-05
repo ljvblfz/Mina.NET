@@ -6,7 +6,7 @@ namespace Mina.Core.Future
     /// <summary>
     /// A default implementation of <see cref="IConnectFuture"/>.
     /// </summary>
-    public class DefaultConnectFuture : DefaultIoFuture, IConnectFuture
+    public class DefaultConnectFuture : DefaultIOFuture, IConnectFuture
     {
         private static readonly object CANCELED = new object();
 

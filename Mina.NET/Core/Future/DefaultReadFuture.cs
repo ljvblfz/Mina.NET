@@ -6,7 +6,7 @@ namespace Mina.Core.Future
     /// <summary>
     /// A default implementation of <see cref="IReadFuture"/>.
     /// </summary>
-    public class DefaultReadFuture : DefaultIoFuture, IReadFuture
+    public class DefaultReadFuture : DefaultIOFuture, IReadFuture
     {
         private static readonly object CLOSED = new object();
 

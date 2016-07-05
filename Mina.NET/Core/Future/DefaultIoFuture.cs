@@ -11,7 +11,7 @@ namespace Mina.Core.Future
     /// <summary>
     /// A default implementation of <see cref="IOFuture"/> associated with an <see cref="IOSession"/>.
     /// </summary>
-    public class DefaultIoFuture : IOFuture, IDisposable
+    public class DefaultIOFuture : IOFuture, IDisposable
     {
         private readonly IOSession _session;
         private volatile bool _ready;
@@ -26,7 +26,7 @@ namespace Mina.Core.Future
 
         /// <summary>
         /// </summary>
-        public DefaultIoFuture(IOSession session)
+        public DefaultIOFuture(IOSession session)
         {
             _session = session;
         }

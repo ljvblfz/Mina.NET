@@ -5,7 +5,7 @@ namespace Mina.Core.Future
     /// <summary>
     /// A default implementation of <see cref="ICloseFuture"/>.
     /// </summary>
-    public class DefaultCloseFuture : DefaultIoFuture, ICloseFuture
+    public class DefaultCloseFuture : DefaultIOFuture, ICloseFuture
     {
         /// <summary>
         /// </summary>
