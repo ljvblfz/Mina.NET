@@ -10,7 +10,7 @@ namespace Mina.Core.Filterchain
     /// <summary>
     /// A default implementation of <see cref="IOFilterChain"/> that provides
     /// all operations for developers who want to implement their own
-    /// transport layer once used with <see cref="AbstractIoSession"/>.
+    /// transport layer once used with <see cref="AbstractIOSession"/>.
     /// </summary>
     public class DefaultIOFilterChain : Chain<DefaultIOFilterChain, IOFilter, INextFilter>, IOFilterChain
     {
@@ -19,11 +19,11 @@ namespace Mina.Core.Filterchain
 
         private readonly static ILog Log = LogManager.GetLogger(typeof(DefaultIOFilterChain));
 
-        private readonly AbstractIoSession _session;
+        private readonly AbstractIOSession _session;
 
         /// <summary>
         /// </summary>
-        public DefaultIOFilterChain(AbstractIoSession session)
+        public DefaultIOFilterChain(AbstractIOSession session)
             : base(e => new NextFilter(e), () => new HeadFilter(), () => new TailFilter())
         {
             if (session == null)
@@ -346,7 +346,7 @@ namespace Mina.Core.Filterchain
         {
             public override void FilterWrite(INextFilter nextFilter, IOSession session, IWriteRequest writeRequest)
             {
-                var s = session as AbstractIoSession;
+                var s = session as AbstractIOSession;
                 if (s != null)
                 {
                     // Maintain counters.
@@ -423,7 +423,7 @@ namespace Mina.Core.Filterchain
 
             public override void SessionClosed(INextFilter nextFilter, IOSession session)
             {
-                var s = session as AbstractIoSession;
+                var s = session as AbstractIOSession;
                 try
                 {
                     session.Handler.SessionClosed(session);
@@ -467,7 +467,7 @@ namespace Mina.Core.Filterchain
 
             public override void MessageReceived(INextFilter nextFilter, IOSession session, object message)
             {
-                var s = session as AbstractIoSession;
+                var s = session as AbstractIOSession;
                 if (s != null)
                 {
                     var buf = message as IOBuffer;
@@ -487,7 +487,7 @@ namespace Mina.Core.Filterchain
 
             public override void MessageSent(INextFilter nextFilter, IOSession session, IWriteRequest writeRequest)
             {
-                var s = session as AbstractIoSession;
+                var s = session as AbstractIOSession;
                 if (s != null)
                 {
                     s.IncreaseWrittenMessages(writeRequest, DateTime.Now);

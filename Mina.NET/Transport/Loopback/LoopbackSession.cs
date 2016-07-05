@@ -9,7 +9,7 @@ namespace Mina.Transport.Loopback
     /// <summary>
     /// A <see cref="IOSession"/> for loopback transport.
     /// </summary>
-    class LoopbackSession : AbstractIoSession
+    class LoopbackSession : AbstractIOSession
     {
         public static readonly ITransportMetadata Metadata
             = new DefaultTransportMetadata("mina", "loopback", false, false, typeof(LoopbackEndPoint));

@@ -11,7 +11,7 @@ namespace Mina.Core.Session
     /// A dummy <see cref="IOSession"/> for unit-testing or non-network-use of
     /// the classes that depends on <see cref="IOSession"/>.
     /// </summary>
-    public class DummySession : AbstractIoSession
+    public class DummySession : AbstractIOSession
     {
         private static readonly ITransportMetadata Metadata
             = new DefaultTransportMetadata("mina", "dummy", false, false, typeof(IPEndPoint));

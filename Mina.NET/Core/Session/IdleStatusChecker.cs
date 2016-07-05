@@ -22,7 +22,7 @@ namespace Mina.Core.Session
             Interval = interval;
             _idleTimer = new Timer(o =>
             {
-                AbstractIoSession.NotifyIdleness(getSessionsFunc(), DateTime.Now);
+                AbstractIOSession.NotifyIdleness(getSessionsFunc(), DateTime.Now);
             });
         }
 

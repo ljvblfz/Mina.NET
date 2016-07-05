@@ -13,7 +13,7 @@ namespace Mina.Transport.Socket
     /// <summary>
     /// Base implementation of <see cref="IOSession"/> for socket transport (TCP/IP).
     /// </summary>
-    public abstract class SocketSession : AbstractIoSession
+    public abstract class SocketSession : AbstractIOSession
     {
         private static readonly object Dummy = IOBuffer.Wrap(new byte[0]);
         private int _writing;

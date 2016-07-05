@@ -18,7 +18,7 @@ namespace Mina.Transport.Loopback
 
         /// <summary>
         /// </summary>
-        public LoopbackFilterChain(AbstractIoSession session)
+        public LoopbackFilterChain(AbstractIOSession session)
             : base(session)
         {
             Processor = new LoopbackIoProcessor(this);

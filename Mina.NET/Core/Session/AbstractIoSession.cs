@@ -14,7 +14,7 @@ namespace Mina.Core.Session
     /// <summary>
     /// Base implementation of <see cref="IOSession"/>.
     /// </summary>
-    public abstract class AbstractIoSession : IOSession, IDisposable
+    public abstract class AbstractIOSession : IOSession, IDisposable
     {
         private static readonly IWriteRequest CloseRequest = new DefaultWriteRequest(new object());
         private static long _idGenerator;
@@ -24,7 +24,7 @@ namespace Mina.Core.Session
 
         /// <summary>
         /// </summary>
-        protected AbstractIoSession(IOService service)
+        protected AbstractIOSession(IOService service)
         {
             Service = service;
             Handler = service.Handler;
@@ -621,7 +621,7 @@ namespace Mina.Core.Session
 
         private static void ResetCounter(object sender, IoFutureEventArgs e)
         {
-            var session = (AbstractIoSession) e.Future.Session;
+            var session = (AbstractIOSession) e.Future.Session;
             Interlocked.Exchange(ref session._scheduledWriteBytes, 0);
             Interlocked.Exchange(ref session._scheduledWriteMessages, 0);
             session.ReadBytesThroughput = 0;
@@ -700,12 +700,12 @@ namespace Mina.Core.Session
         /// </summary>
         class CloseAwareWriteQueue : IWriteRequestQueue
         {
-            private readonly AbstractIoSession _session;
+            private readonly AbstractIOSession _session;
             private readonly IWriteRequestQueue _queue;
 
             /// <summary>
             /// </summary>
-            public CloseAwareWriteQueue(AbstractIoSession session, IWriteRequestQueue queue)
+            public CloseAwareWriteQueue(AbstractIOSession session, IWriteRequestQueue queue)
             {
                 _session = session;
                 _queue = queue;

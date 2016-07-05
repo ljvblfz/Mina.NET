@@ -147,7 +147,7 @@ namespace Mina.Core.Service
         protected void InitSession<TFuture>(IOSession session, TFuture future, Action<IOSession, TFuture> initializeSession)
             where TFuture : IOFuture
         {
-            var s = session as AbstractIoSession;
+            var s = session as AbstractIOSession;
             if (s != null)
             {
                 s.AttributeMap = s.Service.SessionDataStructureFactory.GetAttributeMap(session);

@@ -10,7 +10,7 @@ using Mina.Core.Session;
 
 namespace Mina.Transport.Serial
 {
-    class SerialSession : AbstractIoSession, ISerialSession
+    class SerialSession : AbstractIOSession, ISerialSession
     {
         public static readonly ITransportMetadata Metadata
             = new DefaultTransportMetadata("mina", "serial", false, true, typeof(SerialEndPoint));
