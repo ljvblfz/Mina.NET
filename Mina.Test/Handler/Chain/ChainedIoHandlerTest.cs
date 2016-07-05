@@ -16,13 +16,13 @@ namespace Mina.Handler.Chain
         [TestMethod]
         public void TestChainedCommand()
         {
-            var chain = new IoHandlerChain();
+            var chain = new IOHandlerChain();
             var buf = new StringBuilder();
             chain.AddLast("A", new TestCommand(buf, 'A'));
             chain.AddLast("B", new TestCommand(buf, 'B'));
             chain.AddLast("C", new TestCommand(buf, 'C'));
 
-            new ChainedIoHandler(chain).MessageReceived(new DummySession(), null);
+            new ChainedIOHandler(chain).MessageReceived(new DummySession(), null);
 
             Assert.AreEqual("ABC", buf.ToString());
         }
