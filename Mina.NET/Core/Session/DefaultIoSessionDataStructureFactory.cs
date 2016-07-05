@@ -6,7 +6,7 @@ namespace Mina.Core.Session
     {
         public IOSessionAttributeMap GetAttributeMap(IOSession session)
         {
-            return new DefaultIoSessionAttributeMap();
+            return new DefaultIOSessionAttributeMap();
         }
 
         public IWriteRequestQueue GetWriteRequestQueue(IOSession session)

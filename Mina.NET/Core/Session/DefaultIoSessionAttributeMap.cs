@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace Mina.Core.Session
 {
-    class DefaultIoSessionAttributeMap : IOSessionAttributeMap
+    class DefaultIOSessionAttributeMap : IOSessionAttributeMap
     {
         private readonly ConcurrentDictionary<object, object> _attributes = new ConcurrentDictionary<object, object>();
 
