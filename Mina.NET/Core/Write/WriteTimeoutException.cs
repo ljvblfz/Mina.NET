@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Runtime.Serialization;
 using Mina.Core.Session;
 
 namespace Mina.Core.Write
@@ -15,19 +16,21 @@ namespace Mina.Core.Write
         /// </summary>
         public WriteTimeoutException(IWriteRequest request)
             : base(request)
-        { }
+        {
+        }
 
         /// <summary>
         /// </summary>
         public WriteTimeoutException(IEnumerable<IWriteRequest> requests)
             : base(requests)
-        { }
+        {
+        }
 
         /// <summary>
         /// </summary>
-        protected WriteTimeoutException(
-          System.Runtime.Serialization.SerializationInfo info,
-          System.Runtime.Serialization.StreamingContext context)
-            : base(info, context) { }
+        protected WriteTimeoutException(SerializationInfo info, StreamingContext context)
+            : base(info, context)
+        {
+        }
     }
 }
