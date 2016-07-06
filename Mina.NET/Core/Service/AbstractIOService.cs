@@ -53,10 +53,10 @@ namespace Mina.Core.Service
         public event EventHandler<IOSessionEventArgs> InputClosed;
 
         /// <inheritdoc/>
-        public event EventHandler<IoSessionMessageEventArgs> MessageReceived;
+        public event EventHandler<IOSessionMessageEventArgs> MessageReceived;
 
         /// <inheritdoc/>
-        public event EventHandler<IoSessionMessageEventArgs> MessageSent;
+        public event EventHandler<IOSessionMessageEventArgs> MessageSent;
 
         /// <summary>
         /// </summary>
@@ -361,7 +361,7 @@ namespace Mina.Core.Service
                 var act = _service.MessageReceived;
                 if (act != null)
                 {
-                    act(_service, new IoSessionMessageEventArgs(session, message));
+                    act(_service, new IOSessionMessageEventArgs(session, message));
                 }
             }
 
@@ -370,7 +370,7 @@ namespace Mina.Core.Service
                 var act = _service.MessageSent;
                 if (act != null)
                 {
-                    act(_service, new IoSessionMessageEventArgs(session, message));
+                    act(_service, new IOSessionMessageEventArgs(session, message));
                 }
             }
 

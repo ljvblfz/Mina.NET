@@ -144,7 +144,7 @@ namespace Mina.Core.Service
         /// <remarks>
         /// If <see cref="Handler"/> is set, use <see cref="IOHandler.MessageReceived(IOSession, object)"/> instead.
         /// </remarks>
-        event EventHandler<IoSessionMessageEventArgs> MessageReceived;
+        event EventHandler<IOSessionMessageEventArgs> MessageReceived;
 
         /// <summary>
         /// Fires when a message is sent. Only available when
@@ -153,7 +153,7 @@ namespace Mina.Core.Service
         /// <remarks>
         /// If <see cref="Handler"/> is set, use <see cref="IOHandler.MessageSent(IOSession, object)"/> instead.
         /// </remarks>
-        event EventHandler<IoSessionMessageEventArgs> MessageSent;
+        event EventHandler<IOSessionMessageEventArgs> MessageSent;
 
         /// <summary>
         /// Gets the IoServiceStatistics object for this service.

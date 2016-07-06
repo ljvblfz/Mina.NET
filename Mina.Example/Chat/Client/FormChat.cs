@@ -31,7 +31,7 @@ namespace Mina.Example.Chat.Client
             SetState(false);
         }
 
-        private void OnMessageReceived(object sender, IoSessionMessageEventArgs e)
+        private void OnMessageReceived(object sender, IOSessionMessageEventArgs e)
         {
             var theMessage = (string)e.Message;
             var result = theMessage.Split(new char[] { ' ' }, 3);

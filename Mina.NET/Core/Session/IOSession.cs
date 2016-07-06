@@ -390,11 +390,11 @@ namespace Mina.Core.Session
     /// <summary>
     /// Provides data for <see cref="IOSession"/>'s message receive/sent event.
     /// </summary>
-    public class IoSessionMessageEventArgs : IOSessionEventArgs
+    public class IOSessionMessageEventArgs : IOSessionEventArgs
     {
         /// <summary>
         /// </summary>
-        public IoSessionMessageEventArgs(IOSession session, object message)
+        public IOSessionMessageEventArgs(IOSession session, object message)
             : base(session)
         {
             Message = message;
