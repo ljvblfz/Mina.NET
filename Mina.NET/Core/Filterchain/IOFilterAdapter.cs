@@ -13,27 +13,33 @@ namespace Mina.Core.Filterchain
     {
         /// <inheritdoc/>
         public virtual void Init()
-        { }
+        {
+        }
 
         /// <inheritdoc/>
         public virtual void Destroy()
-        { }
+        {
+        }
 
         /// <inheritdoc/>
         public virtual void OnPreAdd(IOFilterChain parent, string name, INextFilter nextFilter)
-        { }
+        {
+        }
 
         /// <inheritdoc/>
         public virtual void OnPostAdd(IOFilterChain parent, string name, INextFilter nextFilter)
-        { }
+        {
+        }
 
         /// <inheritdoc/>
         public virtual void OnPreRemove(IOFilterChain parent, string name, INextFilter nextFilter)
-        { }
+        {
+        }
 
         /// <inheritdoc/>
         public virtual void OnPostRemove(IOFilterChain parent, string name, INextFilter nextFilter)
-        { }
+        {
+        }
 
         /// <inheritdoc/>
         public virtual void SessionCreated(INextFilter nextFilter, IOSession session)
@@ -64,7 +70,7 @@ namespace Mina.Core.Filterchain
         {
             nextFilter.ExceptionCaught(session, cause);
         }
-        
+
         /// <inheritdoc/>
         public virtual void InputClosed(INextFilter nextFilter, IOSession session)
         {
