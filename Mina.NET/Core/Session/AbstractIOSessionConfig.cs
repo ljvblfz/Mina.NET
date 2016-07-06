@@ -92,7 +92,9 @@ namespace Mina.Core.Session
         public void SetAll(IOSessionConfig config)
         {
             if (config == null)
+            {
                 throw new ArgumentNullException(nameof(config));
+            }
             ReadBufferSize = config.ReadBufferSize;
             SetIdleTime(IdleStatus.BothIdle, config.GetIdleTime(IdleStatus.BothIdle));
             SetIdleTime(IdleStatus.ReaderIdle, config.GetIdleTime(IdleStatus.ReaderIdle));
