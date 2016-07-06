@@ -14,7 +14,9 @@ namespace Mina.Core.Write
         public WriteRequestWrapper(IWriteRequest request)
         {
             if (request == null)
+            {
                 throw new ArgumentNullException(nameof(request));
+            }
             InnerRequest = request;
         }
 
