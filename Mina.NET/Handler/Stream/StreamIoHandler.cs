@@ -10,11 +10,11 @@ namespace Mina.Handler.Stream
     /// <summary>
     /// A <see cref="IOHandler"/> that adapts asynchronous MINA events to stream I/O.
     /// </summary>
-    public abstract class StreamIoHandler : IOHandlerAdapter
+    public abstract class StreamIOHandler : IOHandlerAdapter
     {
-        private static readonly ILog Log = LogManager.GetLogger(typeof(StreamIoHandler));
-        private static readonly AttributeKey KeyIn = new AttributeKey(typeof(StreamIoHandler), "in");
-        private static readonly AttributeKey KeyOut = new AttributeKey(typeof(StreamIoHandler), "out");
+        private static readonly ILog Log = LogManager.GetLogger(typeof(StreamIOHandler));
+        private static readonly AttributeKey KeyIn = new AttributeKey(typeof(StreamIOHandler), "in");
+        private static readonly AttributeKey KeyOut = new AttributeKey(typeof(StreamIOHandler), "out");
 
         /// <summary>
         /// Gets or sets read timeout in seconds.

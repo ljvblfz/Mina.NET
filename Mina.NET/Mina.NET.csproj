@@ -214,7 +214,7 @@
     <Compile Include="Handler\Demux\IMessageHandler.cs" />
     <Compile Include="Handler\Demux\MessageHandler.cs" />
     <Compile Include="Handler\Stream\IOSessionStream.cs" />
-    <Compile Include="Handler\Stream\StreamIoHandler.cs" />
+    <Compile Include="Handler\Stream\StreamIOHandler.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Transport\Loopback\DefaultLoopbackSessionConfig.cs" />
     <Compile Include="Transport\Loopback\LoopbackAcceptor.cs" />
