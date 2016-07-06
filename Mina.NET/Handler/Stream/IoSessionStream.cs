@@ -13,7 +13,7 @@ namespace Mina.Handler.Stream
     /// <see cref="IOHandler.MesIOSessionved(IoSession, object)"/> events,
     /// and forwards all write operations to the associated <see cref="IOSession"/>.
     /// </summary>
-    public class IoSessionStream : System.IO.Stream
+    public class IOSessionStream : System.IO.Stream
     {
         private volatile bool _closed;
 
@@ -27,7 +27,7 @@ namespace Mina.Handler.Stream
 
         /// <summary>
         /// </summary>
-        public IoSessionStream()
+        public IOSessionStream()
         {
             _syncRoot = new byte[0];
             _buf = IOBuffer.Allocate(16);
@@ -37,7 +37,7 @@ namespace Mina.Handler.Stream
 
         /// <summary>
         /// </summary>
-        public IoSessionStream(IOSession session)
+        public IOSessionStream(IOSession session)
         {
             _session = session;
         }

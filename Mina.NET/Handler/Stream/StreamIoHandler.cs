@@ -34,8 +34,8 @@ namespace Mina.Handler.Stream
             session.Config.SetIdleTime(IdleStatus.ReaderIdle, ReadTimeout);
 
             // Create streams
-            var input = new IoSessionStream();
-            var output = new IoSessionStream(session);
+            var input = new IOSessionStream();
+            var output = new IOSessionStream(session);
             session.SetAttribute(KeyIn, input);
             session.SetAttribute(KeyOut, output);
             ProcessStreamIo(session, input, output);
@@ -44,8 +44,8 @@ namespace Mina.Handler.Stream
         /// <inheritdoc/>
         public override void SessionClosed(IOSession session)
         {
-            var input = session.GetAttribute<IoSessionStream>(KeyIn);
-            var output = session.GetAttribute<IoSessionStream>(KeyOut);
+            var input = session.GetAttribute<IOSessionStream>(KeyIn);
+            var output = session.GetAttribute<IOSessionStream>(KeyOut);
             try
             {
                 input.Close();
@@ -59,7 +59,7 @@ namespace Mina.Handler.Stream
         /// <inheritdoc/>
         public override void MessageReceived(IOSession session, object message)
         {
-            var input = session.GetAttribute<IoSessionStream>(KeyIn);
+            var input = session.GetAttribute<IOSessionStream>(KeyIn);
             input.Write((IOBuffer)message);
         }
 
@@ -69,7 +69,7 @@ namespace Mina.Handler.Stream
             var ioe = cause as IOException;
             if (ioe != null)
             {
-                var input = session.GetAttribute<IoSessionStream>(KeyIn);
+                var input = session.GetAttribute<IOSessionStream>(KeyIn);
                 if (input != null)
                 {
                     input.Exception = ioe;

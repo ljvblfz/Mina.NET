@@ -213,7 +213,7 @@
     <Compile Include="Handler\Demux\IExceptionHandler.cs" />
     <Compile Include="Handler\Demux\IMessageHandler.cs" />
     <Compile Include="Handler\Demux\MessageHandler.cs" />
-    <Compile Include="Handler\Stream\IoSessionStream.cs" />
+    <Compile Include="Handler\Stream\IOSessionStream.cs" />
     <Compile Include="Handler\Stream\StreamIoHandler.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Transport\Loopback\DefaultLoopbackSessionConfig.cs" />
