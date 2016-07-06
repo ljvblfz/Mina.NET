@@ -26,7 +26,7 @@ namespace Mina.Transport.Socket
         /// <summary>
         /// Creates a new acceptor-side session instance.
         /// </summary>
-        internal AsyncDatagramSession(IOService service, IIoProcessor<AsyncDatagramSession> processor,
+        internal AsyncDatagramSession(IOService service, IIOProcessor<AsyncDatagramSession> processor,
             AsyncDatagramAcceptor.SocketContext ctx, EndPoint remoteEp, bool reuseBuffer)
             : base(service, processor, new DefaultDatagramSessionConfig(), ctx.Socket, ctx.Socket.LocalEndPoint, remoteEp, reuseBuffer)
         {

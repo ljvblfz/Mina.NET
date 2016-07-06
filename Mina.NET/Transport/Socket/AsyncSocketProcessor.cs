@@ -7,7 +7,7 @@ using Mina.Core.Write;
 
 namespace Mina.Transport.Socket
 {
-    class AsyncSocketProcessor : IIoProcessor<SocketSession>, IDisposable
+    class AsyncSocketProcessor : IIOProcessor<SocketSession>, IDisposable
     {
         public AsyncSocketProcessor(Func<IEnumerable<IOSession>> getSessionsFunc)
         {

@@ -229,7 +229,7 @@ namespace Mina.Transport.Socket
         }
 
         /// <inheritdoc/>
-        protected abstract IOSession NewSession(IIoProcessor<SocketSession> processor, System.Net.Sockets.Socket socket);
+        protected abstract IOSession NewSession(IIOProcessor<SocketSession> processor, System.Net.Sockets.Socket socket);
 
         /// <summary>
         /// Begins an accept operation.

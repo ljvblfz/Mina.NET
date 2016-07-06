@@ -13,7 +13,7 @@ namespace Mina.Transport.Serial
     /// <summary>
     /// <see cref="IOConnector"/> for serial communication transport.
     /// </summary>
-    public class SerialConnector : AbstractIOConnector, IIoProcessor<SerialSession>
+    public class SerialConnector : AbstractIOConnector, IIOProcessor<SerialSession>
     {
         private readonly IdleStatusChecker _idleStatusChecker;
 
@@ -123,27 +123,27 @@ namespace Mina.Transport.Serial
                 Flush(session);
         }
 
-        void IIoProcessor<SerialSession>.Add(SerialSession session)
+        void IIOProcessor<SerialSession>.Add(SerialSession session)
         {
             Add(session);
         }
 
-        void IIoProcessor<SerialSession>.Write(SerialSession session, IWriteRequest writeRequest)
+        void IIOProcessor<SerialSession>.Write(SerialSession session, IWriteRequest writeRequest)
         {
             Write(session, writeRequest);
         }
 
-        void IIoProcessor<SerialSession>.Flush(SerialSession session)
+        void IIOProcessor<SerialSession>.Flush(SerialSession session)
         {
             Flush(session);
         }
 
-        void IIoProcessor<SerialSession>.Remove(SerialSession session)
+        void IIOProcessor<SerialSession>.Remove(SerialSession session)
         {
             Remove(session);
         }
 
-        void IIoProcessor<SerialSession>.UpdateTrafficControl(SerialSession session)
+        void IIOProcessor<SerialSession>.UpdateTrafficControl(SerialSession session)
         {
             UpdateTrafficControl(session);
         }

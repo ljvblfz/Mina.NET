@@ -15,7 +15,7 @@ namespace Mina.Transport.Socket
         /// <summary>
         /// Creates a new connector-side session instance.
         /// </summary>
-        public AsyncDatagramSession(IOService service, IIoProcessor<SocketSession> processor,
+        public AsyncDatagramSession(IOService service, IIOProcessor<SocketSession> processor,
             System.Net.Sockets.Socket socket, EndPoint remoteEp,
             SocketAsyncEventArgsBuffer readBuffer, SocketAsyncEventArgsBuffer writeBuffer, bool reuseBuffer)
             : base(service, processor, new DatagramSessionConfigImpl(socket), socket, socket.LocalEndPoint, socket.RemoteEndPoint, reuseBuffer)

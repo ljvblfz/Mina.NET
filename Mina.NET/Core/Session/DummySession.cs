@@ -17,7 +17,7 @@ namespace Mina.Core.Session
             = new DefaultTransportMetadata("mina", "dummy", false, false, typeof(IPEndPoint));
 
         private volatile IOHandler _handler = new IOHandlerAdapter();
-        private readonly IIoProcessor<DummySession> _processor;
+        private readonly IIOProcessor<DummySession> _processor;
         private volatile EndPoint _remoteAddress = AnonymousEndPoint.Instance;
         private volatile ITransportMetadata _transportMetadata = Metadata;
 
@@ -93,7 +93,7 @@ namespace Mina.Core.Session
             }
         }
 
-        class DummyProcessor : IIoProcessor<DummySession>
+        class DummyProcessor : IIOProcessor<DummySession>
         {
             public void Add(DummySession session)
             {

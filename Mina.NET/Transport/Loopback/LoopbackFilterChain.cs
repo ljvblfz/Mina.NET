@@ -21,7 +21,7 @@ namespace Mina.Transport.Loopback
         public LoopbackFilterChain(AbstractIOSession session)
             : base(session)
         {
-            Processor = new LoopbackIoProcessor(this);
+            Processor = new LoopbackIOProcessor(this);
         }
 
         public void Start()
@@ -31,7 +31,7 @@ namespace Mina.Transport.Loopback
             FlushPendingDataQueues((LoopbackSession)Session);
         }
 
-        internal IIoProcessor<LoopbackSession> Processor { get; }
+        internal IIOProcessor<LoopbackSession> Processor { get; }
 
         private void PushEvent(IOEvent e)
         {
@@ -174,11 +174,11 @@ namespace Mina.Transport.Loopback
             PushEvent(new IOEvent(IOEventType.Close, Session, null));
         }
 
-        class LoopbackIoProcessor : IIoProcessor<LoopbackSession>
+        class LoopbackIOProcessor : IIOProcessor<LoopbackSession>
         {
             private readonly LoopbackFilterChain _chain;
 
-            public LoopbackIoProcessor(LoopbackFilterChain chain)
+            public LoopbackIOProcessor(LoopbackFilterChain chain)
             {
                 _chain = chain;
             }

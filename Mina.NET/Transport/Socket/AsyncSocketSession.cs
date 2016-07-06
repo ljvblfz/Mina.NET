@@ -32,7 +32,7 @@ namespace Mina.Transport.Socket
         /// <param name="readBuffer">the <see cref="SocketAsyncEventArgsBuffer"/> as reading buffer</param>
         /// <param name="writeBuffer">the <see cref="SocketAsyncEventArgsBuffer"/> as writing buffer</param>
         /// <param name="reuseBuffer">whether or not reuse internal buffer, see <seealso cref="SocketSession.ReuseBuffer"/> for more</param>
-        public AsyncSocketSession(IOService service, IIoProcessor<SocketSession> processor, System.Net.Sockets.Socket socket,
+        public AsyncSocketSession(IOService service, IIOProcessor<SocketSession> processor, System.Net.Sockets.Socket socket,
             SocketAsyncEventArgsBuffer readBuffer, SocketAsyncEventArgsBuffer writeBuffer, bool reuseBuffer)
             : base(service, processor, new SessionConfigImpl(socket), socket, socket.LocalEndPoint, socket.RemoteEndPoint, reuseBuffer)
         {

@@ -16,7 +16,7 @@ namespace Mina.Transport.Socket
     /// <summary>
     /// <see cref="IOAcceptor"/> for datagram transport (UDP/IP).
     /// </summary>
-    public partial class AsyncDatagramAcceptor : AbstractIOAcceptor, IDatagramAcceptor, IIoProcessor<AsyncDatagramSession>
+    public partial class AsyncDatagramAcceptor : AbstractIOAcceptor, IDatagramAcceptor, IIOProcessor<AsyncDatagramSession>
     {
         private static readonly IOSessionRecycler DefaultRecycler = new ExpiringSessionRecycler();
 

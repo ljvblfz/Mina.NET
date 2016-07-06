@@ -49,7 +49,7 @@ namespace Mina.Transport.Socket
         /// <summary>
         /// Gets the <see cref="IOProcessor"/>.
         /// </summary>
-        protected IIoProcessor<SocketSession> Processor => _processor;
+        protected IIOProcessor<SocketSession> Processor => _processor;
 
         /// <inheritdoc/>
         protected override IConnectFuture Connect0(EndPoint remoteEp, EndPoint localEp, Action<IOSession, IConnectFuture> sessionInitializer)

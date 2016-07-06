@@ -53,7 +53,7 @@ namespace Mina.Core.Service
     /// actual I/O operations for <typeparamref name="TS"/>s.
     /// </summary>
     /// <typeparam name="TS">the type of sessions</typeparam>
-    public interface IIoProcessor<in TS> : IOProcessor
+    public interface IIOProcessor<in TS> : IOProcessor
         where TS : IOSession
     {
         /// <summary>

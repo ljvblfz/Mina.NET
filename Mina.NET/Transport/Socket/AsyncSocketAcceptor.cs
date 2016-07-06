@@ -152,7 +152,7 @@ namespace Mina.Transport.Socket
         }
 
         /// <inheritdoc/>
-        protected override IOSession NewSession(IIoProcessor<SocketSession> processor, System.Net.Sockets.Socket socket)
+        protected override IOSession NewSession(IIOProcessor<SocketSession> processor, System.Net.Sockets.Socket socket)
         {
             var readBuffer = _readWritePool.Pop();
             var writeBuffer = _readWritePool.Pop();
