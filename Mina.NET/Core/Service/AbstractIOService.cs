@@ -32,16 +32,16 @@ namespace Mina.Core.Service
         public event EventHandler Deactivated;
 
         /// <inheritdoc/>
-        public event EventHandler<IoSessionEventArgs> SessionCreated;
+        public event EventHandler<IOSessionEventArgs> SessionCreated;
 
         /// <inheritdoc/>
-        public event EventHandler<IoSessionEventArgs> SessionOpened;
+        public event EventHandler<IOSessionEventArgs> SessionOpened;
 
         /// <inheritdoc/>
-        public event EventHandler<IoSessionEventArgs> SessionClosed;
+        public event EventHandler<IOSessionEventArgs> SessionClosed;
 
         /// <inheritdoc/>
-        public event EventHandler<IoSessionEventArgs> SessionDestroyed;
+        public event EventHandler<IOSessionEventArgs> SessionDestroyed;
 
         /// <inheritdoc/>
         public event EventHandler<IoSessionIdleEventArgs> SessionIdle;
@@ -50,7 +50,7 @@ namespace Mina.Core.Service
         public event EventHandler<IoSessionExceptionEventArgs> ExceptionCaught;
 
         /// <inheritdoc/>
-        public event EventHandler<IoSessionEventArgs> InputClosed;
+        public event EventHandler<IOSessionEventArgs> InputClosed;
 
         /// <inheritdoc/>
         public event EventHandler<IoSessionMessageEventArgs> MessageReceived;
@@ -261,7 +261,7 @@ namespace Mina.Core.Service
 
             if (_hasHandler)
             {
-                DelegateUtils.SafeInvoke(SessionCreated, this, new IoSessionEventArgs(session));
+                DelegateUtils.SafeInvoke(SessionCreated, this, new IOSessionEventArgs(session));
             }
         }
 
@@ -276,7 +276,7 @@ namespace Mina.Core.Service
             // Fire session events.
             session.FilterChain.FireSessionClosed();
 
-            DelegateUtils.SafeInvoke(SessionDestroyed, this, new IoSessionEventArgs(session));
+            DelegateUtils.SafeInvoke(SessionDestroyed, this, new IOSessionEventArgs(session));
 
             // Fire a virtual service deactivation event for the last session of the connector.
             if (session.Service is IOConnector)
@@ -316,7 +316,7 @@ namespace Mina.Core.Service
                 var act = _service.SessionCreated;
                 if (act != null)
                 {
-                    act(_service, new IoSessionEventArgs(session));
+                    act(_service, new IOSessionEventArgs(session));
                 }
             }
 
@@ -325,7 +325,7 @@ namespace Mina.Core.Service
                 var act = _service.SessionOpened;
                 if (act != null)
                 {
-                    act(_service, new IoSessionEventArgs(session));
+                    act(_service, new IOSessionEventArgs(session));
                 }
             }
 
@@ -334,7 +334,7 @@ namespace Mina.Core.Service
                 var act = _service.SessionClosed;
                 if (act != null)
                 {
-                    act(_service, new IoSessionEventArgs(session));
+                    act(_service, new IOSessionEventArgs(session));
                 }
             }
 
@@ -379,7 +379,7 @@ namespace Mina.Core.Service
                 var act = _service.InputClosed;
                 if (act != null)
                 {
-                    act(_service, new IoSessionEventArgs(session));
+                    act(_service, new IOSessionEventArgs(session));
                 }
                 else
                 {

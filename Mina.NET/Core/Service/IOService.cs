@@ -89,12 +89,12 @@ namespace Mina.Core.Service
         /// <summary>
         /// Fires when a new session is created.
         /// </summary>
-        event EventHandler<IoSessionEventArgs> SessionCreated;
+        event EventHandler<IOSessionEventArgs> SessionCreated;
 
         /// <summary>
         /// Fires when a new session is being destroyed.
         /// </summary>
-        event EventHandler<IoSessionEventArgs> SessionDestroyed;
+        event EventHandler<IOSessionEventArgs> SessionDestroyed;
 
         /// <summary>
         /// Fires when a session is opened. Only available when
@@ -103,7 +103,7 @@ namespace Mina.Core.Service
         /// <remarks>
         /// If <see cref="Handler"/> is set, use <see cref="IOHandler.SessionOpened(IOSession)"/> instead.
         /// </remarks>
-        event EventHandler<IoSessionEventArgs> SessionOpened;
+        event EventHandler<IOSessionEventArgs> SessionOpened;
 
         /// <summary>
         /// Fires when a session is closed. Only available when
@@ -112,7 +112,7 @@ namespace Mina.Core.Service
         /// <remarks>
         /// If <see cref="Handler"/> is set, use <see cref="IOHandler.SessionClosed(IOSession)"/> instead.
         /// </remarks>
-        event EventHandler<IoSessionEventArgs> SessionClosed;
+        event EventHandler<IOSessionEventArgs> SessionClosed;
 
         /// <summary>
         /// Fires when a session is idle. Only available when
@@ -135,7 +135,7 @@ namespace Mina.Core.Service
         /// <summary>
         /// Occurs when the closure of an half-duplex channel.
         /// </summary>
-        event EventHandler<IoSessionEventArgs> InputClosed;
+        event EventHandler<IOSessionEventArgs> InputClosed;
 
         /// <summary>
         /// Fires when a message is received. Only available when

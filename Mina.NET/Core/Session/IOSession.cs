@@ -334,11 +334,11 @@ namespace Mina.Core.Session
     /// <summary>
     /// Provides data for <see cref="IOSession"/>'s events.
     /// </summary>
-    public class IoSessionEventArgs : EventArgs
+    public class IOSessionEventArgs : EventArgs
     {
         /// <summary>
         /// </summary>
-        public IoSessionEventArgs(IOSession session)
+        public IOSessionEventArgs(IOSession session)
         {
             Session = session;
         }
@@ -352,7 +352,7 @@ namespace Mina.Core.Session
     /// <summary>
     /// Provides data for <see cref="IOSession"/>'s idle event.
     /// </summary>
-    public class IoSessionIdleEventArgs : IoSessionEventArgs
+    public class IoSessionIdleEventArgs : IOSessionEventArgs
     {
         /// <summary>
         /// </summary>
@@ -371,7 +371,7 @@ namespace Mina.Core.Session
     /// <summary>
     /// Provides data for <see cref="IOSession"/>'s exception event.
     /// </summary>
-    public class IoSessionExceptionEventArgs : IoSessionEventArgs
+    public class IoSessionExceptionEventArgs : IOSessionEventArgs
     {
         /// <summary>
         /// </summary>
@@ -390,7 +390,7 @@ namespace Mina.Core.Session
     /// <summary>
     /// Provides data for <see cref="IOSession"/>'s message receive/sent event.
     /// </summary>
-    public class IoSessionMessageEventArgs : IoSessionEventArgs
+    public class IoSessionMessageEventArgs : IOSessionEventArgs
     {
         /// <summary>
         /// </summary>

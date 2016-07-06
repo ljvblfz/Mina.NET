@@ -221,7 +221,7 @@ namespace Mina.Transport.Socket
             BeginAccept((ListenerContext)state);
         }
 
-        private void OnSessionDestroyed(object sender, IoSessionEventArgs e)
+        private void OnSessionDestroyed(object sender, IOSessionEventArgs e)
         {
             var pool = _connectionPool;
             if (pool != null)

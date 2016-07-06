@@ -86,7 +86,7 @@ namespace Mina.Transport.Socket
             }
         }
 
-        private void OnSessionDestroyed(object sender, IoSessionEventArgs e)
+        private void OnSessionDestroyed(object sender, IOSessionEventArgs e)
         {
             var s = e.Session as AsyncSocketSession;
             if (s != null && _readWritePool != null)
