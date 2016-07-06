@@ -15,18 +15,22 @@ namespace Mina.Core.Write
         /// which is not transformed by any <see cref="IOFilter"/>.
         /// </summary>
         IWriteRequest OriginalRequest { get; }
+
         /// <summary>
         /// Gets the message object to be written.
         /// </summary>
         object Message { get; }
+
         /// <summary>
         /// Gets the destination of this write request.
         /// </summary>
         EndPoint Destination { get; }
+
         /// <summary>
         /// Tells if the current message has been encoded.
         /// </summary>
         bool Encoded { get; }
+
         /// <summary>
         /// Gets <see cref="IWriteFuture"/> that is associated with this write request.
         /// </summary>
