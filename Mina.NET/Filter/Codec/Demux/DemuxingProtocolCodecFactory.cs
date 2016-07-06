@@ -38,7 +38,7 @@ namespace Mina.Filter.Codec.Demux
 
         public void AddMessageEncoder<TMessage>(IMessageEncoder<TMessage> encoder)
         {
-            this._encoder.AddMessageEncoder<TMessage>(encoder);
+            _encoder.AddMessageEncoder<TMessage>(encoder);
         }
 
         public void AddMessageEncoder<TMessage>(IMessageEncoderFactory<TMessage> factory)
@@ -53,7 +53,7 @@ namespace Mina.Filter.Codec.Demux
 
         public void AddMessageDecoder(IMessageDecoder decoder)
         {
-            this._decoder.AddMessageDecoder(decoder);
+            _decoder.AddMessageDecoder(decoder);
         }
 
         public void AddMessageDecoder(IMessageDecoderFactory factory)
