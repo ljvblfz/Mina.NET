@@ -16,7 +16,8 @@ namespace Mina.Core.Service
         /// </summary>
         protected AbstractIOConnector(IOSessionConfig sessionConfig)
             : base(sessionConfig)
-        { }
+        {
+        }
 
         /// <inheritdoc/>
         public EndPoint DefaultRemoteEndPoint
@@ -25,10 +26,14 @@ namespace Mina.Core.Service
             set
             {
                 if (value == null)
+                {
                     throw new ArgumentNullException(nameof(value));
+                }
                 if (!TransportMetadata.EndPointType.IsAssignableFrom(value.GetType()))
+                {
                     throw new ArgumentException("defaultRemoteAddress type: " + value.GetType()
-                            + " (expected: " + TransportMetadata.EndPointType + ")");
+                                                + " (expected: " + TransportMetadata.EndPointType + ")");
+                }
                 _defaultRemoteEp = value;
             }
         }
@@ -39,7 +44,7 @@ namespace Mina.Core.Service
         /// <inheritdoc/>
         public int ConnectTimeout
         {
-            get { return (int)(ConnectTimeoutInMillis / 1000L); }
+            get { return (int) (ConnectTimeoutInMillis / 1000L); }
             set { ConnectTimeoutInMillis = value * 1000L; }
         }
 
@@ -50,7 +55,9 @@ namespace Mina.Core.Service
         public IConnectFuture Connect()
         {
             if (_defaultRemoteEp == null)
+            {
                 throw new InvalidOperationException("DefaultRemoteEndPoint is not set.");
+            }
             return Connect(_defaultRemoteEp, DefaultLocalEndPoint, null);
         }
 
@@ -58,7 +65,9 @@ namespace Mina.Core.Service
         public IConnectFuture Connect(Action<IOSession, IConnectFuture> sessionInitializer)
         {
             if (_defaultRemoteEp == null)
+            {
                 throw new InvalidOperationException("DefaultRemoteEndPoint is not set.");
+            }
             return Connect(_defaultRemoteEp, DefaultLocalEndPoint, sessionInitializer);
         }
 
@@ -81,17 +90,24 @@ namespace Mina.Core.Service
         }
 
         /// <inheritdoc/>
-        public IConnectFuture Connect(EndPoint remoteEp, EndPoint localEp, Action<IOSession, IConnectFuture> sessionInitializer)
+        public IConnectFuture Connect(EndPoint remoteEp, EndPoint localEp,
+            Action<IOSession, IConnectFuture> sessionInitializer)
         {
             if (Disposed)
+            {
                 throw new ObjectDisposedException(GetType().Name);
+            }
 
             if (remoteEp == null)
+            {
                 throw new ArgumentNullException(nameof(remoteEp));
+            }
 
             if (!TransportMetadata.EndPointType.IsAssignableFrom(remoteEp.GetType()))
+            {
                 throw new ArgumentException("remoteAddress type: " + remoteEp.GetType() + " (expected: "
-                        + TransportMetadata.EndPointType + ")");
+                                            + TransportMetadata.EndPointType + ")");
+            }
 
             return Connect0(remoteEp, localEp, sessionInitializer);
         }
@@ -101,13 +117,14 @@ namespace Mina.Core.Service
         {
             var m = TransportMetadata;
             return '(' + m.ProviderName + ' ' + m.Name + " connector: " + "managedSessionCount: "
-                    + ManagedSessions.Count + ')';
+                   + ManagedSessions.Count + ')';
         }
 
         /// <summary>
         /// Implement this method to perform the actual connect operation.
         /// </summary>
-        protected abstract IConnectFuture Connect0(EndPoint remoteEp, EndPoint localEp, Action<IOSession, IConnectFuture> sessionInitializer);
+        protected abstract IConnectFuture Connect0(EndPoint remoteEp, EndPoint localEp,
+            Action<IOSession, IConnectFuture> sessionInitializer);
 
         /// <inheritdoc/>
         protected override void FinishSessionInitialization0(IOSession session, IOFuture future)
@@ -117,8 +134,10 @@ namespace Mina.Core.Service
             // connection immediately on cancellation.
             future.Complete += (s, e) =>
             {
-                if (((IConnectFuture)e.Future).Canceled)
+                if (((IConnectFuture) e.Future).Canceled)
+                {
                     session.Close(true);
+                }
             };
         }
     }
