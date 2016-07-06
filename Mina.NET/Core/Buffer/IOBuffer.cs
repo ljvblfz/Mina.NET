@@ -94,8 +94,8 @@ namespace Mina.Core.Buffer
         /// <summary>
         /// 
         /// </summary>
-        protected IOBuffer(int mark, int pos, int lim, int cap)
-            : base(mark, pos, lim, cap)
+        protected IOBuffer(int mark, int position, int limit, int capacity)
+            : base(mark, position, limit, capacity)
         {
         }
 
