@@ -14,12 +14,14 @@ namespace Mina.Core.Session
         /// </summary>
         /// <param name="session"></param>
         void Put(IOSession session);
+
         /// <summary>
         /// Attempts to retrieve a recycled <see cref="IOSession"/>.
         /// </summary>
         /// <param name="remoteEp">the remote endpoint of the <see cref="IOSession"/> the transport wants to recycle</param>
         /// <returns>a recycled <see cref="IOSession"/>, or null if one cannot be found</returns>
         IOSession Recycle(EndPoint remoteEp);
+
         /// <summary>
         /// Called when an <see cref="IOSession"/> is explicitly closed.
         /// </summary>
@@ -40,7 +42,8 @@ namespace Mina.Core.Session
         public static readonly NoopRecycler Instance = new NoopRecycler();
 
         private NoopRecycler()
-        { }
+        {
+        }
 
         /// <inheritdoc/>
         public void Put(IOSession session)
