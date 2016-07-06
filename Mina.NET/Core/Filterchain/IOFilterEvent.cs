@@ -19,7 +19,9 @@ namespace Mina.Core.Filterchain
             : base(eventType, session, parameter)
         {
             if (nextFilter == null)
+            {
                 throw new ArgumentNullException(nameof(nextFilter));
+            }
             NextFilter = nextFilter;
         }
 
@@ -32,7 +34,9 @@ namespace Mina.Core.Filterchain
         public override void Fire()
         {
             if (Log.IsDebugEnabled)
+            {
                 Log.DebugFormat("Firing a {0} event for session {1}", EventType, Session.Id);
+            }
 
             switch (EventType)
             {
@@ -68,7 +72,9 @@ namespace Mina.Core.Filterchain
             }
 
             if (Log.IsDebugEnabled)
+            {
                 Log.DebugFormat("Event {0} has been fired for session {1}", EventType, Session.Id);
+            }
         }
     }
 }
