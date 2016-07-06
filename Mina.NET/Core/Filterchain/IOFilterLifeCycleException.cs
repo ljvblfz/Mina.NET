@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Runtime.Serialization;
 
 namespace Mina.Core.Filterchain
 {
@@ -12,34 +13,28 @@ namespace Mina.Core.Filterchain
         /// <summary>
         /// </summary>
         public IOFilterLifeCycleException()
-        { }
+        {
+        }
 
         /// <summary>
         /// </summary>
         public IOFilterLifeCycleException(string message)
             : base(message)
-        { }
+        {
+        }
 
         /// <summary>
         /// </summary>
         public IOFilterLifeCycleException(string message, Exception innerException)
             : base(message, innerException)
-        { }
-
-        /// <summary>
-        /// </summary>
-        protected IOFilterLifeCycleException(
-          System.Runtime.Serialization.SerializationInfo info,
-          System.Runtime.Serialization.StreamingContext context)
-            : base(info, context) { }
-
-        /// <summary>
-        /// </summary>
-        public override void GetObjectData(
-            System.Runtime.Serialization.SerializationInfo info,
-            System.Runtime.Serialization.StreamingContext context)
         {
-            base.GetObjectData(info, context);
+        }
+
+        /// <summary>
+        /// </summary>
+        protected IOFilterLifeCycleException(SerializationInfo info, StreamingContext context)
+            : base(info, context)
+        {
         }
     }
 }
