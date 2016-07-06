@@ -15,7 +15,8 @@ namespace Mina.Core.Session
 
         public IdleStatusChecker(Func<IEnumerable<IOSession>> getSessionsFunc)
             : this(IdleCheckingInterval, getSessionsFunc)
-        { }
+        {
+        }
 
         public IdleStatusChecker(int interval, Func<IEnumerable<IOSession>> getSessionsFunc)
         {
