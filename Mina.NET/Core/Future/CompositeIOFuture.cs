@@ -7,8 +7,7 @@ namespace Mina.Core.Future
     /// An <see cref="IOFuture"/> of <see cref="IOFuture"/>s.
     /// It is useful when you want to get notified when all <see cref="IOFuture"/>s are complete.
     /// </summary>
-    public class CompositeIOFuture<TFuture> : DefaultIOFuture
-        where TFuture : IOFuture
+    public class CompositeIOFuture<TFuture> : DefaultIOFuture where TFuture : IOFuture
     {
         private int _unnotified;
         private volatile bool _constructionFinished;
@@ -26,13 +25,17 @@ namespace Mina.Core.Future
 
             _constructionFinished = true;
             if (_unnotified == 0)
+            {
                 Value = true;
+            }
         }
 
         private void OnComplete(object sender, IoFutureEventArgs e)
         {
             if (Interlocked.Decrement(ref _unnotified) == 0 && _constructionFinished)
+            {
                 Value = true;
+            }
         }
     }
 }
