@@ -14,16 +14,20 @@ namespace Mina.Core.Write
 
         public DefaultWriteRequest(object message)
             : this(message, null, null)
-        { }
+        {
+        }
 
         public DefaultWriteRequest(object message, IWriteFuture future)
             : this(message, future, null)
-        { }
+        {
+        }
 
         public DefaultWriteRequest(object message, IWriteFuture future, EndPoint destination)
         {
             if (message == null)
+            {
                 throw new ArgumentNullException(nameof(message));
+            }
             Message = message;
             Future = future ?? UnusedFuture.Instance;
             Destination = destination;
