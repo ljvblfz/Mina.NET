@@ -41,13 +41,14 @@ namespace Mina.Core.Future
                 do
                 {
                     tmp = complete;
-                    var newComplete = (EventHandler<IoFutureEventArgs>)Delegate.Combine(tmp, value);
+                    var newComplete = (EventHandler<IoFutureEventArgs>) Delegate.Combine(tmp, value);
                     complete = Interlocked.CompareExchange(ref _complete, newComplete, tmp);
-                }
-                while (complete != tmp);
+                } while (complete != tmp);
 
                 if (_ready)
+                {
                     OnComplete(value);
+                }
             }
             remove
             {
@@ -56,10 +57,9 @@ namespace Mina.Core.Future
                 do
                 {
                     tmp = complete;
-                    var newComplete = (EventHandler<IoFutureEventArgs>)Delegate.Remove(tmp, value);
+                    var newComplete = (EventHandler<IoFutureEventArgs>) Delegate.Remove(tmp, value);
                     complete = Interlocked.CompareExchange(ref _complete, newComplete, tmp);
-                }
-                while (complete != tmp);
+                } while (complete != tmp);
             }
         }
 
@@ -80,7 +80,9 @@ namespace Mina.Core.Future
                 lock (this)
                 {
                     if (_ready)
+                    {
                         return;
+                    }
                     _ready = true;
                     _value = value;
                     _readyEvent.Set();
@@ -102,7 +104,9 @@ namespace Mina.Core.Future
             lock (this)
             {
                 if (_ready)
+                {
                     return false;
+                }
                 _ready = true;
                 _value = value;
                 _readyEvent.Set();
@@ -151,15 +155,21 @@ namespace Mina.Core.Future
         private bool Await0(int millisecondsTimeout)
         {
             if (_ready)
+            {
                 return _ready;
+            }
 #if NET20
             _readyEvent.WaitOne(millisecondsTimeout);
             if (_ready)
+            {
                 _readyEvent.Close();
+            }
 #else
             _readyEvent.Wait(millisecondsTimeout);
             if (_ready)
+            {
                 _readyEvent.Dispose();
+            }
 #endif
 
             return _ready;
@@ -173,7 +183,7 @@ namespace Mina.Core.Future
                 var handlers = complete.GetInvocationList();
                 foreach (var current in handlers)
                 {
-                    OnComplete((EventHandler<IoFutureEventArgs>)current);
+                    OnComplete((EventHandler<IoFutureEventArgs>) current);
                 }
             }
         }
