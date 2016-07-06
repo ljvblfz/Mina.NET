@@ -16,44 +16,54 @@ namespace Mina.Core.Filterchain
         /// Gets the parent <see cref="IOSession"/> of this chain.
         /// </summary>
         IOSession Session { get; }
+
         /// <summary>
-        /// Fires a <see cref="IOHandler.SeIOSessionted(IoSession)"/> event.
+        /// Fires a <see cref="IOHandler.SessionCreated(IOSession)"/> event.
         /// </summary>
         void FireSessionCreated();
+
         /// <summary>
-        /// Fires a <see cref="IOHandler.SIOSessionned(IoSession)"/> event.
+        /// Fires a <see cref="IOHandler.SessionOpened(IOSession)"/> event.
         /// </summary>
         void FireSessionOpened();
+
         /// <summary>
-        /// Fires a <see cref="IOHandler.SIOSessionsed(IoSession)"/> event.
+        /// Fires a <see cref="IOHandler.SessionClosed(IOSession)"/> event.
         /// </summary>
         void FireSessionClosed();
+
         /// <summary>
-        /// Fires a <see cref="IOHandlerIOSessiondle(IoSession, IdleStatus)"/> event.
+        /// Fires a <see cref="IOHandler.SessionIdle(IOSession, IdleStatus)"/> event.
         /// </summary>
         void FireSessionIdle(IdleStatus status);
+
         /// <summary>
-        /// Fires a <see cref="IOHandler.MesIOSessionved(IoSession, object)"/> event.
+        /// Fires a <see cref="IOHandler.MessageReceived(IOSession, object)"/> event.
         /// </summary>
         void FireMessageReceived(object message);
+
         /// <summary>
-        /// Fires a <see cref="IOHandlerIOSessionent(IoSession, object)"/> event.
+        /// Fires a <see cref="IOHandler.MessageSent(IOSession, object)"/> event.
         /// </summary>
         void FireMessageSent(IWriteRequest request);
+
         /// <summary>
-        /// Fires a <see cref="IOHandler.ExcIOSessionght(IoSession, Exception)"/> event.
+        /// Fires a <see cref="IOHandler.ExceptionCaught(IOSession, Exception)"/> event.
         /// </summary>
         void FireExceptionCaught(Exception ex);
+
         /// <summary>
-        /// Fires a <see cref="IOHandlerIOSessionsed(IoSession)"/> event. Most users don't
+        /// Fires a <see cref="IOHandler.InputClosed(IOSession)"/> event. Most users don't
         /// need to call this method at all. Please use this method only when you
         /// implement a new transport or fire a virtual event.
         /// </summary>
         void FireInputClosed();
+
         /// <summary>
         /// Fires a <see cref="IOSession.Write(object)"/> event.
         /// </summary>
         void FireFilterWrite(IWriteRequest writeRequest);
+
         /// <summary>
         /// Fires a <see cref="IOSession.Close(bool)"/> event.
         /// </summary>
