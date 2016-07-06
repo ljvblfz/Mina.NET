@@ -12,6 +12,7 @@ namespace Mina.Core.Future
         /// the associated <see cref="IOSession"/> been closed.
         /// </summary>
         bool Closed { get; set; }
+
         /// <inheritdoc/>
         new ICloseFuture Await();
     }
