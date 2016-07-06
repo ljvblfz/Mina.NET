@@ -77,7 +77,8 @@ namespace Mina.Core.Session
         {
             public DummyService(IOSessionConfig sessionConfig)
                 : base(sessionConfig)
-            { }
+            {
+            }
 
             public override ITransportMetadata TransportMetadata => Metadata;
 
@@ -102,7 +103,9 @@ namespace Mina.Core.Session
             public void Remove(DummySession session)
             {
                 if (!session.CloseFuture.Closed)
+                {
                     session.FilterChain.FireSessionClosed();
+                }
             }
 
             public void Write(DummySession session, IWriteRequest writeRequest)
@@ -110,7 +113,9 @@ namespace Mina.Core.Session
                 var queue = session.WriteRequestQueue;
                 queue.Offer(session, writeRequest);
                 if (!session.WriteSuspended)
+                {
                     Flush(session);
+                }
             }
 
             public void Flush(DummySession session)
@@ -133,27 +138,27 @@ namespace Mina.Core.Session
 
             void IOProcessor.Write(IOSession session, IWriteRequest writeRequest)
             {
-                Write((DummySession)session, writeRequest);
+                Write((DummySession) session, writeRequest);
             }
 
             void IOProcessor.Flush(IOSession session)
             {
-                Flush((DummySession)session);
+                Flush((DummySession) session);
             }
 
             void IOProcessor.Add(IOSession session)
             {
-                Add((DummySession)session);
+                Add((DummySession) session);
             }
 
             void IOProcessor.Remove(IOSession session)
             {
-                Remove((DummySession)session);
+                Remove((DummySession) session);
             }
 
             void IOProcessor.UpdateTrafficControl(IOSession session)
             {
-                UpdateTrafficControl((DummySession)session);
+                UpdateTrafficControl((DummySession) session);
             }
         }
 
@@ -169,7 +174,9 @@ namespace Mina.Core.Session
         {
             public static AnonymousEndPoint Instance = new AnonymousEndPoint();
 
-            private AnonymousEndPoint() { }
+            private AnonymousEndPoint()
+            {
+            }
 
             public override string ToString()
             {
