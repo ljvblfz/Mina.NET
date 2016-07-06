@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Runtime.Serialization;
 
 namespace Mina.Core.Write
 {
@@ -22,27 +23,21 @@ namespace Mina.Core.Write
             _requests = AsRequestList(requests);
         }
 
-        protected WriteException(
-          System.Runtime.Serialization.SerializationInfo info,
-          System.Runtime.Serialization.StreamingContext context)
-            : base(info, context) { }
+        protected WriteException(SerializationInfo info, StreamingContext context)
+            : base(info, context)
+        {
+        }
 
         public IWriteRequest Request => _requests[0];
 
         public IEnumerable<IWriteRequest> Requests => _requests;
 
-        /// <inheritdoc/>
-        public override void GetObjectData(
-            System.Runtime.Serialization.SerializationInfo info,
-            System.Runtime.Serialization.StreamingContext context)
-        {
-            base.GetObjectData(info, context);
-        }
-
         private static IList<IWriteRequest> AsRequestList(IWriteRequest request)
         {
             if (request == null)
+            {
                 throw new ArgumentNullException(nameof(request));
+            }
             var requests = new List<IWriteRequest>(1);
             requests.Add(request);
             return requests.AsReadOnly();
@@ -51,7 +46,9 @@ namespace Mina.Core.Write
         private static IList<IWriteRequest> AsRequestList(IEnumerable<IWriteRequest> requests)
         {
             if (requests == null)
+            {
                 throw new ArgumentNullException(nameof(requests));
+            }
             var newRequests = new List<IWriteRequest>(requests);
             return newRequests.AsReadOnly();
         }
