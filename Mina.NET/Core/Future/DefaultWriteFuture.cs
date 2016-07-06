@@ -32,7 +32,8 @@ namespace Mina.Core.Future
         /// </summary>
         public DefaultWriteFuture(IOSession session)
             : base(session)
-        { }
+        {
+        }
 
         /// <inheritdoc/>
         public bool Written
@@ -43,7 +44,9 @@ namespace Mina.Core.Future
                 {
                     var v = Value;
                     if (v is bool)
-                        return (bool)v;
+                    {
+                        return (bool) v;
+                    }
                 }
                 return false;
             }
@@ -64,7 +67,9 @@ namespace Mina.Core.Future
             set
             {
                 if (value == null)
+                {
                     throw new ArgumentNullException(nameof(value));
+                }
                 Value = value;
             }
         }
@@ -72,7 +77,7 @@ namespace Mina.Core.Future
         /// <inheritdoc/>
         public new IWriteFuture Await()
         {
-            return (IWriteFuture)base.Await();
+            return (IWriteFuture) base.Await();
         }
     }
 }
