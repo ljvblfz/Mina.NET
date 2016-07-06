@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Runtime.Serialization;
 
 namespace Mina.Core.Write
 {
@@ -11,18 +12,12 @@ namespace Mina.Core.Write
     {
         public NothingWrittenException(IWriteRequest request)
             : base(request)
-        { }
-
-        protected NothingWrittenException(
-          System.Runtime.Serialization.SerializationInfo info,
-          System.Runtime.Serialization.StreamingContext context)
-            : base(info, context) { }
-
-        public override void GetObjectData(
-            System.Runtime.Serialization.SerializationInfo info,
-            System.Runtime.Serialization.StreamingContext context)
         {
-            base.GetObjectData(info, context);
+        }
+
+        protected NothingWrittenException(SerializationInfo info, StreamingContext context)
+            : base(info, context)
+        {
         }
     }
 }
