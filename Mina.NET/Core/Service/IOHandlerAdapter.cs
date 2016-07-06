@@ -42,7 +42,8 @@ namespace Mina.Core.Service
         {
             if (Log.IsWarnEnabled)
             {
-                Log.WarnFormat("EXCEPTION, please implement {0}.ExceptionCaught() for proper handling: {1}", GetType().Name, cause);
+                Log.WarnFormat("EXCEPTION, please implement {0}.ExceptionCaught() for proper handling: {1}",
+                    GetType().Name, cause);
             }
         }
 
