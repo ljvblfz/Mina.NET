@@ -23,7 +23,9 @@ namespace Mina.Filter.Codec.Demux
             var decoderType = typeof(TDecoder);
 
             if (decoderType.GetConstructor(DemuxingProtocolCodecFactory.EmptyParams) == null)
+            {
                 throw new ArgumentException("The specified class doesn't have a public default constructor.");
+            }
 
             AddMessageDecoder(new DefaultConstructorMessageDecoderFactory(decoderType));
         }
@@ -36,7 +38,9 @@ namespace Mina.Filter.Codec.Demux
         public void AddMessageDecoder(IMessageDecoderFactory factory)
         {
             if (factory == null)
+            {
                 throw new ArgumentNullException(nameof(factory));
+            }
 
             var decoderFactories = _decoderFactories;
             var newDecoderFactories = new IMessageDecoderFactory[decoderFactories.Length + 1];
@@ -59,7 +63,9 @@ namespace Mina.Filter.Codec.Demux
             var state = GetState(session);
             var currentDecoder = state.CurrentDecoder;
             if (currentDecoder == null)
+            {
                 return;
+            }
             currentDecoder.FinishDecode(session, output);
         }
 
@@ -157,7 +163,7 @@ namespace Mina.Filter.Codec.Demux
             if (state == null)
             {
                 state = new State(_decoderFactories);
-                var oldState = (State)session.SetAttributeIfAbsent(_state, state);
+                var oldState = (State) session.SetAttributeIfAbsent(_state, state);
 
                 if (oldState != null)
                 {
@@ -190,8 +196,10 @@ namespace Mina.Filter.Codec.Demux
             public SingletonMessageDecoderFactory(IMessageDecoder decoder)
             {
                 if (decoder == null)
+                {
                     throw new ArgumentNullException(nameof(decoder));
-                this._decoder = decoder;
+                }
+                _decoder = decoder;
             }
 
             public IMessageDecoder GetDecoder()
@@ -206,12 +214,12 @@ namespace Mina.Filter.Codec.Demux
 
             public DefaultConstructorMessageDecoderFactory(Type decoderType)
             {
-                this._decoderType = decoderType;
+                _decoderType = decoderType;
             }
 
             public IMessageDecoder GetDecoder()
             {
-                return (IMessageDecoder)Activator.CreateInstance(_decoderType);
+                return (IMessageDecoder) Activator.CreateInstance(_decoderType);
             }
         }
     }
