@@ -14,7 +14,9 @@ namespace Mina.Core.Session
         public IOEvent(IOEventType eventType, IOSession session, object parameter)
         {
             if (session == null)
+            {
                 throw new ArgumentNullException(nameof(session));
+            }
             EventType = eventType;
             Session = session;
             Parameter = parameter;
@@ -46,19 +48,19 @@ namespace Mina.Core.Session
                     Session.FilterChain.FireMessageReceived(Parameter);
                     break;
                 case IOEventType.MessageSent:
-                    Session.FilterChain.FireMessageSent((IWriteRequest)Parameter);
+                    Session.FilterChain.FireMessageSent((IWriteRequest) Parameter);
                     break;
                 case IOEventType.Write:
-                    Session.FilterChain.FireFilterWrite((IWriteRequest)Parameter);
+                    Session.FilterChain.FireFilterWrite((IWriteRequest) Parameter);
                     break;
                 case IOEventType.Close:
                     Session.FilterChain.FireFilterClose();
                     break;
                 case IOEventType.ExceptionCaught:
-                    Session.FilterChain.FireExceptionCaught((Exception)Parameter);
+                    Session.FilterChain.FireExceptionCaught((Exception) Parameter);
                     break;
                 case IOEventType.SessionIdle:
-                    Session.FilterChain.FireSessionIdle((IdleStatus)Parameter);
+                    Session.FilterChain.FireSessionIdle((IdleStatus) Parameter);
                     break;
                 case IOEventType.SessionCreated:
                     Session.FilterChain.FireSessionCreated();
@@ -78,7 +80,9 @@ namespace Mina.Core.Session
         public override string ToString()
         {
             if (Parameter == null)
+            {
                 return "[" + Session + "] " + EventType;
+            }
             return "[" + Session + "] " + EventType + ": " + Parameter;
         }
     }
