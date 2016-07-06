@@ -24,7 +24,8 @@ namespace Mina.Core.Future
         /// </summary>
         public DefaultConnectFuture()
             : base(null)
-        { }
+        {
+        }
 
         /// <inheritdoc/>
         public bool Connected => Value is IOSession;
@@ -46,7 +47,9 @@ namespace Mina.Core.Future
             set
             {
                 if (value == null)
+                {
                     throw new ArgumentNullException(nameof(value));
+                }
                 Value = value;
             }
         }
@@ -59,7 +62,9 @@ namespace Mina.Core.Future
                 var val = Value;
                 var ex = val as Exception;
                 if (ex != null)
+                {
                     throw ex;
+                }
                 return val as IOSession;
             }
         }
@@ -68,7 +73,9 @@ namespace Mina.Core.Future
         public void SetSession(IOSession session)
         {
             if (session == null)
+            {
                 throw new ArgumentNullException(nameof(session));
+            }
             Value = session;
         }
 
@@ -81,7 +88,7 @@ namespace Mina.Core.Future
         /// <inheritdoc/>
         public new IConnectFuture Await()
         {
-            return (IConnectFuture)base.Await();
+            return (IConnectFuture) base.Await();
         }
     }
 }
