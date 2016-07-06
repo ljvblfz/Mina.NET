@@ -147,7 +147,9 @@ namespace Mina.Core.Service
             set
             {
                 if (value < 0)
+                {
                     throw new ArgumentException("ThroughputCalculationInterval should be greater than 0", nameof(value));
+                }
                 _throughputCalculationInterval = value;
             }
         }
@@ -176,7 +178,7 @@ namespace Mina.Core.Service
         {
             lock (_throughputCalculationLock)
             {
-                var interval = (long)(currentTime - LastThroughputCalculationTime).TotalMilliseconds;
+                var interval = (long) (currentTime - LastThroughputCalculationTime).TotalMilliseconds;
                 var minInterval = ThroughputCalculationIntervalInMillis;
                 if (minInterval == 0 || interval < minInterval)
                 {
