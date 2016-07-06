@@ -11,7 +11,8 @@ namespace Mina.Core.Future
         /// </summary>
         public DefaultCloseFuture(IOSession session)
             : base(session)
-        { }
+        {
+        }
 
         /// <inheritdoc/>
         public bool Closed
@@ -22,7 +23,9 @@ namespace Mina.Core.Future
                 {
                     var v = Value;
                     if (v is bool)
-                        return (bool)v;
+                    {
+                        return (bool) v;
+                    }
                 }
                 return false;
             }
@@ -32,7 +35,7 @@ namespace Mina.Core.Future
         /// <inheritdoc/>
         public new ICloseFuture Await()
         {
-            return (ICloseFuture)base.Await();
+            return (ICloseFuture) base.Await();
         }
     }
 }
