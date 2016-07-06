@@ -38,10 +38,14 @@ namespace Mina.Core.Session
         public override bool Equals(object obj)
         {
             if (ReferenceEquals(this, obj))
+            {
                 return true;
+            }
             var other = obj as AttributeKey;
             if (other == null)
+            {
                 return false;
+            }
             return _name.Equals(other._name);
         }
     }
