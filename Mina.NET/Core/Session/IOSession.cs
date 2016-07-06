@@ -371,11 +371,11 @@ namespace Mina.Core.Session
     /// <summary>
     /// Provides data for <see cref="IOSession"/>'s exception event.
     /// </summary>
-    public class IoSessionExceptionEventArgs : IOSessionEventArgs
+    public class IOSessionExceptionEventArgs : IOSessionEventArgs
     {
         /// <summary>
         /// </summary>
-        public IoSessionExceptionEventArgs(IOSession session, Exception exception)
+        public IOSessionExceptionEventArgs(IOSession session, Exception exception)
             : base(session)
         {
             Exception = exception;

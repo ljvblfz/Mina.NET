@@ -130,7 +130,7 @@ namespace Mina.Core.Service
         /// <remarks>
         /// If <see cref="Handler"/> is set, use <see cref="IOHandler.ExceptionCaught(IOSession, Exception)"/> instead.
         /// </remarks>
-        event EventHandler<IoSessionExceptionEventArgs> ExceptionCaught;
+        event EventHandler<IOSessionExceptionEventArgs> ExceptionCaught;
 
         /// <summary>
         /// Occurs when the closure of an half-duplex channel.
