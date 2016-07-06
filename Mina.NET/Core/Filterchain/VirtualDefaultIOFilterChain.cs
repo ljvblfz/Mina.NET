@@ -22,12 +22,14 @@ namespace Mina.Core.Filterchain
         /// </summary>
         public VirtualDefaultIOFilterChain(AbstractIOSession session)
             : base(
-            e => new NextFilter(e),
-            () => new HeadFilter(), () => new TailFilter()
-            )
+                e => new NextFilter(e),
+                () => new HeadFilter(), () => new TailFilter()
+                )
         {
             if (session == null)
+            {
                 throw new ArgumentNullException(nameof(session));
+            }
             _session = session;
         }
 
@@ -77,7 +79,9 @@ namespace Mina.Core.Filterchain
         {
             var buf = message as IOBuffer;
             if (buf != null)
+            {
                 _session.IncreaseReadBytes(buf.Remaining, DateTime.Now);
+            }
 
             CallNextMessageReceived(Head, _session, message);
         }
@@ -126,7 +130,8 @@ namespace Mina.Core.Filterchain
             CallPreviousFilterClose(Tail, _session);
         }
 
-        private void CallNext(IEntry<IOFilter, INextFilter> entry, Action<IOFilter, INextFilter> act, Action<Exception> error = null)
+        private void CallNext(IEntry<IOFilter, INextFilter> entry, Action<IOFilter, INextFilter> act,
+            Action<Exception> error = null)
         {
             try
             {
@@ -137,13 +142,18 @@ namespace Mina.Core.Filterchain
             catch (Exception e)
             {
                 if (error == null)
+                {
                     FireExceptionCaught(e);
+                }
                 else
+                {
                     error(e);
+                }
             }
         }
 
-        private void CallPrevious(IEntry<IOFilter, INextFilter> entry, Action<IOFilter, INextFilter> act, Action<Exception> error = null)
+        private void CallPrevious(IEntry<IOFilter, INextFilter> entry, Action<IOFilter, INextFilter> act,
+            Action<Exception> error = null)
         {
             try
             {
@@ -154,9 +164,13 @@ namespace Mina.Core.Filterchain
             catch (Exception e)
             {
                 if (error == null)
+                {
                     FireExceptionCaught(e);
+                }
                 else
+                {
                     error(e);
+                }
             }
         }
 
@@ -208,7 +222,8 @@ namespace Mina.Core.Filterchain
             CallNext(entry, (filter, next) => filter.MessageReceived(next, session, message));
         }
 
-        private void CallNextMessageSent(IEntry<IOFilter, INextFilter> entry, IOSession session, IWriteRequest writeRequest)
+        private void CallNextMessageSent(IEntry<IOFilter, INextFilter> entry, IOSession session,
+            IWriteRequest writeRequest)
         {
             CallNext(entry, (filter, next) => filter.MessageSent(next, session, writeRequest));
         }
@@ -218,7 +233,8 @@ namespace Mina.Core.Filterchain
             CallPrevious(entry, (filter, next) => filter.FilterClose(next, session));
         }
 
-        private void CallPreviousFilterWrite(IEntry<IOFilter, INextFilter> entry, IOSession session, IWriteRequest writeRequest)
+        private void CallPreviousFilterWrite(IEntry<IOFilter, INextFilter> entry, IOSession session,
+            IWriteRequest writeRequest)
         {
             CallPrevious(entry, (filter, next) => filter.FilterWrite(next, session, writeRequest),
                 e =>
@@ -251,7 +267,8 @@ namespace Mina.Core.Filterchain
             }
             catch (Exception e)
             {
-                throw new IOFilterLifeCycleException("OnPreAdd(): " + entry.Name + ':' + entry.Filter + " in " + Session, e);
+                throw new IOFilterLifeCycleException(
+                    "OnPreAdd(): " + entry.Name + ':' + entry.Filter + " in " + Session, e);
             }
         }
 
@@ -265,7 +282,8 @@ namespace Mina.Core.Filterchain
             catch (Exception e)
             {
                 Deregister0(entry);
-                throw new IOFilterLifeCycleException("OnPostAdd(): " + entry.Name + ':' + entry.Filter + " in " + Session, e);
+                throw new IOFilterLifeCycleException(
+                    "OnPostAdd(): " + entry.Name + ':' + entry.Filter + " in " + Session, e);
             }
         }
 
@@ -279,7 +297,7 @@ namespace Mina.Core.Filterchain
             catch (Exception e)
             {
                 throw new IOFilterLifeCycleException("OnPreRemove(): " + entry.Name + ':' + entry.Filter + " in "
-                        + Session, e);
+                                                     + Session, e);
             }
         }
 
@@ -293,7 +311,7 @@ namespace Mina.Core.Filterchain
             catch (Exception e)
             {
                 throw new IOFilterLifeCycleException("OnPostRemove(): " + entry.Name + ':' + entry.Filter + " in "
-                        + Session, e);
+                                                     + Session, e);
             }
         }
 
@@ -321,7 +339,8 @@ namespace Mina.Core.Filterchain
             }
             catch (Exception e)
             {
-                throw new IOFilterLifeCycleException("OnPostAdd(): " + entry.Name + ':' + newFilter + " in " + Session, e);
+                throw new IOFilterLifeCycleException("OnPostAdd(): " + entry.Name + ':' + newFilter + " in " + Session,
+                    e);
             }
         }
 
@@ -342,13 +361,19 @@ namespace Mina.Core.Filterchain
                         buffer.Mark();
                         var remaining = buffer.Remaining;
                         if (remaining == 0)
+                        {
                             // Zero-sized buffer means the internal message delimiter
                             s.IncreaseScheduledWriteMessages();
+                        }
                         else
+                        {
                             s.IncreaseScheduledWriteBytes(remaining);
+                        }
                     }
                     else
+                    {
                         s.IncreaseScheduledWriteMessages();
+                    }
                 }
 
                 var writeRequestQueue = session.WriteRequestQueue;
@@ -387,7 +412,9 @@ namespace Mina.Core.Filterchain
                 {
                     var future = session.RemoveAttribute(DefaultIOFilterChain.SessionCreatedFuture) as IConnectFuture;
                     if (future != null)
+                    {
                         future.SetSession(session);
+                    }
                 }
             }
 
@@ -405,10 +432,16 @@ namespace Mina.Core.Filterchain
                 }
                 finally
                 {
-                    try { session.WriteRequestQueue.Dispose(session); }
+                    try
+                    {
+                        session.WriteRequestQueue.Dispose(session);
+                    }
                     finally
                     {
-                        try { s.AttributeMap.Dispose(session); }
+                        try
+                        {
+                            s.AttributeMap.Dispose(session);
+                        }
                         finally
                         {
                             session.FilterChain.Clear();
@@ -441,7 +474,9 @@ namespace Mina.Core.Filterchain
                 {
                     var buf = message as IOBuffer;
                     if (buf == null || !buf.HasRemaining)
+                    {
                         s.IncreaseReadMessages(DateTime.Now);
+                    }
                 }
 
                 // Update the statistics
