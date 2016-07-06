@@ -121,7 +121,7 @@ namespace Mina.Core.Service
         /// <remarks>
         /// If <see cref="Handler"/> is set, use <see cref="IOHandler.SessionIdle(IOSession, IdleStatus)"/> instead.
         /// </remarks>
-        event EventHandler<IoSessionIdleEventArgs> SessionIdle;
+        event EventHandler<IOSessionIdleEventArgs> SessionIdle;
 
         /// <summary>
         /// Fires when any exception is thrown. Only available when

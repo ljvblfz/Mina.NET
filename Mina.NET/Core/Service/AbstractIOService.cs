@@ -44,7 +44,7 @@ namespace Mina.Core.Service
         public event EventHandler<IOSessionEventArgs> SessionDestroyed;
 
         /// <inheritdoc/>
-        public event EventHandler<IoSessionIdleEventArgs> SessionIdle;
+        public event EventHandler<IOSessionIdleEventArgs> SessionIdle;
 
         /// <inheritdoc/>
         public event EventHandler<IoSessionExceptionEventArgs> ExceptionCaught;
@@ -343,7 +343,7 @@ namespace Mina.Core.Service
                 var act = _service.SessionIdle;
                 if (act != null)
                 {
-                    act(_service, new IoSessionIdleEventArgs(session, status));
+                    act(_service, new IOSessionIdleEventArgs(session, status));
                 }
             }
 

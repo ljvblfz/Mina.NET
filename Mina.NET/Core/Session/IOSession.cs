@@ -352,11 +352,11 @@ namespace Mina.Core.Session
     /// <summary>
     /// Provides data for <see cref="IOSession"/>'s idle event.
     /// </summary>
-    public class IoSessionIdleEventArgs : IOSessionEventArgs
+    public class IOSessionIdleEventArgs : IOSessionEventArgs
     {
         /// <summary>
         /// </summary>
-        public IoSessionIdleEventArgs(IOSession session, IdleStatus idleStatus)
+        public IOSessionIdleEventArgs(IOSession session, IdleStatus idleStatus)
             : base(session)
         {
             IdleStatus = idleStatus;
