@@ -10,7 +10,7 @@ namespace Mina.Handler.Demux
     /// A <see cref="IOHandler"/> that demuxes <code>MessageReceived</code> events
     /// to the appropriate <see cref="IMessageHandler"/>.
     /// </summary>
-    public class DemuxingIoHandler : IOHandlerAdapter
+    public class DemuxingIOHandler : IOHandlerAdapter
     {
         private readonly ConcurrentDictionary<Type, IMessageHandler> _receivedMessageHandlers
             = new ConcurrentDictionary<Type, IMessageHandler>();

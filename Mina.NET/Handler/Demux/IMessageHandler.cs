@@ -3,7 +3,7 @@
 namespace Mina.Handler.Demux
 {
     /// <summary>
-    /// A handler interface that <see cref="DemuxingIoHandler"/> forwards
+    /// A handler interface that <see cref="DemuxingIOHandler"/> forwards
     /// <tt>MessageReceived</tt> or <tt>MessageSent</tt> events to.
     /// </summary>
     public interface IMessageHandler
@@ -18,7 +18,7 @@ namespace Mina.Handler.Demux
     }
 
     /// <summary>
-    /// A handler interface that <see cref="DemuxingIoHandler"/> forwards
+    /// A handler interface that <see cref="DemuxingIOHandler"/> forwards
     /// <tt>MessageReceived</tt> or <tt>MessageSent</tt> events to.
     /// </summary>
     /// <typeparam name="T"></typeparam>

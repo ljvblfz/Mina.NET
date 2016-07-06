@@ -4,7 +4,7 @@ using Mina.Core.Session;
 namespace Mina.Handler.Demux
 {
     /// <summary>
-    /// A handler interface that <see cref="DemuxingIoHandler"/> forwards
+    /// A handler interface that <see cref="DemuxingIOHandler"/> forwards
     /// <code>ExceptionCaught</code> events to.
     /// </summary>
     public interface IExceptionHandler
@@ -17,7 +17,7 @@ namespace Mina.Handler.Demux
     }
 
     /// <summary>
-    /// A handler interface that <see cref="DemuxingIoHandler"/> forwards
+    /// A handler interface that <see cref="DemuxingIOHandler"/> forwards
     /// <code>ExceptionCaught</code> events to.
     /// </summary>
     /// <typeparam name="TE"></typeparam>
