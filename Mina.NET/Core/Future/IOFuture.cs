@@ -12,20 +12,24 @@ namespace Mina.Core.Future
         /// Gets the <see cref="IOSession"/> which is associated with this future.
         /// </summary>
         IOSession Session { get; }
+
         /// <summary>
         /// Returns if the asynchronous operation is completed.
         /// </summary>
         bool Done { get; }
+
         /// <summary>
         /// Event that this future is completed.
         /// If the listener is added after the completion, the listener is directly notified.
         /// </summary>
         event EventHandler<IoFutureEventArgs> Complete;
+
         /// <summary>
         /// Wait for the asynchronous operation to complete.
         /// </summary>
         /// <returns>self</returns>
         IOFuture Await();
+
         /// <summary>
         /// Wait for the asynchronous operation to complete with the specified timeout.
         /// </summary>
