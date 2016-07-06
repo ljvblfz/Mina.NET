@@ -14,7 +14,8 @@ namespace Mina.Core.Future
         /// </summary>
         public DefaultReadFuture(IOSession session)
             : base(session)
-        { }
+        {
+        }
 
         /// <inheritdoc/>
         public object Message
@@ -25,10 +26,14 @@ namespace Mina.Core.Future
                 {
                     var val = Value;
                     if (ReferenceEquals(val, CLOSED))
+                    {
                         return null;
+                    }
                     var ex = val as Exception;
                     if (ex != null)
+                    {
                         throw ex;
+                    }
                     return val;
                 }
 
@@ -37,7 +42,9 @@ namespace Mina.Core.Future
             set
             {
                 if (value == null)
+                {
                     throw new ArgumentNullException(nameof(value));
+                }
                 Value = value;
             }
         }
@@ -77,7 +84,9 @@ namespace Mina.Core.Future
             set
             {
                 if (value == null)
+                {
                     throw new ArgumentNullException(nameof(value));
+                }
                 Value = value;
             }
         }
@@ -85,7 +94,7 @@ namespace Mina.Core.Future
         /// <inheritdoc/>
         public new IReadFuture Await()
         {
-            return (IReadFuture)base.Await();
+            return (IReadFuture) base.Await();
         }
     }
 }
