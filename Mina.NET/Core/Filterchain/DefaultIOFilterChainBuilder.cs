@@ -28,7 +28,7 @@ namespace Mina.Core.Filterchain
         public DefaultIOFilterChainBuilder()
         {
             _entries = new List<EntryImpl>();
-            _syncRoot = ((ICollection)_entries).SyncRoot;
+            _syncRoot = ((ICollection) _entries).SyncRoot;
         }
 
         /// <summary>
@@ -36,9 +36,11 @@ namespace Mina.Core.Filterchain
         public DefaultIOFilterChainBuilder(DefaultIOFilterChainBuilder filterChain)
         {
             if (filterChain == null)
+            {
                 throw new ArgumentNullException(nameof(filterChain));
+            }
             _entries = new List<EntryImpl>(filterChain._entries);
-            _syncRoot = ((ICollection)_entries).SyncRoot;
+            _syncRoot = ((ICollection) _entries).SyncRoot;
         }
 
         /// <summary>
@@ -125,7 +127,9 @@ namespace Mina.Core.Filterchain
 
                 var i = _entries.FindIndex(e => e.Name.Equals(baseName));
                 if (i >= 0)
+                {
                     Register(i, new EntryImpl(this, name, filter));
+                }
             }
         }
 
@@ -143,7 +147,9 @@ namespace Mina.Core.Filterchain
                 CheckBaseName(baseName);
                 var i = _entries.FindIndex(e => e.Name.Equals(baseName));
                 if (i >= 0)
+                {
                     Register(i + 1, new EntryImpl(this, name, filter));
+                }
             }
         }
 
@@ -155,7 +161,9 @@ namespace Mina.Core.Filterchain
         public IOFilter Remove(string name)
         {
             if (name == null)
+            {
                 throw new ArgumentNullException(nameof(name));
+            }
 
             lock (_syncRoot)
             {
@@ -181,7 +189,7 @@ namespace Mina.Core.Filterchain
             lock (_syncRoot)
             {
                 CheckBaseName(name);
-                var e = (EntryImpl)GetEntry(name);
+                var e = (EntryImpl) GetEntry(name);
                 var oldFilter = e.Filter;
                 e.Filter = newFilter;
                 return oldFilter;
@@ -211,15 +219,21 @@ namespace Mina.Core.Filterchain
         private void CheckBaseName(string baseName)
         {
             if (baseName == null)
+            {
                 throw new ArgumentNullException(nameof(baseName));
+            }
             if (!Contains(baseName))
+            {
                 throw new ArgumentException("Unknown filter name: " + baseName);
+            }
         }
 
         private void Register(int index, EntryImpl e)
         {
             if (Contains(e.Name))
+            {
                 throw new ArgumentException("Other filter is using the same name: " + e.Name);
+            }
             _entries.Insert(index, e);
         }
 
@@ -230,9 +244,13 @@ namespace Mina.Core.Filterchain
             public EntryImpl(DefaultIOFilterChainBuilder chain, string name, IOFilter filter)
             {
                 if (name == null)
+                {
                     throw new ArgumentNullException(nameof(name));
+                }
                 if (filter == null)
+                {
                     throw new ArgumentNullException(nameof(filter));
+                }
 
                 _chain = chain;
                 Name = name;
