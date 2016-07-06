@@ -12,11 +12,13 @@ namespace Mina.Core.Future
         /// Returns <code>true</code> if the connect operation is finished successfully.
         /// </summary>
         bool Connected { get; }
+
         /// <summary>
         /// Returns <code>true</code> if the connect operation has been
         /// canceled by <see cref="Cancel()"/>.
         /// </summary>
         bool Canceled { get; }
+
         /// <summary>
         /// Gets or sets the cause of the connection failure.
         /// </summary>
@@ -25,11 +27,13 @@ namespace Mina.Core.Future
         /// or if the connection attempt is successful.
         /// </remarks>
         Exception Exception { get; set; }
+
         /// <summary>
         /// Sets the newly connected session and notifies all threads waiting for this future.
         /// </summary>
         /// <param name="session"></param>
         void SetSession(IOSession session);
+
         /// <summary>
         /// Cancels the connection attempt and notifies all threads waiting for this future.
         /// <returns>
@@ -38,6 +42,7 @@ namespace Mina.Core.Future
         /// </returns>
         /// </summary>
         bool Cancel();
+
         /// <inheritdoc/>
         new IConnectFuture Await();
     }
