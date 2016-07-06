@@ -31,22 +31,25 @@ namespace Mina.Filter.Buffer
 
         public BufferedWriteFilter()
             : this(DefaultBufferSize, null)
-        { }
+        {
+        }
 
         public BufferedWriteFilter(int bufferSize)
             : this(bufferSize, null)
-        { }
+        {
+        }
 
 #if NET20
         internal
 #else
         public
 #endif
-        BufferedWriteFilter(int bufferSize, ConcurrentDictionary<IOSession, Lazy<IOBuffer>> buffersMap)
+            BufferedWriteFilter(int bufferSize, ConcurrentDictionary<IOSession, Lazy<IOBuffer>> buffersMap)
         {
             BufferSize = bufferSize;
-            _buffersMap = buffersMap == null ?
-                new ConcurrentDictionary<IOSession, Lazy<IOBuffer>>() : buffersMap;
+            _buffersMap = buffersMap == null
+                ? new ConcurrentDictionary<IOSession, Lazy<IOBuffer>>()
+                : buffersMap;
         }
 
         /// <summary>
@@ -59,7 +62,9 @@ namespace Mina.Filter.Buffer
         {
             var buf = writeRequest.Message as IOBuffer;
             if (buf == null)
+            {
                 throw new ArgumentException("This filter should only buffer IoBuffer objects");
+            }
             Write(session, buf);
         }
 
@@ -140,7 +145,9 @@ namespace Mina.Filter.Buffer
                 buf.Clear();
             }
             if (Log.IsDebugEnabled)
+            {
                 Log.Debug("Flushing buffer: " + tmp);
+            }
             nextFilter.FilterWrite(session, new DefaultWriteRequest(tmp));
         }
 
