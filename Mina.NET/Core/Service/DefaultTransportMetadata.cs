@@ -13,19 +13,29 @@ namespace Mina.Core.Service
             bool connectionless, bool fragmentation, Type endpointType)
         {
             if (providerName == null)
+            {
                 throw new ArgumentNullException(nameof(providerName));
+            }
             if (name == null)
+            {
                 throw new ArgumentNullException(nameof(name));
+            }
 
             providerName = providerName.Trim().ToLowerInvariant();
             if (providerName.Length == 0)
+            {
                 throw new ArgumentException("providerName is empty", nameof(providerName));
+            }
             name = name.Trim().ToLowerInvariant();
             if (name.Length == 0)
+            {
                 throw new ArgumentException("name is empty", nameof(name));
+            }
 
             if (endpointType == null)
+            {
                 throw new ArgumentNullException(nameof(endpointType));
+            }
 
             ProviderName = providerName;
             Name = name;
