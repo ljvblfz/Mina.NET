@@ -17,6 +17,7 @@ namespace Mina.Filter.Codec.StateMachine
         /// Carriage return character
         /// </summary>
         private static readonly byte Cr = 13;
+
         /// <summary>
         /// Line feed character
         /// </summary>
