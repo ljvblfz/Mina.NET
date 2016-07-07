@@ -22,7 +22,8 @@ namespace Mina.Filter.Codec.TextLine
         /// </summary>
         public TextLineDecoder()
             : this(LineDelimiter.Auto)
-        { }
+        {
+        }
 
         /// <summary>
         /// Instantiates with default <see cref="Encoding.Default"/> and given delimiter.
@@ -30,7 +31,8 @@ namespace Mina.Filter.Codec.TextLine
         /// <param name="delimiter">the delimiter string</param>
         public TextLineDecoder(string delimiter)
             : this(new LineDelimiter(delimiter))
-        { }
+        {
+        }
 
         /// <summary>
         /// Instantiates with default <see cref="Encoding.Default"/> and given delimiter.
@@ -38,7 +40,8 @@ namespace Mina.Filter.Codec.TextLine
         /// <param name="delimiter">the <see cref="LineDelimiter"/></param>
         public TextLineDecoder(LineDelimiter delimiter)
             : this(Encoding.Default, delimiter)
-        { }
+        {
+        }
 
         /// <summary>
         /// Instantiates with given encoding,
@@ -47,7 +50,8 @@ namespace Mina.Filter.Codec.TextLine
         /// <param name="encoding">the <see cref="Encoding"/></param>
         public TextLineDecoder(Encoding encoding)
             : this(encoding, LineDelimiter.Auto)
-        { }
+        {
+        }
 
         /// <summary>
         /// Instantiates.
@@ -56,7 +60,8 @@ namespace Mina.Filter.Codec.TextLine
         /// <param name="delimiter">the delimiter string</param>
         public TextLineDecoder(Encoding encoding, string delimiter)
             : this(encoding, new LineDelimiter(delimiter))
-        { }
+        {
+        }
 
         /// <summary>
         /// Instantiates.
@@ -66,9 +71,13 @@ namespace Mina.Filter.Codec.TextLine
         public TextLineDecoder(Encoding encoding, LineDelimiter delimiter)
         {
             if (encoding == null)
+            {
                 throw new ArgumentNullException(nameof(encoding));
+            }
             if (delimiter == null)
+            {
                 throw new ArgumentNullException(nameof(delimiter));
+            }
 
             _context = new AttributeKey(GetType(), "context");
             _encoding = encoding;
@@ -86,13 +95,15 @@ namespace Mina.Filter.Codec.TextLine
             set
             {
                 if (value <= 0)
+                {
                     throw new ArgumentException("maxLineLength (" + value + ") should be a positive value");
+                }
                 _maxLineLength = value;
             }
         }
 
         /// <summary>
-        /// Gets or sets the lenght of inner buffer.
+        /// Gets or sets the length of inner buffer.
         /// </summary>
         public int BufferLength
         {
@@ -100,7 +111,9 @@ namespace Mina.Filter.Codec.TextLine
             set
             {
                 if (value <= 0)
+                {
                     throw new ArgumentException("bufferLength (" + value + ") should be a positive value");
+                }
                 _bufferLength = value;
             }
         }
@@ -111,9 +124,13 @@ namespace Mina.Filter.Codec.TextLine
             var ctx = GetContext(session);
 
             if (LineDelimiter.Auto.Equals(_delimiter))
+            {
                 DecodeAuto(ctx, session, input, output);
+            }
             else
+            {
                 DecodeNormal(ctx, session, input, output);
+            }
         }
 
         /// <inheritdoc/>
@@ -148,7 +165,7 @@ namespace Mina.Filter.Codec.TextLine
             {
                 var b = input.Get();
                 var matched = false;
-                
+
                 switch (b)
                 {
                     case 0x0d: // \r
@@ -334,9 +351,13 @@ namespace Mina.Filter.Codec.TextLine
             private void Discard(IOBuffer input)
             {
                 if (int.MaxValue - input.Remaining < OverflowPosition)
+                {
                     OverflowPosition = int.MaxValue;
+                }
                 else
+                {
                     OverflowPosition += input.Remaining;
+                }
                 input.Position = input.Limit;
             }
         }
