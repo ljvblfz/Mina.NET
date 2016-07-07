@@ -33,7 +33,8 @@ namespace Mina.Filter.KeepAlive
         /// <param name="messageFactory">the factory to generate keep-alive messages</param>
         public KeepAliveFilter(IKeepAliveMessageFactory messageFactory)
             : this(messageFactory, IdleStatus.ReaderIdle, KeepAliveRequestTimeoutHandler.Close)
-        { }
+        {
+        }
 
         /// <summary>
         /// Creates a new instance with the default properties.
@@ -47,7 +48,8 @@ namespace Mina.Filter.KeepAlive
         /// <param name="interestedIdleStatus"></param>
         public KeepAliveFilter(IKeepAliveMessageFactory messageFactory, IdleStatus interestedIdleStatus)
             : this(messageFactory, interestedIdleStatus, KeepAliveRequestTimeoutHandler.Close)
-        { }
+        {
+        }
 
         /// <summary>
         /// Creates a new instance with the default properties.
@@ -61,7 +63,8 @@ namespace Mina.Filter.KeepAlive
         /// <param name="strategy"></param>
         public KeepAliveFilter(IKeepAliveMessageFactory messageFactory, IKeepAliveRequestTimeoutHandler strategy)
             : this(messageFactory, IdleStatus.ReaderIdle, strategy)
-        { }
+        {
+        }
 
         /// <summary>
         /// Creates a new instance with the default properties.
@@ -76,7 +79,8 @@ namespace Mina.Filter.KeepAlive
         public KeepAliveFilter(IKeepAliveMessageFactory messageFactory, IdleStatus interestedIdleStatus,
             IKeepAliveRequestTimeoutHandler strategy)
             : this(messageFactory, interestedIdleStatus, strategy, 60, 30)
-        { }
+        {
+        }
 
         /// <summary>
         /// Creates a new instance.
@@ -90,9 +94,13 @@ namespace Mina.Filter.KeepAlive
             IKeepAliveRequestTimeoutHandler strategy, int keepAliveRequestInterval, int keepAliveRequestTimeout)
         {
             if (messageFactory == null)
+            {
                 throw new ArgumentNullException(nameof(messageFactory));
+            }
             if (strategy == null)
+            {
                 throw new ArgumentNullException(nameof(strategy));
+            }
 
             _waitingForResponse = new AttributeKey(GetType(), "waitingForResponse");
             _ignoreReaderIdleOnce = new AttributeKey(GetType(), "ignoreReaderIdleOnce");
@@ -112,7 +120,9 @@ namespace Mina.Filter.KeepAlive
             set
             {
                 if (value == 0)
+                {
                     throw new ArgumentException("RequestInterval must be a positive integer: " + value);
+                }
                 _requestInterval = value;
             }
         }
@@ -126,7 +136,9 @@ namespace Mina.Filter.KeepAlive
             set
             {
                 if (value == 0)
+                {
                     throw new ArgumentException("RequestTimeout must be a positive integer: " + value);
+                }
                 _requestTimeout = value;
             }
         }
@@ -148,7 +160,9 @@ namespace Mina.Filter.KeepAlive
             set
             {
                 if (value == null)
+                {
                     throw new ArgumentNullException(nameof(value));
+                }
                 _requestTimeoutHandler = value;
             }
         }
@@ -157,8 +171,10 @@ namespace Mina.Filter.KeepAlive
         public override void OnPreAdd(IOFilterChain parent, string name, INextFilter nextFilter)
         {
             if (parent.Contains(this))
+            {
                 throw new ArgumentException("You can't add the same filter instance more than once. "
-                    + "Create another instance and add it.");
+                                            + "Create another instance and add it.");
+            }
         }
 
         /// <inheritdoc/>
@@ -183,16 +199,22 @@ namespace Mina.Filter.KeepAlive
                     var pongMessage = _messageFactory.GetResponse(session, message);
 
                     if (pongMessage != null)
+                    {
                         nextFilter.FilterWrite(session, new DefaultWriteRequest(pongMessage));
+                    }
                 }
 
                 if (_messageFactory.IsResponse(session, message))
+                {
                     ResetStatus(session);
+                }
             }
             finally
             {
                 if (!IsKeepAliveMessage(session, message))
+                {
                     nextFilter.MessageReceived(session, message);
+                }
             }
         }
 
@@ -201,7 +223,9 @@ namespace Mina.Filter.KeepAlive
         {
             var message = writeRequest.Message;
             if (!IsKeepAliveMessage(session, message))
+            {
                 nextFilter.MessageSent(session, writeRequest);
+            }
         }
 
         /// <inheritdoc/>
@@ -249,7 +273,9 @@ namespace Mina.Filter.KeepAlive
             }
 
             if (_forwardEvent)
+            {
                 nextFilter.SessionIdle(session, status);
+            }
         }
 
         private void ResetStatus(IOSession session)
@@ -270,7 +296,9 @@ namespace Mina.Filter.KeepAlive
             ResetStatus(session);
             var handler = _requestTimeoutHandler;
             if (handler == KeepAliveRequestTimeoutHandler.DeafSpeaker)
+            {
                 return;
+            }
             handler.KeepAliveRequestTimedOut(this, session);
         }
 
