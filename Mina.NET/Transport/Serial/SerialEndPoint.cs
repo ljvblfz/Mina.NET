@@ -16,7 +16,8 @@ namespace Mina.Transport.Serial
         /// <param name="baudRate">the baud rate</param>
         public SerialEndPoint(string portName, int baudRate)
             : this(portName, baudRate, Parity.None, 8, StopBits.One)
-        { }
+        {
+        }
 
         /// <summary>
         /// Instantiates.
