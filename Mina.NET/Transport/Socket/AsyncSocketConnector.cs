@@ -13,10 +13,11 @@ namespace Mina.Transport.Socket
         /// </summary>
         public AsyncSocketConnector()
             : base(new DefaultSocketSessionConfig())
-        { }
+        {
+        }
 
         /// <inheritdoc/>
-        public new ISocketSessionConfig SessionConfig => (ISocketSessionConfig)base.SessionConfig;
+        public new ISocketSessionConfig SessionConfig => (ISocketSessionConfig) base.SessionConfig;
 
         /// <inheritdoc/>
         public override ITransportMetadata TransportMetadata => AsyncSocketSession.Metadata;
@@ -36,7 +37,9 @@ namespace Mina.Transport.Socket
             e.UserToken = connector;
             var willRaiseEvent = connector.Socket.ConnectAsync(e);
             if (!willRaiseEvent)
+            {
                 ProcessConnect(e);
+            }
         }
 
         void SocketAsyncEventArgs_Completed(object sender, SocketAsyncEventArgs e)
@@ -47,18 +50,18 @@ namespace Mina.Transport.Socket
                     ProcessConnect(e);
                     break;
                 case SocketAsyncOperation.Receive:
-                    ((AsyncSocketSession)e.UserToken).ProcessReceive(e);
+                    ((AsyncSocketSession) e.UserToken).ProcessReceive(e);
                     break;
                 case SocketAsyncOperation.Send:
                 case SocketAsyncOperation.SendPackets:
-                    ((AsyncSocketSession)e.UserToken).ProcessSend(e);
+                    ((AsyncSocketSession) e.UserToken).ProcessSend(e);
                     break;
             }
         }
 
         private void ProcessConnect(SocketAsyncEventArgs e)
         {
-            var connector = (ConnectorContext)e.UserToken;
+            var connector = (ConnectorContext) e.UserToken;
             if (e.SocketError == SocketError.Success)
             {
                 var readBuffer = e;
@@ -76,7 +79,7 @@ namespace Mina.Transport.Socket
             }
             else
             {
-                EndConnect(new SocketException((int)e.SocketError), connector);
+                EndConnect(new SocketException((int) e.SocketError), connector);
             }
         }
     }
