@@ -10,6 +10,7 @@ namespace Mina.Transport.Socket
     {
         /// <inheritdoc/>
         new IDatagramSessionConfig SessionConfig { get; }
+
         /// <inheritdoc/>
         new IPEndPoint DefaultRemoteEndPoint { get; set; }
     }
