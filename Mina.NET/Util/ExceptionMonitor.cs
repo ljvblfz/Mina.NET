@@ -33,7 +33,9 @@ namespace Mina.Util
         public override void ExceptionCaught(Exception cause)
         {
             if (Log.IsWarnEnabled)
+            {
                 Log.Warn("Unexpected exception.", cause);
+            }
         }
     }
 }
