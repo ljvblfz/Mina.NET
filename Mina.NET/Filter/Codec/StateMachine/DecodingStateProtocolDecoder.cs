@@ -24,24 +24,32 @@ namespace Mina.Filter.Codec.StateMachine
         public DecodingStateProtocolDecoder(IDecodingState state)
         {
             if (state == null)
+            {
                 throw new ArgumentNullException(nameof(state));
+            }
             _state = state;
         }
 
         public void Decode(IOSession session, IOBuffer input, IProtocolDecoderOutput output)
         {
             if (_session == null)
+            {
                 _session = session;
+            }
             else if (_session != session)
+            {
                 throw new InvalidOperationException(GetType().Name + " is a stateful decoder.  "
-                        + "You have to create one per session.");
+                                                    + "You have to create one per session.");
+            }
 
             _undecodedBuffers.Enqueue(input);
             while (true)
             {
                 IOBuffer b;
                 if (!_undecodedBuffers.TryPeek(out b))
+                {
                     break;
+                }
 
                 var oldRemaining = b.Remaining;
                 _state.Decode(b, output);
@@ -49,8 +57,10 @@ namespace Mina.Filter.Codec.StateMachine
                 if (newRemaining != 0)
                 {
                     if (oldRemaining == newRemaining)
+                    {
                         throw new InvalidOperationException(_state.GetType().Name
-                            + " must consume at least one byte per decode().");
+                                                            + " must consume at least one byte per decode().");
+                    }
                 }
                 else
                 {
