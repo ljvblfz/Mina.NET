@@ -5,16 +5,16 @@ namespace Mina.Util
 {
     /// <summary>
     /// This class creates a single large buffer which can be divided up and assigned to SocketAsyncEventArgs objects for use
-    /// with each socket I/O operation.  This enables bufffers to be easily reused and gaurds against fragmenting heap memory.
+    /// with each socket I/O operation.  This enables buffers to be easily reused and gaurds against fragmenting heap memory.
     /// 
     /// The operations exposed on the BufferManager class are not thread safe.
     /// </summary>
     class BufferManager
     {
-        int _mNumBytes;                 // the total number of bytes controlled by the buffer pool
-        byte[] _mBuffer;                // the underlying byte array maintained by the Buffer Manager
-        Stack<int> _mFreeIndexPool;     // 
-        int _mCurrentIndex;
+        int _numBytes; // the total number of bytes controlled by the buffer pool
+        byte[] _buffer; // the underlying byte array maintained by the Buffer Manager
+        Stack<int> _freeIndexPool;
+        int _currentIndex;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="BufferManager"/> class.
@@ -23,10 +23,10 @@ namespace Mina.Util
         /// <param name="bufferSize">the size of one buffer</param>
         public BufferManager(int totalBytes, int bufferSize)
         {
-            _mNumBytes = totalBytes;
-            _mCurrentIndex = 0;
+            _numBytes = totalBytes;
+            _currentIndex = 0;
             BufferSize = bufferSize;
-            _mFreeIndexPool = new Stack<int>();
+            _freeIndexPool = new Stack<int>();
         }
 
         public int BufferSize { get; }
@@ -37,7 +37,7 @@ namespace Mina.Util
         public void InitBuffer()
         {
             // create one big large buffer and divide that out to each SocketAsyncEventArg object
-            _mBuffer = new byte[_mNumBytes];
+            _buffer = new byte[_numBytes];
         }
 
         /// <summary>
@@ -46,18 +46,18 @@ namespace Mina.Util
         /// <returns>true if the buffer was successfully set, else false</returns>
         public bool SetBuffer(SocketAsyncEventArgs args)
         {
-            if (_mFreeIndexPool.Count > 0)
+            if (_freeIndexPool.Count > 0)
             {
-                args.SetBuffer(_mBuffer, _mFreeIndexPool.Pop(), BufferSize);
+                args.SetBuffer(_buffer, _freeIndexPool.Pop(), BufferSize);
             }
             else
             {
-                if ((_mNumBytes - BufferSize) < _mCurrentIndex)
+                if ((_numBytes - BufferSize) < _currentIndex)
                 {
                     return false;
                 }
-                args.SetBuffer(_mBuffer, _mCurrentIndex, BufferSize);
-                _mCurrentIndex += BufferSize;
+                args.SetBuffer(_buffer, _currentIndex, BufferSize);
+                _currentIndex += BufferSize;
             }
             return true;
         }
@@ -68,7 +68,7 @@ namespace Mina.Util
         /// </summary>
         public void FreeBuffer(SocketAsyncEventArgs args)
         {
-            _mFreeIndexPool.Push(args.Offset);
+            _freeIndexPool.Push(args.Offset);
             args.SetBuffer(null, 0, 0);
         }
     }
