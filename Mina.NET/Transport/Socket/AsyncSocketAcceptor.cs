@@ -25,7 +25,8 @@ namespace Mina.Transport.Socket
         /// </summary>
         public AsyncSocketAcceptor()
             : this(1024)
-        { }
+        {
+        }
 
         /// <summary>
         /// Instantiates.
@@ -73,14 +74,16 @@ namespace Mina.Transport.Socket
             var session = e.UserToken as AsyncSocketSession;
 
             if (session == null)
+            {
                 return;
+            }
 
             if (e.LastOperation == SocketAsyncOperation.Receive)
             {
                 session.ProcessReceive(e);
             }
             else if (e.LastOperation == SocketAsyncOperation.Send
-                || e.LastOperation == SocketAsyncOperation.SendPackets)
+                     || e.LastOperation == SocketAsyncOperation.SendPackets)
             {
                 session.ProcessSend(e);
             }
@@ -105,7 +108,7 @@ namespace Mina.Transport.Socket
         /// <inheritdoc/>
         protected override void BeginAccept(ListenerContext listener)
         {
-            var acceptEventArg = (SocketAsyncEventArgs)listener.Tag;
+            var acceptEventArg = (SocketAsyncEventArgs) listener.Tag;
             if (acceptEventArg == null)
             {
                 acceptEventArg = new SocketAsyncEventArgs();
@@ -142,12 +145,12 @@ namespace Mina.Transport.Socket
         {
             if (e.SocketError == SocketError.Success)
             {
-                EndAccept(e.AcceptSocket, (ListenerContext)e.UserToken);
+                EndAccept(e.AcceptSocket, (ListenerContext) e.UserToken);
             }
             else if (e.SocketError != SocketError.OperationAborted
-                && e.SocketError != SocketError.Interrupted)
+                     && e.SocketError != SocketError.Interrupted)
             {
-                ExceptionMonitor.Instance.ExceptionCaught(new SocketException((int)e.SocketError));
+                ExceptionMonitor.Instance.ExceptionCaught(new SocketException((int) e.SocketError));
             }
         }
 
