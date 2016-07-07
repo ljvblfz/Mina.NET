@@ -13,6 +13,7 @@ namespace Mina.Transport.Socket
         /// created by this connect service.
         /// </summary>
         new ISocketSessionConfig SessionConfig { get; }
+
         /// <inheritdoc/>
         new IPEndPoint DefaultRemoteEndPoint { get; set; }
     }
