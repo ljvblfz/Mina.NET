@@ -1,4 +1,5 @@
-﻿using Mina.Core.Session;
+﻿using System.Net.Sockets;
+using Mina.Core.Session;
 
 namespace Mina.Transport.Socket
 {
@@ -8,20 +9,34 @@ namespace Mina.Transport.Socket
         {
             var cfg = config as IDatagramSessionConfig;
             if (cfg == null)
+            {
                 return;
+            }
 
             if (cfg.EnableBroadcast.HasValue)
+            {
                 EnableBroadcast = cfg.EnableBroadcast;
+            }
             if (cfg.ReceiveBufferSize.HasValue)
+            {
                 ReceiveBufferSize = cfg.ReceiveBufferSize;
+            }
             if (cfg.SendBufferSize.HasValue)
+            {
                 SendBufferSize = cfg.SendBufferSize;
+            }
             if (cfg.ReuseAddress.HasValue)
+            {
                 ReuseAddress = cfg.ReuseAddress;
+            }
             if (cfg.TrafficClass.HasValue)
+            {
                 TrafficClass = cfg.TrafficClass;
+            }
             if (cfg.ExclusiveAddressUse.HasValue)
+            {
                 ExclusiveAddressUse = cfg.ExclusiveAddressUse;
+            }
             MulticastOption = cfg.MulticastOption;
         }
 
@@ -37,6 +52,6 @@ namespace Mina.Transport.Socket
 
         public abstract bool? ExclusiveAddressUse { get; set; }
 
-        public abstract System.Net.Sockets.MulticastOption MulticastOption { get; set; }
+        public abstract MulticastOption MulticastOption { get; set; }
     }
 }
