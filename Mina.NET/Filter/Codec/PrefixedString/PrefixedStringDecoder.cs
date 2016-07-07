@@ -10,12 +10,16 @@ namespace Mina.Filter.Codec.PrefixedString
     public class PrefixedStringDecoder : CumulativeProtocolDecoder
     {
         public PrefixedStringDecoder(Encoding encoding)
-            : this(encoding, PrefixedStringCodecFactory.DefaultPrefixLength, PrefixedStringCodecFactory.DefaultMaxDataLength)
-        { }
+            : this(
+                encoding, PrefixedStringCodecFactory.DefaultPrefixLength,
+                PrefixedStringCodecFactory.DefaultMaxDataLength)
+        {
+        }
 
         public PrefixedStringDecoder(Encoding encoding, int prefixLength)
             : this(encoding, prefixLength, PrefixedStringCodecFactory.DefaultMaxDataLength)
-        { }
+        {
+        }
 
         public PrefixedStringDecoder(Encoding encoding, int prefixLength, int maxDataLength)
         {
