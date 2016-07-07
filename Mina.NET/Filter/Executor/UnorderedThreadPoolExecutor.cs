@@ -15,7 +15,8 @@ namespace Mina.Filter.Executor
         /// </summary>
         public UnorderedThreadPoolExecutor()
             : this(null)
-        { }
+        {
+        }
 
         /// <summary>
         /// Instantiates with the given <see cref="IOEventQueueHandler"/>.
