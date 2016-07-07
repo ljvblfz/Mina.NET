@@ -32,8 +32,10 @@ namespace Mina.Filter.Codec.StateMachine
             }
 
             if (_buffer.Position + input.Remaining > _maxLength)
+            {
                 throw new ProtocolDecoderException("Received data exceeds " + _maxLength + " byte(s).");
-         
+            }
+
             _buffer.Put(input);
             return this;
         }
