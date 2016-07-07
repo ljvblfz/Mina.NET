@@ -11,6 +11,7 @@ namespace Mina.Filter.Codec
         /// Encodes higher-level message objects into binary or protocol-specific data.
         /// </summary>
         void Encode(IOSession session, object message, IProtocolEncoderOutput output);
+
         /// <summary>
         /// Releases all resources related with this encoder.
         /// </summary>
