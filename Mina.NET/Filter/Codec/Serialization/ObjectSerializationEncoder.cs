@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Runtime.Serialization;
 using Mina.Core.Buffer;
 using Mina.Core.Session;
 
@@ -24,7 +25,9 @@ namespace Mina.Filter.Codec.Serialization
             set
             {
                 if (value <= 0)
+                {
                     throw new ArgumentException("MaxObjectSize should be larger than zero.", nameof(value));
+                }
                 _maxObjectSize = value;
             }
         }
@@ -33,7 +36,9 @@ namespace Mina.Filter.Codec.Serialization
         public override void Encode(IOSession session, object message, IProtocolEncoderOutput output)
         {
             if (!message.GetType().IsSerializable)
-                throw new System.Runtime.Serialization.SerializationException(message.GetType() + " is not serializable.");
+            {
+                throw new SerializationException(message.GetType() + " is not serializable.");
+            }
 
             var buf = IOBuffer.Allocate(64);
             buf.AutoExpand = true;
@@ -42,8 +47,10 @@ namespace Mina.Filter.Codec.Serialization
 
             var objectSize = buf.Position - 4;
             if (objectSize > _maxObjectSize)
+            {
                 throw new ArgumentException(string.Format("The encoded object is too big: {0} (> {1})",
                     objectSize, _maxObjectSize), nameof(message));
+            }
 
             buf.PutInt32(0, objectSize);
             buf.Flip();
