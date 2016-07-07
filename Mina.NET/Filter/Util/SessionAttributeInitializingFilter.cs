@@ -19,7 +19,8 @@ namespace Mina.Filter.Util
         /// Creates a new instance with no default attributes.
         /// </summary>
         public SessionAttributeInitializingFilter()
-        { }
+        {
+        }
 
         /// <summary>
         /// Creates a new instance with the specified default attributes.
@@ -68,7 +69,9 @@ namespace Mina.Filter.Util
         public object SetAttribute(string key, object value)
         {
             if (value == null)
+            {
                 return RemoveAttribute(key);
+            }
 
             object old;
             _attributes.TryGetValue(key, out old);
