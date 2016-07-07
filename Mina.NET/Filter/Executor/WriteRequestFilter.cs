@@ -16,7 +16,8 @@ namespace Mina.Filter.Executor
         /// </summary>
         public WriteRequestFilter()
             : this(new IOEventQueueThrottle())
-        { }
+        {
+        }
 
         /// <summary>
         /// Instantiates with the given <see cref="IOEventQueueHandler"/>.
@@ -25,7 +26,9 @@ namespace Mina.Filter.Executor
         public WriteRequestFilter(IOEventQueueHandler queueHandler)
         {
             if (queueHandler == null)
+            {
                 throw new ArgumentNullException(nameof(queueHandler));
+            }
             QueueHandler = queueHandler;
         }
 
@@ -43,7 +46,9 @@ namespace Mina.Filter.Executor
                 nextFilter.FilterWrite(session, writeRequest);
                 var writeFuture = writeRequest.Future;
                 if (writeFuture == null)
+                {
                     return;
+                }
 
                 // We can track the write request only when it has a future.
                 QueueHandler.Offered(this, ioe);
