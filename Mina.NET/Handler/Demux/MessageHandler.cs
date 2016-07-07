@@ -46,10 +46,6 @@ namespace Mina.Handler.Demux
 
     class NoopMessageHandler : IMessageHandler<object>
     {
-        internal NoopMessageHandler()
-        {
-        }
-
         public void HandleMessage(IOSession session, object message)
         {
             // Do nothing
