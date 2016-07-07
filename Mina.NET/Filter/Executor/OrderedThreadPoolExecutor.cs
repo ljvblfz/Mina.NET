@@ -24,7 +24,8 @@ namespace Mina.Filter.Executor
         /// </summary>
         public OrderedThreadPoolExecutor()
             : this(null)
-        { }
+        {
+        }
 
         /// <summary>
         /// Instantiates with the given <see cref="IOEventQueueHandler"/>.
@@ -69,7 +70,9 @@ namespace Mina.Filter.Executor
                     }
 
                     if (Log.IsDebugEnabled)
+                    {
                         Print(sessionTasksQueue.TasksQueue, ioe);
+                    }
                 }
 
                 if (exec)
@@ -91,9 +94,11 @@ namespace Mina.Filter.Executor
             if (queue == null)
             {
                 queue = new SessionTasksQueue();
-                var oldQueue = (SessionTasksQueue)session.SetAttributeIfAbsent(_tasksQueue, queue);
+                var oldQueue = (SessionTasksQueue) session.SetAttributeIfAbsent(_tasksQueue, queue);
                 if (oldQueue != null)
+                {
                     queue = oldQueue;
+                }
             }
 
             return queue;
@@ -147,10 +152,12 @@ namespace Mina.Filter.Executor
         class SessionTasksQueue
         {
             public readonly object SyncRoot = new byte[0];
+
             /// <summary>
             /// A queue of ordered event waiting to be processed
             /// </summary>
             public readonly ConcurrentQueue<IOEvent> TasksQueue = new ConcurrentQueue<IOEvent>();
+
             /// <summary>
             /// The current task state
             /// </summary>
