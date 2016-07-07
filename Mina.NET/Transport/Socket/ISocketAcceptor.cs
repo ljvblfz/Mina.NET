@@ -10,14 +10,18 @@ namespace Mina.Transport.Socket
     {
         /// <inheritdoc/>
         new ISocketSessionConfig SessionConfig { get; }
+
         /// <inheritdoc/>
         new IPEndPoint LocalEndPoint { get; }
+
         /// <inheritdoc/>
         new IPEndPoint DefaultLocalEndPoint { get; set; }
+
         /// <summary>
         /// Gets or sets the Reuse Address flag.
         /// </summary>
         bool ReuseAddress { get; set; }
+
         /// <summary>
         /// Gets or sets the size of the backlog. This can only be set when this class is not bound.
         /// </summary>
