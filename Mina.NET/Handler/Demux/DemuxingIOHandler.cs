@@ -14,16 +14,19 @@ namespace Mina.Handler.Demux
     {
         private readonly ConcurrentDictionary<Type, IMessageHandler> _receivedMessageHandlers
             = new ConcurrentDictionary<Type, IMessageHandler>();
+
         private readonly ConcurrentDictionary<Type, IMessageHandler> _receivedMessageHandlerCache
             = new ConcurrentDictionary<Type, IMessageHandler>();
 
         private readonly ConcurrentDictionary<Type, IMessageHandler> _sentMessageHandlers
             = new ConcurrentDictionary<Type, IMessageHandler>();
+
         private readonly ConcurrentDictionary<Type, IMessageHandler> _sentMessageHandlerCache
             = new ConcurrentDictionary<Type, IMessageHandler>();
 
         private readonly ConcurrentDictionary<Type, IExceptionHandler> _exceptionHandlers
             = new ConcurrentDictionary<Type, IExceptionHandler>();
+
         private readonly ConcurrentDictionary<Type, IExceptionHandler> _exceptionHandlerCache
             = new ConcurrentDictionary<Type, IExceptionHandler>();
 
@@ -34,7 +37,9 @@ namespace Mina.Handler.Demux
         /// <returns>the old handler if there is already a registered handler for the specified type</returns>
         public IMessageHandler<T> AddReceivedMessageHandler<T>(IMessageHandler<T> handler)
         {
-            return (IMessageHandler<T>)AddHandler(_receivedMessageHandlers, _receivedMessageHandlerCache, typeof(T), handler);
+            return
+                (IMessageHandler<T>)
+                    AddHandler(_receivedMessageHandlers, _receivedMessageHandlerCache, typeof(T), handler);
         }
 
         /// <summary>
@@ -44,7 +49,7 @@ namespace Mina.Handler.Demux
         /// <returns>the removed handler if successfully removed, null otherwise</returns>
         public IMessageHandler<T> RemoveReceivedMessageHandler<T>(IMessageHandler<T> handler)
         {
-            return (IMessageHandler<T>)RemoveHandler(_receivedMessageHandlers, _receivedMessageHandlerCache, typeof(T));
+            return (IMessageHandler<T>) RemoveHandler(_receivedMessageHandlers, _receivedMessageHandlerCache, typeof(T));
         }
 
         /// <summary>
@@ -54,7 +59,7 @@ namespace Mina.Handler.Demux
         /// <returns>the old handler if there is already a registered handler for the specified type</returns>
         public IMessageHandler<T> AddSentMessageHandler<T>(IMessageHandler<T> handler)
         {
-            return (IMessageHandler<T>)AddHandler(_sentMessageHandlers, _sentMessageHandlerCache, typeof(T), handler);
+            return (IMessageHandler<T>) AddHandler(_sentMessageHandlers, _sentMessageHandlerCache, typeof(T), handler);
         }
 
         /// <summary>
@@ -64,7 +69,7 @@ namespace Mina.Handler.Demux
         /// <returns>the removed handler if successfully removed, null otherwise</returns>
         public IMessageHandler<T> RemoveSentMessageHandler<T>(IMessageHandler<T> handler)
         {
-            return (IMessageHandler<T>)RemoveHandler(_sentMessageHandlers, _sentMessageHandlerCache, typeof(T));
+            return (IMessageHandler<T>) RemoveHandler(_sentMessageHandlers, _sentMessageHandlerCache, typeof(T));
         }
 
         /// <summary>
@@ -75,7 +80,7 @@ namespace Mina.Handler.Demux
         public IExceptionHandler<TE> AddExceptionHandler<TE>(IExceptionHandler<TE> handler)
             where TE : Exception
         {
-            return (IExceptionHandler<TE>)AddHandler(_exceptionHandlers, _exceptionHandlerCache, typeof(TE), handler);
+            return (IExceptionHandler<TE>) AddHandler(_exceptionHandlers, _exceptionHandlerCache, typeof(TE), handler);
         }
 
         /// <summary>
@@ -86,7 +91,7 @@ namespace Mina.Handler.Demux
         public IExceptionHandler<TE> RemoveExceptionHandler<TE>()
             where TE : Exception
         {
-            return (IExceptionHandler<TE>)RemoveHandler(_exceptionHandlers, _exceptionHandlerCache, typeof(TE));
+            return (IExceptionHandler<TE>) RemoveHandler(_exceptionHandlers, _exceptionHandlerCache, typeof(TE));
         }
 
         /// <inheritdoc/>
@@ -94,8 +99,10 @@ namespace Mina.Handler.Demux
         {
             var handler = FindReceivedMessageHandler(message.GetType());
             if (handler == null)
+            {
                 throw new UnknownMessageTypeException("No message handler found for message type: "
-                    + message.GetType().Name);
+                                                      + message.GetType().Name);
+            }
             handler.HandleMessage(session, message);
         }
 
@@ -104,8 +111,10 @@ namespace Mina.Handler.Demux
         {
             var handler = FindSentMessageHandler(message.GetType());
             if (handler == null)
+            {
                 throw new UnknownMessageTypeException("No message handler found for message type: "
-                    + message.GetType().Name);
+                                                      + message.GetType().Name);
+            }
             handler.HandleMessage(session, message);
         }
 
@@ -114,8 +123,10 @@ namespace Mina.Handler.Demux
         {
             var handler = FindExceptionHandler(cause.GetType());
             if (handler == null)
+            {
                 throw new UnknownMessageTypeException("No handler found for exception type: "
-                    + cause.GetType().Name);
+                                                      + cause.GetType().Name);
+            }
             handler.ExceptionCaught(session, cause);
         }
 
@@ -134,16 +145,21 @@ namespace Mina.Handler.Demux
             return FindHandler(_exceptionHandlers, _exceptionHandlerCache, type, null);
         }
 
-        private static T FindHandler<T>(IDictionary<Type, T> handlers, IDictionary<Type, T> handlerCache, Type type, HashSet<Type> triedClasses)
+        private static T FindHandler<T>(IDictionary<Type, T> handlers, IDictionary<Type, T> handlerCache, Type type,
+            HashSet<Type> triedClasses)
         {
             var handler = default(T);
 
             if (triedClasses != null && triedClasses.Contains(type))
+            {
                 return default(T);
+            }
 
             // Try the cache first.
             if (handlerCache.TryGetValue(type, out handler))
+            {
                 return handler;
+            }
 
             // Try the registered handlers for an immediate match.
             handlers.TryGetValue(type, out handler);
@@ -153,14 +169,18 @@ namespace Mina.Handler.Demux
                 // No immediate match could be found. Search the type's interfaces.
 
                 if (triedClasses == null)
+                {
                     triedClasses = new HashSet<Type>();
+                }
                 triedClasses.Add(type);
 
                 foreach (var ifc in type.GetInterfaces())
                 {
                     handler = FindHandler(handlers, handlerCache, ifc, triedClasses);
                     if (handler != null)
+                    {
                         break;
+                    }
                 }
             }
 
@@ -169,7 +189,9 @@ namespace Mina.Handler.Demux
                 // No match in type's interfaces could be found. Search the superclass.
                 var baseType = type.BaseType;
                 if (baseType != null)
+                {
                     handler = FindHandler(handlers, handlerCache, baseType, null);
+                }
             }
 
             /*
@@ -185,7 +207,8 @@ namespace Mina.Handler.Demux
             return handler;
         }
 
-        private static T AddHandler<T>(ConcurrentDictionary<Type, T> handlers, ConcurrentDictionary<Type, T> handlerCache, Type type, T handler)
+        private static T AddHandler<T>(ConcurrentDictionary<Type, T> handlers,
+            ConcurrentDictionary<Type, T> handlerCache, Type type, T handler)
         {
             handlerCache.Clear();
 
@@ -198,7 +221,8 @@ namespace Mina.Handler.Demux
             return old;
         }
 
-        private static T RemoveHandler<T>(ConcurrentDictionary<Type, T> handlers, ConcurrentDictionary<Type, T> handlerCache, Type type)
+        private static T RemoveHandler<T>(ConcurrentDictionary<Type, T> handlers,
+            ConcurrentDictionary<Type, T> handlerCache, Type type)
         {
             handlerCache.Clear();
             T old;
