@@ -15,7 +15,8 @@ namespace Mina.Filter.Codec
         /// <summary>
         /// </summary>
         protected CumulativeProtocolDecoder()
-        { }
+        {
+        }
 
         /// <inheritdoc/>
         public override void Decode(IOSession session, IOBuffer input, IProtocolDecoderOutput output)
@@ -25,7 +26,9 @@ namespace Mina.Filter.Codec
                 while (input.HasRemaining)
                 {
                     if (!DoDecode(session, input, output))
+                    {
                         break;
+                    }
                 }
 
                 return;
@@ -93,9 +96,13 @@ namespace Mina.Filter.Codec
                 if (decoded)
                 {
                     if (buf.Position == oldPos)
+                    {
                         throw new InvalidOperationException("DoDecode() can't return true when buffer is not consumed.");
+                    }
                     if (!buf.HasRemaining)
+                    {
                         break;
+                    }
                 }
                 else
                 {
