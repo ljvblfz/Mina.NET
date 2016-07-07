@@ -10,13 +10,17 @@ namespace Mina.Filter.Codec.PrefixedString
     /// </summary>
     public class PrefixedStringEncoder : ProtocolEncoderAdapter
     {
-         public PrefixedStringEncoder(Encoding encoding)
-            : this(encoding, PrefixedStringCodecFactory.DefaultPrefixLength, PrefixedStringCodecFactory.DefaultMaxDataLength)
-        { }
+        public PrefixedStringEncoder(Encoding encoding)
+            : this(
+                encoding, PrefixedStringCodecFactory.DefaultPrefixLength,
+                PrefixedStringCodecFactory.DefaultMaxDataLength)
+        {
+        }
 
         public PrefixedStringEncoder(Encoding encoding, int prefixLength)
-             : this(encoding, prefixLength, PrefixedStringCodecFactory.DefaultMaxDataLength)
-        { }
+            : this(encoding, prefixLength, PrefixedStringCodecFactory.DefaultMaxDataLength)
+        {
+        }
 
         public PrefixedStringEncoder(Encoding encoding, int prefixLength, int maxDataLength)
         {
@@ -43,7 +47,7 @@ namespace Mina.Filter.Codec.PrefixedString
         /// <inheritdoc/>
         public override void Encode(IOSession session, object message, IProtocolEncoderOutput output)
         {
-            var value = (string)message;
+            var value = (string) message;
             var buffer = IOBuffer.Allocate(value.Length);
             buffer.AutoExpand = true;
             buffer.PutPrefixedString(value, PrefixLength, Encoding);
