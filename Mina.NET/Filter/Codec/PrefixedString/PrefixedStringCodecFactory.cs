@@ -17,7 +17,8 @@ namespace Mina.Filter.Codec.PrefixedString
 
         public PrefixedStringCodecFactory()
             : this(Encoding.Default)
-        { }
+        {
+        }
 
         public PrefixedStringCodecFactory(Encoding encoding)
         {
