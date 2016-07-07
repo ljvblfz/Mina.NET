@@ -12,10 +12,12 @@ namespace Mina.Transport.Serial
         /// Gets or set read timeout in seconds.
         /// </summary>
         int ReadTimeout { get; set; }
+
         /// <summary>
         /// <seealso cref="System.IO.Ports.SerialPort.WriteBufferSize"/>
         /// </summary>
         int WriteBufferSize { get; set; }
+
         /// <summary>
         /// <seealso cref="System.IO.Ports.SerialPort.ReceivedBytesThreshold"/>
         /// </summary>
