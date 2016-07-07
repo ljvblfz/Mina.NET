@@ -15,6 +15,7 @@ namespace Mina.Transport.Loopback
     {
         internal static readonly Dictionary<EndPoint, LoopbackPipe> BoundHandlers
             = new Dictionary<EndPoint, LoopbackPipe>();
+
         private IdleStatusChecker _idleStatusChecker;
 
         /// <summary>
@@ -53,7 +54,9 @@ namespace Mina.Transport.Loopback
                         }
 
                         if (localEp == null)
+                        {
                             throw new IOException("No port available.");
+                        }
                     }
                     else if (localEp.Port < 0)
                     {
