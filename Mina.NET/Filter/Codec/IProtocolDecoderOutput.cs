@@ -16,6 +16,7 @@ namespace Mina.Filter.Codec
         /// messages.
         /// </summary>
         void Write(object message);
+
         /// <summary>
         /// Flushes all messages you wrote via write(Object) to
         /// the next filter.
