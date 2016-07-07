@@ -31,7 +31,8 @@ namespace Mina.Filter.Ssl
         /// <param name="certFile">the path of the PKCS7 signed file from which to create the X.509 certificate</param>
         public SslFilter(string certFile)
             : this(X509Certificate.CreateFromCertFile(certFile))
-        { }
+        {
+        }
 
         /// <summary>
         /// Creates a new SSL filter using the specified certificate.
@@ -112,7 +113,9 @@ namespace Mina.Filter.Ssl
         public override void OnPreAdd(IOFilterChain parent, string name, INextFilter nextFilter)
         {
             if (parent.Contains<SslFilter>())
+            {
                 throw new InvalidOperationException("Only one SSL filter is permitted in a chain.");
+            }
 
             var session = parent.Session;
             session.SetAttribute(NextFilter, nextFilter);
@@ -155,7 +158,7 @@ namespace Mina.Filter.Ssl
         /// <inheritdoc/>
         public override void MessageReceived(INextFilter nextFilter, IOSession session, object message)
         {
-            var buf = (IOBuffer)message;
+            var buf = (IOBuffer) message;
             var handler = GetSslSessionHandler(session);
             // forward read encrypted data to SSL handler
             handler.MessageReceived(nextFilter, buf);
@@ -207,9 +210,11 @@ namespace Mina.Filter.Ssl
                 future.Complete += (s, e) => base.FilterClose(nextFilter, session);
             }
             finally
-            { 
+            {
                 if (future == null)
+                {
                     base.FilterClose(nextFilter, session);
+                }
             }
         }
 
@@ -225,10 +230,14 @@ namespace Mina.Filter.Ssl
             var handler = session.GetAttribute<SslHandler>(SslHandler);
 
             if (handler == null)
+            {
                 throw new InvalidOperationException();
+            }
 
             if (handler.SslFilter != this)
+            {
                 throw new ArgumentException("Not managed by this filter.");
+            }
 
             return handler;
         }
@@ -328,7 +337,9 @@ namespace Mina.Filter.Ssl
             {
                 _authenticated = value;
                 if (value)
+                {
                     FlushPreHandshakeEvents();
+                }
             }
         }
 
@@ -424,15 +435,18 @@ namespace Mina.Filter.Ssl
                 if (_session.Connected)
                 {
                     // Handshake not complete yet.
-                    _preHandshakeEventQueue.Enqueue(new IOFilterEvent(nextFilter, IOEventType.Write, _session, writeRequest));
+                    _preHandshakeEventQueue.Enqueue(new IOFilterEvent(nextFilter, IOEventType.Write, _session,
+                        writeRequest));
                 }
                 return;
             }
 
-            var buf = (IOBuffer)writeRequest.Message;
+            var buf = (IOBuffer) writeRequest.Message;
             if (!buf.HasRemaining)
+            {
                 // empty message will break this SSL stream?
                 return;
+            }
             lock (this)
             {
                 var array = buf.GetRemaining();
@@ -462,7 +476,8 @@ namespace Mina.Filter.Ssl
             _sslStream.Close();
             IOFilterEvent scheduledWrite;
             while (_preHandshakeEventQueue.TryDequeue(out scheduledWrite))
-            { }
+            {
+            }
         }
 
         private void FlushPreHandshakeEvents()
@@ -472,7 +487,8 @@ namespace Mina.Filter.Ssl
                 IOFilterEvent scheduledWrite;
                 while (_preHandshakeEventQueue.TryDequeue(out scheduledWrite))
                 {
-                    SslFilter.FilterWrite(scheduledWrite.NextFilter, scheduledWrite.Session, (IWriteRequest)scheduledWrite.Parameter);
+                    SslFilter.FilterWrite(scheduledWrite.NextFilter, scheduledWrite.Session,
+                        (IWriteRequest) scheduledWrite.Parameter);
                 }
             }
         }
@@ -481,9 +497,13 @@ namespace Mina.Filter.Ssl
         {
             IWriteRequest writeRequest;
             if (_authenticated)
+            {
                 writeRequest = new SslFilter.EncryptedWriteRequest(_currentWriteRequest, buf);
+            }
             else
+            {
                 writeRequest = new DefaultWriteRequest(buf);
+            }
             _currentNextFilter.FilterWrite(_session, writeRequest);
         }
 
@@ -496,11 +516,15 @@ namespace Mina.Filter.Ssl
                 var array = buf.GetRemaining();
                 var bytesRead = _sslStream.Read(array.Array, array.Offset, array.Count);
                 if (bytesRead <= 0)
+                {
                     break;
+                }
                 buf.Position += bytesRead;
 
                 if (_sessionStream.Remaining == 0)
+                {
                     break;
+                }
                 // We have to grow the target buffer, it's too small.
                 buf.Capacity <<= 1;
                 buf.Limit = buf.Capacity;
@@ -532,7 +556,9 @@ namespace Mina.Filter.Ssl
                 lock (_syncRoot)
                 {
                     if (!WaitForData())
+                    {
                         return 0;
+                    }
                     return _buf.Get() & 0xff;
                 }
             }
@@ -542,7 +568,9 @@ namespace Mina.Filter.Ssl
                 lock (_syncRoot)
                 {
                     if (!WaitForData())
+                    {
                         return 0;
+                    }
 
                     var readBytes = Math.Min(count, _buf.Remaining);
                     _buf.Get(buffer, offset, readBytes);
@@ -555,7 +583,9 @@ namespace Mina.Filter.Ssl
                 base.Close();
 
                 if (_closed)
+                {
                     return;
+                }
 
                 lock (_syncRoot)
                 {
@@ -567,7 +597,7 @@ namespace Mina.Filter.Ssl
 
             public override void Write(byte[] buffer, int offset, int count)
             {
-                _sslHandler.WriteBuffer(IOBuffer.Wrap((byte[])buffer.Clone(), offset, count));
+                _sslHandler.WriteBuffer(IOBuffer.Wrap((byte[]) buffer.Clone(), offset, count));
             }
 
             public override void WriteByte(byte value)
@@ -579,12 +609,15 @@ namespace Mina.Filter.Ssl
             }
 
             public override void Flush()
-            { }
+            {
+            }
 
             public void Write(IOBuffer buf)
             {
                 if (_closed)
+                {
                     return;
+                }
 
                 lock (_syncRoot)
                 {
@@ -603,7 +636,9 @@ namespace Mina.Filter.Ssl
             private bool WaitForData()
             {
                 if (_released)
+                {
                     return false;
+                }
 
                 lock (_syncRoot)
                 {
@@ -638,7 +673,9 @@ namespace Mina.Filter.Ssl
             private void ReleaseBuffer()
             {
                 if (_released)
+                {
                     return;
+                }
                 _released = true;
             }
 
