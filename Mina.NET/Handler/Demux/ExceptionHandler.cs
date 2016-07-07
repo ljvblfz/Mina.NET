@@ -47,10 +47,6 @@ namespace Mina.Handler.Demux
 
     class NoopExceptionHandler : IExceptionHandler<Exception>
     {
-        internal NoopExceptionHandler()
-        {
-        }
-
         public void ExceptionCaught(IOSession session, Exception cause)
         {
             // Do nothing
@@ -59,10 +55,6 @@ namespace Mina.Handler.Demux
 
     class CloseExceptionHandler : IExceptionHandler<Exception>
     {
-        internal CloseExceptionHandler()
-        {
-        }
-
         public void ExceptionCaught(IOSession session, Exception cause)
         {
             session.Close(true);
