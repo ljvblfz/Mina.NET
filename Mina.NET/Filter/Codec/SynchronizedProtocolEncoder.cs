@@ -18,7 +18,9 @@ namespace Mina.Filter.Codec
         public SynchronizedProtocolEncoder(IProtocolEncoder encoder)
         {
             if (encoder == null)
+            {
                 throw new ArgumentNullException(nameof(encoder));
+            }
             _encoder = encoder;
         } 
 
