@@ -54,7 +54,9 @@ namespace Mina.Filter.Codec.TextLine
         public LineDelimiter(string value)
         {
             if (value == null)
+            {
                 throw new ArgumentNullException(nameof(value));
+            }
             Value = value;
         }
 
@@ -71,17 +73,23 @@ namespace Mina.Filter.Codec.TextLine
         public override bool Equals(object obj)
         {
             if (ReferenceEquals(this, obj))
+            {
                 return true;
+            }
             var that = obj as LineDelimiter;
             if (that == null)
+            {
                 return false;
+            }
             return Value.Equals(that.Value);
         }
 
         public override string ToString()
         {
             if (Value.Length == 0)
+            {
                 return "delimiter: auto";
+            }
             var buf = new StringBuilder();
             buf.Append("delimiter:");
 
