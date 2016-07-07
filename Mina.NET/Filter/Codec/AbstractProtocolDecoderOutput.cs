@@ -16,7 +16,9 @@ namespace Mina.Filter.Codec
         public void Write(object message)
         {
             if (message == null)
+            {
                 throw new ArgumentNullException(nameof(message));
+            }
             MessageQueue.Enqueue(message);
         }
 
