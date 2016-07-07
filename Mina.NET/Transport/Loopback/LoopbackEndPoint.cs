@@ -9,7 +9,7 @@ namespace Mina.Transport.Loopback
     public class LoopbackEndPoint : EndPoint, IComparable<LoopbackEndPoint>
     {
         /// <summary>
-        /// Creates a new instance with the specifid port number.
+        /// Creates a new instance with the specified port number.
         /// </summary>
         public LoopbackEndPoint(int port)
         {
@@ -37,9 +37,13 @@ namespace Mina.Transport.Loopback
         public override bool Equals(object obj)
         {
             if (obj == null)
+            {
                 return false;
+            }
             if (ReferenceEquals(this, obj))
+            {
                 return true;
+            }
             var other = obj as LoopbackEndPoint;
             return obj != null && Port == other.Port;
         }
