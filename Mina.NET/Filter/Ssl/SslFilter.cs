@@ -313,7 +313,7 @@ namespace Mina.Filter.Ssl
         static readonly ILog Log = LogManager.GetLogger(typeof(SslFilter));
 
         private readonly IOSession _session;
-        private readonly IoSessionStream _sessionStream;
+        private readonly IOSessionStream _sessionStream;
         private readonly SslStream _sslStream;
         private volatile bool _authenticated;
         private readonly ConcurrentQueue<IOFilterEvent> _preHandshakeEventQueue = new ConcurrentQueue<IOFilterEvent>();
@@ -324,7 +324,7 @@ namespace Mina.Filter.Ssl
         {
             SslFilter = sslFilter;
             _session = session;
-            _sessionStream = new IoSessionStream(this);
+            _sessionStream = new IOSessionStream(this);
             _sslStream = new SslStream(_sessionStream, false);
         }
 
@@ -534,7 +534,7 @@ namespace Mina.Filter.Ssl
             return buf;
         }
 
-        class IoSessionStream : System.IO.Stream
+        class IOSessionStream : System.IO.Stream
         {
             readonly object _syncRoot = new byte[0];
             readonly SslHandler _sslHandler;
@@ -543,7 +543,7 @@ namespace Mina.Filter.Ssl
             volatile bool _released;
             IOException _exception;
 
-            public IoSessionStream(SslHandler sslHandler)
+            public IOSessionStream(SslHandler sslHandler)
             {
                 _sslHandler = sslHandler;
                 _buf = IOBuffer.Allocate(16);
