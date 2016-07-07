@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using Common.Logging;
 using Mina.Core.Buffer;
+using Mina.Core.Filterchain;
+using Mina.Core.Session;
 
 namespace Mina.Filter.Codec.StateMachine
 {
@@ -31,20 +33,26 @@ namespace Mina.Filter.Codec.StateMachine
                 {
                     // Wait for more data if all data is consumed.
                     if (pos == limit)
+                    {
                         break;
+                    }
 
                     var oldState = state;
                     state = state.Decode(input, _childOutput);
 
                     // If finished, call finishDecode
                     if (state == null)
+                    {
                         return FinishDecode(_childProducts, output);
+                    }
 
                     var newPos = input.Position;
 
                     // Wait for more data if nothing is consumed and state didn't change.
                     if (newPos == pos && oldState == state)
+                    {
                         break;
+                    }
 
                     pos = newPos;
                 }
@@ -62,7 +70,9 @@ namespace Mina.Filter.Codec.StateMachine
 
                 // Destroy if decoding is finished or failed.
                 if (state == null)
+                {
                     Cleanup();
+                }
             }
         }
 
@@ -78,26 +88,34 @@ namespace Mina.Filter.Codec.StateMachine
                     var oldState = state;
                     state = state.FinishDecode(_childOutput);
                     if (state == null)
+                    {
                         // Finished
                         break;
+                    }
 
                     // Exit if state didn't change.
                     if (oldState == state)
+                    {
                         break;
+                    }
                 }
             }
             catch (Exception ex)
             {
                 state = null;
                 if (Log.IsDebugEnabled)
+                {
                     Log.Debug("Ignoring the exception caused by a closed session.", ex);
+                }
             }
             finally
             {
                 _currentState = state;
                 nextState = FinishDecode(_childProducts, output);
                 if (state == null)
+                {
                     Cleanup();
+                }
             }
             return nextState;
         }
@@ -140,7 +158,9 @@ namespace Mina.Filter.Codec.StateMachine
         private void Cleanup()
         {
             if (!_initialized)
+            {
                 throw new InvalidOperationException();
+            }
 
             _initialized = false;
             _childProducts.Clear();
@@ -151,7 +171,9 @@ namespace Mina.Filter.Codec.StateMachine
             catch (Exception ex)
             {
                 if (Log.IsWarnEnabled)
+                {
                     Log.Warn("Failed to destroy a decoding state machine.", ex);
+                }
             }
         }
 
@@ -169,7 +191,7 @@ namespace Mina.Filter.Codec.StateMachine
                 _parent._childProducts.Add(message);
             }
 
-            public void Flush(Core.Filterchain.INextFilter nextFilter, Core.Session.IOSession session)
+            public void Flush(INextFilter nextFilter, IOSession session)
             {
                 // Do nothing
             }
