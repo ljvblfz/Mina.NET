@@ -30,7 +30,9 @@ namespace Mina.Transport.Socket
             RemoteEndPoint = remoteEp;
             Config = config;
             if (service.SessionConfig != null)
+            {
                 Config.SetAll(service.SessionConfig);
+            }
             Processor = processor;
             FilterChain = new DefaultIOFilterChain(this);
         }
@@ -74,12 +76,16 @@ namespace Mina.Transport.Socket
         public void Start()
         {
             if (ReadSuspended)
+            {
                 return;
+            }
 
             if (_pendingReceivedMessage != null)
             {
                 if (!ReferenceEquals(_pendingReceivedMessage, Dummy))
+                {
                     FilterChain.FireMessageReceived(_pendingReceivedMessage);
+                }
                 _pendingReceivedMessage = null;
                 BeginReceive();
             }
@@ -91,9 +97,13 @@ namespace Mina.Transport.Socket
         public void Flush()
         {
             if (WriteSuspended)
+            {
                 return;
+            }
             if (Interlocked.CompareExchange(ref _writing, 1, 0) > 0)
+            {
                 return;
+            }
             BeginSend();
         }
 
@@ -109,7 +119,7 @@ namespace Mina.Transport.Socket
                     Interlocked.Exchange(ref _writing, 0);
                     return;
                 }
-                
+
                 CurrentWriteRequest = req;
             }
 
@@ -119,11 +129,16 @@ namespace Mina.Transport.Socket
             {
                 var file = req.Message as IFileRegion;
                 if (file == null)
+                {
                     EndSend(new InvalidOperationException("Don't know how to handle message of type '"
-                            + req.Message.GetType().Name + "'.  Are you missing a protocol encoder?"),
-                            true);
+                                                          + req.Message.GetType().Name +
+                                                          "'.  Are you missing a protocol encoder?"),
+                        true);
+                }
                 else
+                {
                     BeginSendFile(req, file);
+                }
             }
             else if (buf.HasRemaining)
             {
@@ -185,7 +200,9 @@ namespace Mina.Transport.Socket
             }
 
             if (Socket.Connected)
+            {
                 BeginSend();
+            }
         }
 
         /// <summary>
@@ -213,12 +230,16 @@ namespace Mina.Transport.Socket
                     CurrentWriteRequest = null;
                     var buf = req.Message as IOBuffer;
                     if (buf != null)
+                    {
                         buf.Free();
+                    }
                 }
             }
             FilterChain.FireExceptionCaught(ex);
             if (Socket.Connected)
+            {
                 BeginSend();
+            }
         }
 
         /// <summary>
@@ -241,7 +262,9 @@ namespace Mina.Transport.Socket
                 FilterChain.FireMessageReceived(buf);
 
                 if (Socket.Connected)
+                {
                     BeginReceive();
+                }
             }
         }
 
@@ -253,7 +276,9 @@ namespace Mina.Transport.Socket
         {
             FilterChain.FireExceptionCaught(ex);
             if (Socket.Connected && !ReadSuspended)
+            {
                 BeginReceive();
+            }
         }
 
         private void FireMessageSent(IWriteRequest req)
