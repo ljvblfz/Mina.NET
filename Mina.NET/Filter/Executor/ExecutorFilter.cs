@@ -14,8 +14,9 @@ namespace Mina.Filter.Executor
     public class ExecutorFilter : IOFilterAdapter
     {
         private const IOEventType DefaultEventSet = IOEventType.ExceptionCaught |
-            IOEventType.MessageReceived | IOEventType.MessageSent | IOEventType.SessionClosed |
-            IOEventType.SessionIdle | IOEventType.SessionOpened;
+                                                    IOEventType.MessageReceived | IOEventType.MessageSent |
+                                                    IOEventType.SessionClosed |
+                                                    IOEventType.SessionIdle | IOEventType.SessionOpened;
 
         private readonly IOEventType _eventTypes;
 
@@ -24,7 +25,8 @@ namespace Mina.Filter.Executor
         /// </summary>
         public ExecutorFilter()
             : this(null, DefaultEventSet)
-        { }
+        {
+        }
 
         /// <summary>
         /// Creates an executor filter with default <see cref="IOEventExecutor"/>.
@@ -32,7 +34,8 @@ namespace Mina.Filter.Executor
         /// <param name="eventTypes">the event types interested</param>
         public ExecutorFilter(IOEventType eventTypes)
             : this(null, eventTypes)
-        { }
+        {
+        }
 
         /// <summary>
         /// Creates an executor filter on default event types.
@@ -40,7 +43,8 @@ namespace Mina.Filter.Executor
         /// <param name="executor">the <see cref="IOEventExecutor"/> to run events</param>
         public ExecutorFilter(IOEventExecutor executor)
             : this(executor, DefaultEventSet)
-        { }
+        {
+        }
 
         /// <summary>
         /// Creates an executor filter.
@@ -51,9 +55,13 @@ namespace Mina.Filter.Executor
         {
             _eventTypes = eventTypes;
             if (executor == null)
+            {
                 Executor = new OrderedThreadPoolExecutor();
+            }
             else
+            {
                 Executor = executor;
+            }
         }
 
         /// <summary>
@@ -65,7 +73,10 @@ namespace Mina.Filter.Executor
         public override void OnPreAdd(IOFilterChain parent, string name, INextFilter nextFilter)
         {
             if (parent.Contains(this))
-                throw new ArgumentException("You can't add the same filter instance more than once. Create another instance and add it.");
+            {
+                throw new ArgumentException(
+                    "You can't add the same filter instance more than once. Create another instance and add it.");
+            }
         }
 
         /// <inheritdoc/>
