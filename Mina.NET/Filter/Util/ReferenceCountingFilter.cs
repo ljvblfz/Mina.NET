@@ -37,7 +37,9 @@ namespace Mina.Filter.Util
         public override void OnPreAdd(IOFilterChain parent, string name, INextFilter nextFilter)
         {
             if (_count == 0)
+            {
                 _filter.Init();
+            }
             _count++;
             _filter.OnPreAdd(parent, name, nextFilter);
         }
@@ -48,7 +50,9 @@ namespace Mina.Filter.Util
             _filter.OnPostRemove(parent, name, nextFilter);
             _count--;
             if (_count == 0)
+            {
                 _filter.Destroy();
+            }
         }
 
         /// <inheritdoc/>
