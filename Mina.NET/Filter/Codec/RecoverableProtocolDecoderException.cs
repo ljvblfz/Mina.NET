@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Runtime.Serialization;
 
 namespace Mina.Filter.Codec
 {
@@ -9,17 +10,23 @@ namespace Mina.Filter.Codec
     [Serializable]
     public class RecoverableProtocolDecoderException : ProtocolDecoderException
     {
-        public RecoverableProtocolDecoderException() { }
+        public RecoverableProtocolDecoderException()
+        {
+        }
 
         public RecoverableProtocolDecoderException(string message)
-            : base(message) { }
+            : base(message)
+        {
+        }
 
         public RecoverableProtocolDecoderException(string message, Exception innerException)
-            : base(message, innerException) { }
+            : base(message, innerException)
+        {
+        }
 
-        protected RecoverableProtocolDecoderException(
-          System.Runtime.Serialization.SerializationInfo info,
-          System.Runtime.Serialization.StreamingContext context)
-            : base(info, context) { }
+        protected RecoverableProtocolDecoderException(SerializationInfo info, StreamingContext context)
+            : base(info, context)
+        {
+        }
     }
 }
