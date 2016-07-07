@@ -55,7 +55,9 @@ namespace Mina.Transport.Socket
         {
             var destination = request.Destination;
             if (destination == null)
+            {
                 destination = RemoteEndPoint;
+            }
             BeginSend(buf, destination);
         }
 
