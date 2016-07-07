@@ -26,14 +26,17 @@ namespace Mina.Transport.Socket
         private readonly Action<object> _startAccept;
 #endif
         private bool _disposed;
-        private readonly Dictionary<EndPoint, System.Net.Sockets.Socket> _listenSockets = new Dictionary<EndPoint, System.Net.Sockets.Socket>();
+
+        private readonly Dictionary<EndPoint, System.Net.Sockets.Socket> _listenSockets =
+            new Dictionary<EndPoint, System.Net.Sockets.Socket>();
 
         /// <summary>
         /// Instantiates with default max connections of 1024.
         /// </summary>
         protected AbstractSocketAcceptor()
             : this(1024)
-        { }
+        {
+        }
 
         /// <summary>
         /// Instantiates.
@@ -50,15 +53,15 @@ namespace Mina.Transport.Socket
         }
 
         /// <inheritdoc/>
-        public new ISocketSessionConfig SessionConfig => (ISocketSessionConfig)base.SessionConfig;
+        public new ISocketSessionConfig SessionConfig => (ISocketSessionConfig) base.SessionConfig;
 
         /// <inheritdoc/>
-        public new IPEndPoint LocalEndPoint => (IPEndPoint)base.LocalEndPoint;
+        public new IPEndPoint LocalEndPoint => (IPEndPoint) base.LocalEndPoint;
 
         /// <inheritdoc/>
         public new IPEndPoint DefaultLocalEndPoint
         {
-            get { return (IPEndPoint)base.DefaultLocalEndPoint; }
+            get { return (IPEndPoint) base.DefaultLocalEndPoint; }
             set { base.DefaultLocalEndPoint = value; }
         }
 
@@ -77,7 +80,9 @@ namespace Mina.Transport.Socket
                 lock (BindLock)
                 {
                     if (Active)
+                    {
                         throw new InvalidOperationException("Backlog can't be set while the acceptor is bound.");
+                    }
                     _backlog = value;
                 }
             }
@@ -94,7 +99,9 @@ namespace Mina.Transport.Socket
                 lock (BindLock)
                 {
                     if (Active)
+                    {
                         throw new InvalidOperationException("MaxConnections can't be set while the acceptor is bound.");
+                    }
                     _maxConnections = value;
                 }
             }
@@ -125,8 +132,11 @@ namespace Mina.Transport.Socket
                 {
                     var ep = localEp;
                     if (ep == null)
+                    {
                         ep = new IPEndPoint(IPAddress.Any, 0);
-                    var listenSocket = new System.Net.Sockets.Socket(ep.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
+                    }
+                    var listenSocket = new System.Net.Sockets.Socket(ep.AddressFamily, SocketType.Stream,
+                        ProtocolType.Tcp);
                     listenSocket.Bind(ep);
                     listenSocket.Listen(Backlog);
                     newListeners[listenSocket.LocalEndPoint] = listenSocket;
@@ -151,7 +161,9 @@ namespace Mina.Transport.Socket
             }
 
             if (MaxConnections > 0)
+            {
                 _connectionPool = new Semaphore(MaxConnections, MaxConnections);
+            }
 
             foreach (var pair in newListeners)
             {
@@ -171,7 +183,9 @@ namespace Mina.Transport.Socket
             {
                 System.Net.Sockets.Socket listenSocket;
                 if (!_listenSockets.TryGetValue(ep, out listenSocket))
+                {
                     continue;
+                }
                 listenSocket.Close();
                 _listenSockets.Remove(ep);
             }
@@ -208,8 +222,10 @@ namespace Mina.Transport.Socket
         {
             var pool = _connectionPool;
             if (pool == null)
+            {
                 // this might happen if has been unbound
                 return;
+            }
             try
             {
                 pool.WaitOne();
@@ -218,14 +234,16 @@ namespace Mina.Transport.Socket
             {
                 return;
             }
-            BeginAccept((ListenerContext)state);
+            BeginAccept((ListenerContext) state);
         }
 
         private void OnSessionDestroyed(object sender, IOSessionEventArgs e)
         {
             var pool = _connectionPool;
             if (pool != null)
+            {
                 pool.Release();
+            }
         }
 
         /// <inheritdoc/>
@@ -273,7 +291,7 @@ namespace Mina.Transport.Socket
                     {
                         foreach (var listenSocket in _listenSockets.Values)
                         {
-                            ((IDisposable)listenSocket).Dispose();
+                            ((IDisposable) listenSocket).Dispose();
                         }
                     }
                     if (_connectionPool != null)
