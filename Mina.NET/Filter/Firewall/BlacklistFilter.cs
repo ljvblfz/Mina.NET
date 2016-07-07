@@ -22,60 +22,84 @@ namespace Mina.Filter.Firewall
         public override void SessionCreated(INextFilter nextFilter, IOSession session)
         {
             if (IsBlocked(session))
+            {
                 BlockSession(session);
+            }
             else
+            {
                 // forward if not blocked
                 base.SessionCreated(nextFilter, session);
+            }
         }
 
         /// <inheritdoc/>
         public override void SessionOpened(INextFilter nextFilter, IOSession session)
         {
             if (IsBlocked(session))
+            {
                 BlockSession(session);
+            }
             else
+            {
                 // forward if not blocked
                 base.SessionOpened(nextFilter, session);
+            }
         }
 
         /// <inheritdoc/>
         public override void SessionClosed(INextFilter nextFilter, IOSession session)
         {
             if (IsBlocked(session))
+            {
                 BlockSession(session);
+            }
             else
+            {
                 // forward if not blocked
                 base.SessionClosed(nextFilter, session);
+            }
         }
 
         /// <inheritdoc/>
         public override void SessionIdle(INextFilter nextFilter, IOSession session, IdleStatus status)
         {
             if (IsBlocked(session))
+            {
                 BlockSession(session);
+            }
             else
+            {
                 // forward if not blocked
                 base.SessionIdle(nextFilter, session, status);
+            }
         }
 
         /// <inheritdoc/>
         public override void MessageReceived(INextFilter nextFilter, IOSession session, object message)
         {
             if (IsBlocked(session))
+            {
                 BlockSession(session);
+            }
             else
+            {
                 // forward if not blocked
                 base.MessageReceived(nextFilter, session, message);
+            }
         }
 
         /// <inheritdoc/>
         public override void MessageSent(INextFilter nextFilter, IOSession session, IWriteRequest writeRequest)
         {
             if (IsBlocked(session))
+            {
                 BlockSession(session);
+            }
             else
+            {
                 // forward if not blocked
                 base.MessageSent(nextFilter, session, writeRequest);
+            }
         }
 
         /// <summary>
@@ -84,7 +108,9 @@ namespace Mina.Filter.Firewall
         public void SetBlacklist(IEnumerable<IPAddress> addresses)
         {
             if (addresses == null)
+            {
                 throw new ArgumentNullException(nameof(addresses));
+            }
             lock (((IList)_blacklist).SyncRoot)
             {
                 _blacklist.Clear();
@@ -101,7 +127,9 @@ namespace Mina.Filter.Firewall
         public void SetSubnetBlacklist(Subnet[] subnets)
         {
             if (subnets == null)
+            {
                 throw new ArgumentNullException(nameof(subnets));
+            }
             lock (((IList)_blacklist).SyncRoot)
             {
                 _blacklist.Clear();
@@ -118,7 +146,9 @@ namespace Mina.Filter.Firewall
         public void Block(IPAddress address)
         {
             if (address == null)
+            {
                 throw new ArgumentNullException(nameof(address));
+            }
             Block(new Subnet(address, 32));
         }
 
@@ -128,7 +158,9 @@ namespace Mina.Filter.Firewall
         public void Block(Subnet subnet)
         {
             if (subnet == null)
+            {
                 throw new ArgumentNullException(nameof(subnet));
+            }
             lock (((IList)_blacklist).SyncRoot)
             {
                 _blacklist.Add(subnet);
@@ -141,7 +173,9 @@ namespace Mina.Filter.Firewall
         public void Unblock(IPAddress address)
         {
             if (address == null)
+            {
                 throw new ArgumentNullException(nameof(address));
+            }
             Unblock(new Subnet(address, 32));
         }
 
@@ -151,7 +185,9 @@ namespace Mina.Filter.Firewall
         private void Unblock(Subnet subnet)
         {
             if (subnet == null)
+            {
                 throw new ArgumentNullException(nameof(subnet));
+            }
             lock (((IList)_blacklist).SyncRoot)
             {
                 _blacklist.Remove(subnet);
@@ -161,7 +197,9 @@ namespace Mina.Filter.Firewall
         private void BlockSession(IOSession session)
         {
             if (Log.IsWarnEnabled)
+            {
                 Log.Warn("Remote address in the blacklist; closing.");
+            }
             session.Close(true);
         }
 
