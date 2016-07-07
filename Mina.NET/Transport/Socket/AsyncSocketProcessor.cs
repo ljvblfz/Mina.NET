@@ -54,13 +54,18 @@ namespace Mina.Transport.Socket
                 {
                     session.Socket.Shutdown(System.Net.Sockets.SocketShutdown.Send);
                 }
-                catch { /* the session has already closed */ }
+                catch
+                {
+                    /* the session has already closed */
+                }
             }
             session.Socket.Close();
 
             var support = session.Service as IOServiceSupport;
             if (support != null)
+            {
                 support.FireSessionDestroyed(session);
+            }
         }
 
         public void Write(SocketSession session, IWriteRequest writeRequest)
@@ -68,7 +73,9 @@ namespace Mina.Transport.Socket
             var writeRequestQueue = session.WriteRequestQueue;
             writeRequestQueue.Offer(session, writeRequest);
             if (!session.WriteSuspended)
+            {
                 Flush(session);
+            }
         }
 
         public void Flush(SocketSession session)
@@ -79,10 +86,14 @@ namespace Mina.Transport.Socket
         public void UpdateTrafficControl(SocketSession session)
         {
             if (!session.ReadSuspended)
+            {
                 session.Start();
+            }
 
             if (!session.WriteSuspended)
+            {
                 Flush(session);
+            }
         }
 
         private void ClearWriteRequestQueue(SocketSession session)
@@ -137,27 +148,27 @@ namespace Mina.Transport.Socket
 
         void IOProcessor.Write(IOSession session, IWriteRequest writeRequest)
         {
-            Write((SocketSession)session, writeRequest);
+            Write((SocketSession) session, writeRequest);
         }
 
         void IOProcessor.Flush(IOSession session)
         {
-            Flush((SocketSession)session);
+            Flush((SocketSession) session);
         }
 
         void IOProcessor.Add(IOSession session)
         {
-            Add((SocketSession)session);
+            Add((SocketSession) session);
         }
 
         void IOProcessor.Remove(IOSession session)
         {
-            Remove((SocketSession)session);
+            Remove((SocketSession) session);
         }
 
         void IOProcessor.UpdateTrafficControl(IOSession session)
         {
-            UpdateTrafficControl((SocketSession)session);
+            UpdateTrafficControl((SocketSession) session);
         }
     }
 }
