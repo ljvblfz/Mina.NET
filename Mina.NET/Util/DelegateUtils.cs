@@ -19,7 +19,7 @@ namespace Mina.Util
                 {
                     try
                     {
-                        ((EventHandler)d)(sender, EventArgs.Empty);
+                        ((EventHandler) d)(sender, EventArgs.Empty);
                     }
                     catch (Exception e)
                     {
@@ -42,7 +42,7 @@ namespace Mina.Util
                 {
                     try
                     {
-                        ((EventHandler<TEventArgs>)d)(sender, e);
+                        ((EventHandler<TEventArgs>) d)(sender, e);
                     }
                     catch (Exception ex)
                     {
@@ -64,7 +64,7 @@ namespace Mina.Util
                 {
                     try
                     {
-                        ((Action)d)();
+                        ((Action) d)();
                     }
                     catch (Exception e)
                     {
@@ -86,7 +86,7 @@ namespace Mina.Util
                 {
                     try
                     {
-                        ((Action<T>)d)(obj);
+                        ((Action<T>) d)(obj);
                     }
                     catch (Exception e)
                     {
@@ -108,7 +108,7 @@ namespace Mina.Util
                 {
                     try
                     {
-                        ((Action<T1, T2>)d)(obj1, obj2);
+                        ((Action<T1, T2>) d)(obj1, obj2);
                     }
                     catch (Exception e)
                     {
@@ -130,7 +130,7 @@ namespace Mina.Util
                 {
                     try
                     {
-                        ((Action<T1, T2, T3>)d)(obj1, obj2, obj3);
+                        ((Action<T1, T2, T3>) d)(obj1, obj2, obj3);
                     }
                     catch (Exception e)
                     {
