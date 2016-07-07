@@ -1,4 +1,5 @@
-﻿using Mina.Core.Future;
+﻿using System;
+using Mina.Core.Future;
 
 namespace Mina.Filter.Codec
 {
@@ -15,6 +16,7 @@ namespace Mina.Filter.Codec
         /// for each encoded message.
         /// </summary>
         void Write(object encodedMessage);
+
         /// <summary>
         /// Merges all buffers you wrote via <see cref="Write(object)"/> into one <see cref="Core.Buffer.IOBuffer"/>
         /// and replaces the old fragmented ones with it.
@@ -26,6 +28,7 @@ namespace Mina.Filter.Codec
         /// </summary>
         /// <exception cref="InvalidOperationException">if you wrote something else than <see cref="Core.Buffer.IOBuffer"/></exception>
         void MergeAll();
+
         /// <summary>
         /// Flushes all buffers you wrote via <see cref="Write(object)"/> to the session.
         /// This operation is asynchronous; please wait for the returned <see cref="IWriteFuture"/>
