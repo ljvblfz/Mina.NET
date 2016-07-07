@@ -1,4 +1,6 @@
-﻿namespace Mina.Transport.Socket
+﻿using System.Net.Sockets;
+
+namespace Mina.Transport.Socket
 {
     class DefaultDatagramSessionConfig : AbstractDatagramSessionConfig
     {
@@ -14,6 +16,6 @@
 
         public override int? TrafficClass { get; set; }
 
-        public override System.Net.Sockets.MulticastOption MulticastOption { get; set; }
+        public override MulticastOption MulticastOption { get; set; }
     }
 }
