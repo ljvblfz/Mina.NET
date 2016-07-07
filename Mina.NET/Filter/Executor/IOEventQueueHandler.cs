@@ -14,10 +14,12 @@ namespace Mina.Filter.Executor
         /// if <tt>false</tt> is returned.
         /// </summary>
         bool Accept(object source, IOEvent ioe);
+
         /// <summary>
         /// Invoked after the specified <paramref name="ioe"/> has been offered to the event queue.
         /// </summary>
         void Offered(object source, IOEvent ioe);
+
         /// <summary>
         /// Invoked after the specified <paramref name="ioe"/> has been polled to the event queue.
         /// </summary>
@@ -29,7 +31,8 @@ namespace Mina.Filter.Executor
         public static readonly NoopIOEventQueueHandler Instance = new NoopIOEventQueueHandler();
 
         private NoopIOEventQueueHandler()
-        { }
+        {
+        }
 
         public bool Accept(object source, IOEvent ioe)
         {
