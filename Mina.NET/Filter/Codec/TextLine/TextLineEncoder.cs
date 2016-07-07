@@ -20,7 +20,8 @@ namespace Mina.Filter.Codec.TextLine
         /// </summary>
         public TextLineEncoder()
             : this(LineDelimiter.Unix)
-        { }
+        {
+        }
 
         /// <summary>
         /// Instantiates with default <see cref="Encoding.Default"/> and given delimiter.
@@ -28,7 +29,8 @@ namespace Mina.Filter.Codec.TextLine
         /// <param name="delimiter">the delimiter string</param>
         public TextLineEncoder(string delimiter)
             : this(new LineDelimiter(delimiter))
-        { }
+        {
+        }
 
         /// <summary>
         /// Instantiates with default <see cref="Encoding.Default"/> and given delimiter.
@@ -36,7 +38,8 @@ namespace Mina.Filter.Codec.TextLine
         /// <param name="delimiter">the <see cref="LineDelimiter"/></param>
         public TextLineEncoder(LineDelimiter delimiter)
             : this(Encoding.Default, delimiter)
-        { }
+        {
+        }
 
         /// <summary>
         /// Instantiates with given encoding,
@@ -45,7 +48,8 @@ namespace Mina.Filter.Codec.TextLine
         /// <param name="encoding">the <see cref="Encoding"/></param>
         public TextLineEncoder(Encoding encoding)
             : this(encoding, LineDelimiter.Unix)
-        { }
+        {
+        }
 
         /// <summary>
         /// Instantiates.
@@ -54,7 +58,8 @@ namespace Mina.Filter.Codec.TextLine
         /// <param name="delimiter">the delimiter string</param>
         public TextLineEncoder(Encoding encoding, string delimiter)
             : this(encoding, new LineDelimiter(delimiter))
-        { }
+        {
+        }
 
         /// <summary>
         /// Instantiates.
@@ -64,11 +69,17 @@ namespace Mina.Filter.Codec.TextLine
         public TextLineEncoder(Encoding encoding, LineDelimiter delimiter)
         {
             if (encoding == null)
+            {
                 throw new ArgumentNullException(nameof(encoding));
+            }
             if (delimiter == null)
+            {
                 throw new ArgumentNullException(nameof(delimiter));
+            }
             if (LineDelimiter.Auto.Equals(delimiter))
+            {
                 throw new ArgumentException("AUTO delimiter is not allowed for encoder.");
+            }
 
             _encoding = encoding;
             _delimiter = delimiter;
@@ -83,7 +94,9 @@ namespace Mina.Filter.Codec.TextLine
             set
             {
                 if (value <= 0)
+                {
                     throw new ArgumentException("maxLineLength (" + value + ") should be a positive value");
+                }
                 _maxLineLength = value;
             }
         }
@@ -95,7 +108,9 @@ namespace Mina.Filter.Codec.TextLine
             value += _delimiter.Value;
             var bytes = _encoding.GetBytes(value);
             if (bytes.Length > _maxLineLength)
+            {
                 throw new ArgumentException("Line too long: " + bytes.Length);
+            }
 
             // TODO BufferAllocator
             var buf = IOBuffer.Wrap(bytes);
