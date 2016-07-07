@@ -27,28 +27,39 @@ namespace Mina.Transport.Serial
         }
 
         /// <inheritdoc/>
-        public new ISerialSessionConfig SessionConfig => (ISerialSessionConfig)base.SessionConfig;
+        public new ISerialSessionConfig SessionConfig => (ISerialSessionConfig) base.SessionConfig;
 
         /// <inheritdoc/>
         public override ITransportMetadata TransportMetadata => SerialSession.Metadata;
 
         /// <inheritdoc/>
-        protected override IConnectFuture Connect0(EndPoint remoteEp, EndPoint localEp, Action<IOSession, IConnectFuture> sessionInitializer)
+        protected override IConnectFuture Connect0(EndPoint remoteEp, EndPoint localEp,
+            Action<IOSession, IConnectFuture> sessionInitializer)
         {
             var config = SessionConfig;
-            var sep = (SerialEndPoint)remoteEp;
+            var sep = (SerialEndPoint) remoteEp;
 
             var serialPort = new SerialPort(sep.PortName, sep.BaudRate, sep.Parity, sep.DataBits, sep.StopBits);
             if (config.ReadBufferSize > 0)
+            {
                 serialPort.ReadBufferSize = config.ReadBufferSize;
+            }
             if (config.ReadTimeout > 0)
+            {
                 serialPort.ReadTimeout = config.ReadTimeout * 1000;
+            }
             if (config.WriteBufferSize > 0)
+            {
                 serialPort.WriteBufferSize = config.WriteBufferSize;
+            }
             if (config.WriteTimeout > 0)
+            {
                 serialPort.WriteTimeout = config.WriteTimeout * 1000;
+            }
             if (config.ReceivedBytesThreshold > 0)
+            {
                 serialPort.ReceivedBytesThreshold = config.ReceivedBytesThreshold;
+            }
 
             IConnectFuture future = new DefaultConnectFuture();
             var session = new SerialSession(this, sep, serialPort);
@@ -91,7 +102,9 @@ namespace Mina.Transport.Serial
             // Propagate the SESSION_CREATED event up to the chain
             var serviceSupport = session.Service as IOServiceSupport;
             if (serviceSupport != null)
+            {
                 serviceSupport.FireSessionCreated(session);
+            }
 
             session.Start();
         }
@@ -101,7 +114,9 @@ namespace Mina.Transport.Serial
             var writeRequestQueue = session.WriteRequestQueue;
             writeRequestQueue.Offer(session, writeRequest);
             if (!session.WriteSuspended)
+            {
                 Flush(session);
+            }
         }
 
         private void Flush(SerialSession session)
@@ -114,13 +129,17 @@ namespace Mina.Transport.Serial
             session.SerialPort.Close();
             var support = session.Service as IOServiceSupport;
             if (support != null)
+            {
                 support.FireSessionDestroyed(session);
+            }
         }
 
         private void UpdateTrafficControl(SerialSession session)
         {
             if (!session.WriteSuspended)
+            {
                 Flush(session);
+            }
         }
 
         void IIOProcessor<SerialSession>.Add(SerialSession session)
@@ -150,27 +169,27 @@ namespace Mina.Transport.Serial
 
         void IOProcessor.Add(IOSession session)
         {
-            Add((SerialSession)session);
+            Add((SerialSession) session);
         }
 
         void IOProcessor.Write(IOSession session, IWriteRequest writeRequest)
         {
-            Write((SerialSession)session, writeRequest);
+            Write((SerialSession) session, writeRequest);
         }
 
         void IOProcessor.Flush(IOSession session)
         {
-            Flush((SerialSession)session);
+            Flush((SerialSession) session);
         }
 
         void IOProcessor.Remove(IOSession session)
         {
-            Remove((SerialSession)session);
+            Remove((SerialSession) session);
         }
 
         void IOProcessor.UpdateTrafficControl(IOSession session)
         {
-            UpdateTrafficControl((SerialSession)session);
+            UpdateTrafficControl((SerialSession) session);
         }
 
         #endregion
