@@ -28,7 +28,7 @@ namespace Mina.Transport.Socket
         /// <inheritdoc/>
         public new IPEndPoint DefaultRemoteEndPoint
         {
-            get { return (IPEndPoint)base.DefaultRemoteEndPoint; }
+            get { return (IPEndPoint) base.DefaultRemoteEndPoint; }
             set { base.DefaultRemoteEndPoint = value; }
         }
 
@@ -52,11 +52,14 @@ namespace Mina.Transport.Socket
         protected IIOProcessor<SocketSession> Processor => _processor;
 
         /// <inheritdoc/>
-        protected override IConnectFuture Connect0(EndPoint remoteEp, EndPoint localEp, Action<IOSession, IConnectFuture> sessionInitializer)
+        protected override IConnectFuture Connect0(EndPoint remoteEp, EndPoint localEp,
+            Action<IOSession, IConnectFuture> sessionInitializer)
         {
             var socket = NewSocket(remoteEp.AddressFamily);
             if (localEp != null)
+            {
                 socket.Bind(localEp);
+            }
             var ctx = new ConnectorContext(socket, remoteEp, sessionInitializer);
             BeginConnect(ctx);
             return ctx;
@@ -127,7 +130,8 @@ namespace Mina.Transport.Socket
             /// <param name="socket">the associated socket</param>
             /// <param name="remoteEp">the remote endpoint</param>
             /// <param name="sessionInitializer">the funciton to initialize session</param>
-            public ConnectorContext(System.Net.Sockets.Socket socket, EndPoint remoteEp, Action<IOSession, IConnectFuture> sessionInitializer)
+            public ConnectorContext(System.Net.Sockets.Socket socket, EndPoint remoteEp,
+                Action<IOSession, IConnectFuture> sessionInitializer)
             {
                 Socket = socket;
                 RemoteEp = remoteEp;
@@ -145,7 +149,7 @@ namespace Mina.Transport.Socket
             public EndPoint RemoteEp { get; }
 
             /// <summary>
-            /// Gets the funciton to initialize session.
+            /// Gets the function to initialize session.
             /// </summary>
             public Action<IOSession, IConnectFuture> SessionInitializer { get; }
 
