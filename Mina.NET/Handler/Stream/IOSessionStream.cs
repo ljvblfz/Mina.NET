@@ -59,7 +59,9 @@ namespace Mina.Handler.Stream
                 if (CanRead)
                 {
                     if (_released)
+                    {
                         return 0;
+                    }
                     lock (_syncRoot)
                     {
                         return _buf.Remaining;
@@ -75,7 +77,9 @@ namespace Mina.Handler.Stream
             lock (_syncRoot)
             {
                 if (!WaitForData())
+                {
                     return 0;
+                }
                 return _buf.Get() & 0xff;
             }
         }
@@ -86,7 +90,9 @@ namespace Mina.Handler.Stream
             lock (_syncRoot)
             {
                 if (!WaitForData())
+                {
                     return 0;
+                }
 
                 var readBytes = Math.Min(count, _buf.Remaining);
                 _buf.Get(buffer, offset, readBytes);
@@ -97,7 +103,9 @@ namespace Mina.Handler.Stream
         private bool WaitForData()
         {
             if (_released)
+            {
                 return false;
+            }
 
             lock (_syncRoot)
             {
@@ -132,14 +140,16 @@ namespace Mina.Handler.Stream
         private void ReleaseBuffer()
         {
             if (_released)
+            {
                 return;
+            }
             _released = true;
         }
 
         /// <inheritdoc/>
         public override void Write(byte[] buffer, int offset, int count)
         {
-            Write(IOBuffer.Wrap((byte[])buffer.Clone(), offset, count));
+            Write(IOBuffer.Wrap((byte[]) buffer.Clone(), offset, count));
         }
 
         /// <inheritdoc/>
@@ -148,7 +158,9 @@ namespace Mina.Handler.Stream
             base.Close();
 
             if (_closed)
+            {
                 return;
+            }
 
             if (_session == null)
             {
@@ -177,10 +189,14 @@ namespace Mina.Handler.Stream
         public override void Flush()
         {
             if (_lastWriteFuture == null)
+            {
                 return;
+            }
             _lastWriteFuture.Await();
             if (!_lastWriteFuture.Written)
+            {
                 throw new IOException("The bytes could not be written to the session");
+            }
             _lastWriteFuture = null;
         }
 
@@ -192,7 +208,9 @@ namespace Mina.Handler.Stream
             if (CanRead)
             {
                 if (_closed)
+                {
                     return;
+                }
 
                 lock (_syncRoot)
                 {
@@ -210,16 +228,20 @@ namespace Mina.Handler.Stream
             else if (CanWrite)
             {
                 if (!_session.Connected)
+                {
                     throw new IOException("The session has been closed.");
+                }
 
                 _lastWriteFuture = _session.Write(buf);
             }
             else
+            {
                 throw new NotSupportedException();
+            }
         }
 
         /// <summary>
-        /// Sets an exception and notifies threads wating for this object.
+        /// Sets an exception and notifies threads waiting for this object.
         /// </summary>
         public IOException Exception
         {
