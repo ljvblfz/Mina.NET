@@ -11,10 +11,13 @@ namespace Mina.Transport.Socket
     {
         /// <inheritdoc/>
         new IDatagramSessionConfig SessionConfig { get; }
+
         /// <inheritdoc/>
         new IPEndPoint LocalEndPoint { get; }
+
         /// <inheritdoc/>
         new IPEndPoint DefaultLocalEndPoint { get; set; }
+
         /// <summary>
         /// Gets or sets the <see cref="IOSessionRecycler"/> for this service.
         /// </summary>
