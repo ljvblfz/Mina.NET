@@ -180,7 +180,7 @@ namespace Mina.Filter.Codec.Demux
                 {
                     throw new ArgumentNullException(nameof(encoder));
                 }
-                this._encoder = encoder;
+                _encoder = encoder;
             }
 
             public IMessageEncoder<T> GetEncoder()
@@ -200,7 +200,7 @@ namespace Mina.Filter.Codec.Demux
 
             public DefaultConstructorMessageEncoderFactory(Type encoderType)
             {
-                this._encoderType = encoderType;
+                _encoderType = encoderType;
             }
 
             public IMessageEncoder<T> GetEncoder()
