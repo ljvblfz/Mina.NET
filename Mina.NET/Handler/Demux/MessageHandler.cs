@@ -15,14 +15,17 @@ namespace Mina.Handler.Demux
         /// <summary>
         /// </summary>
         public MessageHandler()
-        { }
+        {
+        }
 
         /// <summary>
         /// </summary>
         public MessageHandler(Action<IOSession, T> act)
         {
             if (act == null)
+            {
                 throw new ArgumentNullException(nameof(act));
+            }
             _act = act;
         }
 
@@ -30,18 +33,22 @@ namespace Mina.Handler.Demux
         public virtual void HandleMessage(IOSession session, T message)
         {
             if (_act != null)
+            {
                 _act(session, message);
+            }
         }
 
         void IMessageHandler.HandleMessage(IOSession session, object message)
         {
-            HandleMessage(session, (T)message);
+            HandleMessage(session, (T) message);
         }
     }
 
     class NoopMessageHandler : IMessageHandler<object>
     {
-        internal NoopMessageHandler() { }
+        internal NoopMessageHandler()
+        {
+        }
 
         public void HandleMessage(IOSession session, object message)
         {
