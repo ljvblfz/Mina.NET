@@ -60,7 +60,7 @@ namespace Mina.Handler.Stream
         public override void MessageReceived(IOSession session, object message)
         {
             var input = session.GetAttribute<IOSessionStream>(KeyIn);
-            input.Write((IOBuffer)message);
+            input.Write((IOBuffer) message);
         }
 
         /// <inheritdoc/>
@@ -78,7 +78,9 @@ namespace Mina.Handler.Stream
             }
 
             if (Log.IsWarnEnabled)
+            {
                 Log.Warn("Unexpected exception.", cause);
+            }
             session.Close(true);
         }
 
@@ -86,7 +88,9 @@ namespace Mina.Handler.Stream
         public override void SessionIdle(IOSession session, IdleStatus status)
         {
             if (status == IdleStatus.ReaderIdle)
+            {
                 throw new IOException("Read timeout");
+            }
         }
 
         /// <summary>
