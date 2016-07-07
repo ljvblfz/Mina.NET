@@ -21,7 +21,9 @@ namespace Mina.Filter.Stream
         protected override IOBuffer GetNextBuffer(IFileRegion fileRegion)
         {
             if (fileRegion.RemainingBytes <= 0L)
+            {
                 return null;
+            }
 
             var bufferSize = (int)Math.Min(WriteBufferSize, fileRegion.RemainingBytes);
             var buffer = IOBuffer.Allocate(bufferSize);
