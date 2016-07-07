@@ -32,9 +32,12 @@ namespace Mina.Transport.Socket
         /// <param name="readBuffer">the <see cref="SocketAsyncEventArgsBuffer"/> as reading buffer</param>
         /// <param name="writeBuffer">the <see cref="SocketAsyncEventArgsBuffer"/> as writing buffer</param>
         /// <param name="reuseBuffer">whether or not reuse internal buffer, see <seealso cref="SocketSession.ReuseBuffer"/> for more</param>
-        public AsyncSocketSession(IOService service, IIOProcessor<SocketSession> processor, System.Net.Sockets.Socket socket,
+        public AsyncSocketSession(IOService service, IIOProcessor<SocketSession> processor,
+            System.Net.Sockets.Socket socket,
             SocketAsyncEventArgsBuffer readBuffer, SocketAsyncEventArgsBuffer writeBuffer, bool reuseBuffer)
-            : base(service, processor, new SessionConfigImpl(socket), socket, socket.LocalEndPoint, socket.RemoteEndPoint, reuseBuffer)
+            : base(
+                service, processor, new SessionConfigImpl(socket), socket, socket.LocalEndPoint, socket.RemoteEndPoint,
+                reuseBuffer)
         {
             ReadBuffer = readBuffer;
             ReadBuffer.SocketAsyncEventArgs.UserToken = this;
@@ -62,7 +65,7 @@ namespace Mina.Transport.Socket
             get
             {
                 var chain = FilterChain;
-                var sslFilter = (SslFilter)chain.Get(typeof(SslFilter));
+                var sslFilter = (SslFilter) chain.Get(typeof(SslFilter));
                 return sslFilter != null && sslFilter.IsSslStarted(this);
             }
         }
@@ -121,7 +124,8 @@ namespace Mina.Transport.Socket
         protected override void BeginSendFile(IWriteRequest request, IFileRegion file)
         {
             var saea = WriteBuffer.SocketAsyncEventArgs;
-            saea.SendPacketsElements = new SendPacketsElement[] {
+            saea.SendPacketsElements = new SendPacketsElement[]
+            {
                 new SendPacketsElement(file.FullName)
             };
 
@@ -163,10 +167,10 @@ namespace Mina.Transport.Socket
                 EndSend(e.BytesTransferred);
             }
             else if (e.SocketError != SocketError.OperationAborted
-                && e.SocketError != SocketError.Interrupted
-                && e.SocketError != SocketError.ConnectionReset)
+                     && e.SocketError != SocketError.Interrupted
+                     && e.SocketError != SocketError.ConnectionReset)
             {
-                EndSend(new SocketException((int)e.SocketError));
+                EndSend(new SocketException((int) e.SocketError));
             }
             else
             {
@@ -233,10 +237,10 @@ namespace Mina.Transport.Socket
                 FilterChain.FireInputClosed();
             }
             else if (e.SocketError != SocketError.OperationAborted
-                && e.SocketError != SocketError.Interrupted
-                && e.SocketError != SocketError.ConnectionReset)
+                     && e.SocketError != SocketError.Interrupted
+                     && e.SocketError != SocketError.ConnectionReset)
             {
-                EndReceive(new SocketException((int)e.SocketError));
+                EndReceive(new SocketException((int) e.SocketError));
             }
             else
             {
