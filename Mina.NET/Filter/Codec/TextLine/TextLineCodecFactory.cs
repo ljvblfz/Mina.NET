@@ -20,7 +20,8 @@ namespace Mina.Filter.Codec.TextLine
         /// </summary>
         public TextLineCodecFactory()
             : this(Encoding.Default)
-        { }
+        {
+        }
 
         /// <summary>
         /// Instantiates with given encoding,
@@ -30,7 +31,8 @@ namespace Mina.Filter.Codec.TextLine
         /// <param name="encoding">the <see cref="Encoding"/></param>
         public TextLineCodecFactory(Encoding encoding)
             : this(encoding, LineDelimiter.Unix, LineDelimiter.Auto)
-        { }
+        {
+        }
 
         /// <summary>
         /// Instantiates.
