@@ -34,7 +34,9 @@ namespace Mina.Filter.Stream
             }
 
             if (n <= 0 && off == 0)
+            {
                 return null;
+            }
 
             return IOBuffer.Wrap(bytes, 0, off);
         }
