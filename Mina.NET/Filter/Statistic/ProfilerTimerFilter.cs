@@ -33,7 +33,8 @@ namespace Mina.Filter.Statistic
         /// </summary>
         public ProfilerTimerFilter()
             : this(TimeUnit.Milliseconds, IOEventType.MessageReceived | IOEventType.MessageSent)
-        { }
+        {
+        }
 
         /// <summary>
         /// Creates a profiler on event <see cref="IOEventType.MessageReceived"/>
@@ -42,7 +43,8 @@ namespace Mina.Filter.Statistic
         /// <param name="timeUnit">the time unit being used</param>
         public ProfilerTimerFilter(TimeUnit timeUnit)
             : this(timeUnit, IOEventType.MessageReceived | IOEventType.MessageSent)
-        { }
+        {
+        }
 
         /// <summary>
         /// Creates a profiler.
@@ -72,19 +74,31 @@ namespace Mina.Filter.Statistic
             get
             {
                 var et = default(IOEventType);
-                
+
                 if (_profileMessageReceived)
+                {
                     et |= IOEventType.MessageReceived;
+                }
                 if (_profileMessageSent)
+                {
                     et |= IOEventType.MessageSent;
+                }
                 if (_profileSessionCreated)
+                {
                     et |= IOEventType.SessionCreated;
+                }
                 if (_profileSessionOpened)
+                {
                     et |= IOEventType.SessionOpened;
+                }
                 if (_profileSessionIdle)
+                {
                     et |= IOEventType.SessionIdle;
+                }
                 if (_profileSessionClosed)
+                {
                     et |= IOEventType.SessionClosed;
+                }
 
                 return et;
             }
@@ -135,7 +149,8 @@ namespace Mina.Filter.Statistic
         /// <inheritdoc/>
         public override void MessageReceived(INextFilter nextFilter, IOSession session, object message)
         {
-            Profile(_profileMessageReceived, _messageReceivedTimerWorker, () => nextFilter.MessageReceived(session, message));
+            Profile(_profileMessageReceived, _messageReceivedTimerWorker,
+                () => nextFilter.MessageReceived(session, message));
         }
 
         /// <inheritdoc/>
@@ -257,11 +272,11 @@ namespace Mina.Filter.Statistic
             switch (_timeUnit)
             {
                 case TimeUnit.Seconds:
-                    return DateTime.Now.Ticks / TimeSpan.TicksPerSecond;
+                    return DateTime.Now.Ticks/TimeSpan.TicksPerSecond;
                 case TimeUnit.Ticks:
                     return DateTime.Now.Ticks;
                 default:
-                    return DateTime.Now.Ticks / TimeSpan.TicksPerMillisecond;
+                    return DateTime.Now.Ticks/TimeSpan.TicksPerMillisecond;
             }
         }
 
@@ -271,14 +286,17 @@ namespace Mina.Filter.Statistic
             /// The sum of all operation durations
             /// </summary>
             public long Total;
+
             /// <summary>
             /// The number of calls
             /// </summary>
             public long CallsNumber;
+
             /// <summary>
             /// The fastest operation
             /// </summary>
             public long Minimum = long.MaxValue;
+
             /// <summary>
             /// The slowest operation
             /// </summary>
@@ -293,13 +311,17 @@ namespace Mina.Filter.Statistic
                 lock (_syncRoot)
                 {
                     if (duration < Minimum)
+                    {
                         Minimum = duration;
+                    }
                     if (duration > Maximum)
+                    {
                         Maximum = duration;
+                    }
                 }
             }
 
-            public double Average => Total / CallsNumber;
+            public double Average => Total/CallsNumber;
         }
     }
 
@@ -312,10 +334,12 @@ namespace Mina.Filter.Statistic
         /// Seconds
         /// </summary>
         Seconds,
+
         /// <summary>
         /// Milliseconds
         /// </summary>
         Milliseconds,
+
         /// <summary>
         /// Ticks
         /// </summary>
