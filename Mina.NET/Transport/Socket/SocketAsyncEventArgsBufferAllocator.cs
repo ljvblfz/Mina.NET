@@ -22,7 +22,9 @@ namespace Mina.Transport.Socket
         public SocketAsyncEventArgsBuffer Allocate(int capacity)
         {
             if (capacity < 0)
+            {
                 throw new ArgumentException("Capacity should be >= 0", nameof(capacity));
+            }
             return new SocketAsyncEventArgsBuffer(this, capacity, capacity);
         }
 
