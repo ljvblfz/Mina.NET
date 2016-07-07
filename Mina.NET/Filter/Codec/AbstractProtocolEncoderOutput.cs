@@ -33,25 +33,31 @@ namespace Mina.Filter.Codec
         public void MergeAll()
         {
             if (!_buffersOnly)
+            {
                 throw new InvalidOperationException("The encoded messages contains a non-buffer.");
+            }
 
             if (MessageQueue.Count < 2)
+            {
                 // no need to merge!
                 return;
+            }
 
             var sum = 0;
             foreach (var item in MessageQueue)
             {
-                sum += ((IOBuffer)item).Remaining;
+                sum += ((IOBuffer) item).Remaining;
             }
 
             var newBuf = IOBuffer.Allocate(sum);
-            for (; ; )
+            for (;;)
             {
                 var obj = MessageQueue.Dequeue();
                 if (obj == null)
+                {
                     break;
-                newBuf.Put((IOBuffer)obj);
+                }
+                newBuf.Put((IOBuffer) obj);
             }
 
             newBuf.Flip();
