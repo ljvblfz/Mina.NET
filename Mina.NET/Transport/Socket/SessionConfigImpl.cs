@@ -15,19 +15,37 @@ namespace Mina.Transport.Socket
         public override int? ReceiveBufferSize
         {
             get { return _socket.ReceiveBufferSize; }
-            set { if (value.HasValue) _socket.ReceiveBufferSize = value.Value; }
+            set
+            {
+                if (value.HasValue)
+                {
+                    _socket.ReceiveBufferSize = value.Value;
+                }
+            }
         }
 
         public override int? SendBufferSize
         {
             get { return _socket.SendBufferSize; }
-            set { if (value.HasValue) _socket.SendBufferSize = value.Value; }
+            set
+            {
+                if (value.HasValue)
+                {
+                    _socket.SendBufferSize = value.Value;
+                }
+            }
         }
 
         public override bool? ExclusiveAddressUse
         {
             get { return _socket.ExclusiveAddressUse; }
-            set { if (value.HasValue) _socket.ExclusiveAddressUse = value.Value; }
+            set
+            {
+                if (value.HasValue)
+                {
+                    _socket.ExclusiveAddressUse = value.Value;
+                }
+            }
         }
 
         public override bool? ReuseAddress
@@ -40,7 +58,9 @@ namespace Mina.Transport.Socket
             set
             {
                 if (value.HasValue)
+                {
                     _socket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, value.Value);
+                }
             }
         }
 
@@ -54,7 +74,9 @@ namespace Mina.Transport.Socket
             set
             {
                 if (value.HasValue)
+                {
                     _socket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.TypeOfService, value.Value);
+                }
             }
         }
 
@@ -68,7 +90,9 @@ namespace Mina.Transport.Socket
             set
             {
                 if (value.HasValue)
+                {
                     _socket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.KeepAlive, value.Value);
+                }
             }
         }
 
@@ -82,14 +106,22 @@ namespace Mina.Transport.Socket
             set
             {
                 if (value.HasValue)
+                {
                     _socket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.OutOfBandInline, value.Value);
+                }
             }
         }
 
         public override bool? NoDelay
         {
             get { return _socket.NoDelay; }
-            set { if (value.HasValue) _socket.NoDelay = value.Value; }
+            set
+            {
+                if (value.HasValue)
+                {
+                    _socket.NoDelay = value.Value;
+                }
+            }
         }
 
         public override int? SoLinger
@@ -100,9 +132,13 @@ namespace Mina.Transport.Socket
                 if (value.HasValue)
                 {
                     if (value < 0)
+                    {
                         _socket.LingerState = new LingerOption(false, 0);
+                    }
                     else
+                    {
                         _socket.LingerState = new LingerOption(true, value.Value);
+                    }
                 }
             }
         }
