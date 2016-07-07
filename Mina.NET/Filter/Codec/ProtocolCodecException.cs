@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Runtime.Serialization;
 
 namespace Mina.Filter.Codec
 {
@@ -13,26 +14,29 @@ namespace Mina.Filter.Codec
         /// <summary>
         /// </summary>
         public ProtocolCodecException()
-        { }
+        {
+        }
 
         /// <summary>
         /// </summary>
         public ProtocolCodecException(string message)
             : base(message)
-        { }
+        {
+        }
 
         /// <summary>
         /// </summary>
         public ProtocolCodecException(string message, Exception innerException)
             : base(message, innerException)
-        { }
+        {
+        }
 
         /// <summary>
         /// </summary>
-        protected ProtocolCodecException(
-          System.Runtime.Serialization.SerializationInfo info,
-          System.Runtime.Serialization.StreamingContext context)
-            : base(info, context) { }
+        protected ProtocolCodecException(SerializationInfo info, StreamingContext context)
+            : base(info, context)
+        {
+        }
     }
 
     /// <summary>
@@ -45,26 +49,29 @@ namespace Mina.Filter.Codec
         /// <summary>
         /// </summary>
         public ProtocolEncoderException()
-        { }
+        {
+        }
 
         /// <summary>
         /// </summary>
         public ProtocolEncoderException(string message)
             : base(message)
-        { }
+        {
+        }
 
         /// <summary>
         /// </summary>
         public ProtocolEncoderException(string message, Exception innerException)
             : base(message, innerException)
-        { }
+        {
+        }
 
         /// <summary>
         /// </summary>
-        protected ProtocolEncoderException(
-          System.Runtime.Serialization.SerializationInfo info,
-          System.Runtime.Serialization.StreamingContext context)
-            : base(info, context) { }
+        protected ProtocolEncoderException(SerializationInfo info, StreamingContext context)
+            : base(info, context)
+        {
+        }
     }
 
     /// <summary>
@@ -80,26 +87,29 @@ namespace Mina.Filter.Codec
         /// <summary>
         /// </summary>
         public ProtocolDecoderException()
-        { }
+        {
+        }
 
         /// <summary>
         /// </summary>
         public ProtocolDecoderException(string message)
             : base(message)
-        { }
+        {
+        }
 
         /// <summary>
         /// </summary>
         public ProtocolDecoderException(string message, Exception innerException)
             : base(message, innerException)
-        { }
+        {
+        }
 
         /// <summary>
         /// </summary>
-        protected ProtocolDecoderException(
-          System.Runtime.Serialization.SerializationInfo info,
-          System.Runtime.Serialization.StreamingContext context)
-            : base(info, context) { }
+        protected ProtocolDecoderException(SerializationInfo info, StreamingContext context)
+            : base(info, context)
+        {
+        }
 
         /// <summary>
         /// Gets the current data in hex.
@@ -110,18 +120,11 @@ namespace Mina.Filter.Codec
             set
             {
                 if (_hexdump != null)
+                {
                     throw new InvalidOperationException("Hexdump cannot be set more than once.");
+                }
                 _hexdump = value;
             }
-        }
-
-        /// <summary>
-        /// </summary>
-        public override void GetObjectData(
-            System.Runtime.Serialization.SerializationInfo info,
-            System.Runtime.Serialization.StreamingContext context)
-        {
-            base.GetObjectData(info, context);
         }
     }
 }
