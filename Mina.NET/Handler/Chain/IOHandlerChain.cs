@@ -19,19 +19,21 @@ namespace Mina.Handler.Chain
         /// </summary>
         public IOHandlerChain()
             : base(
-            e => new NextCommand(e),
-            () => new HeadCommand(),
-            () => new TailCommand(typeof(IOHandlerChain).Name + "." + Guid.NewGuid() + ".nextCommand")
-            )
+                e => new NextCommand(e),
+                () => new HeadCommand(),
+                () => new TailCommand(typeof(IOHandlerChain).Name + "." + Guid.NewGuid() + ".nextCommand")
+                )
         {
-            _nextCommandKey = ((TailCommand)Tail.Filter).NextCommandKey;
+            _nextCommandKey = ((TailCommand) Tail.Filter).NextCommandKey;
         }
 
         /// <inheritdoc/>
         public void Execute(INextCommand next, IOSession session, object message)
         {
             if (next != null)
+            {
                 session.SetAttribute(_nextCommandKey, next);
+            }
 
             try
             {
@@ -54,9 +56,13 @@ namespace Mina.Handler.Chain
             while (e != Tail)
             {
                 if (empty)
+                {
                     empty = false;
+                }
                 else
+                {
                     buf.Append(", ");
+                }
 
                 buf.Append('(');
                 buf.Append(e.Name);
@@ -68,12 +74,15 @@ namespace Mina.Handler.Chain
             }
 
             if (empty)
+            {
                 buf.Append("empty");
+            }
 
             return buf.Append(" }").ToString();
         }
 
-        private static void CallNextCommand(IEntry<IOHandlerCommand, INextCommand> entry, IOSession session, object message)
+        private static void CallNextCommand(IEntry<IOHandlerCommand, INextCommand> entry, IOSession session,
+            object message)
         {
             entry.Filter.Execute(entry.NextFilter, session, message);
         }
@@ -92,14 +101,16 @@ namespace Mina.Handler.Chain
 
             public TailCommand(string nextCommandKey)
             {
-                this.NextCommandKey = nextCommandKey;
+                NextCommandKey = nextCommandKey;
             }
 
             public void Execute(INextCommand next, IOSession session, object message)
             {
                 next = session.GetAttribute<INextCommand>(NextCommandKey);
                 if (next != null)
+                {
                     next.Execute(session, message);
+                }
             }
         }
 
