@@ -40,27 +40,37 @@ namespace Mina.Filter.Executor
 
         public int EstimateSize(IOEvent ioe)
         {
-            return EstimateSize((object)ioe) + EstimateSize(ioe.Parameter);
+            return EstimateSize((object) ioe) + EstimateSize(ioe.Parameter);
         }
 
         private int EstimateSize(object obj)
         {
             if (obj == null)
+            {
                 return 8;
+            }
 
             var answer = 8 + EstimateSize(obj.GetType(), null);
 
             if (obj is IOBuffer)
-                answer += ((IOBuffer)obj).Remaining;
+            {
+                answer += ((IOBuffer) obj).Remaining;
+            }
             else if (obj is IWriteRequest)
-                answer += EstimateSize(((IWriteRequest)obj).Message);
+            {
+                answer += EstimateSize(((IWriteRequest) obj).Message);
+            }
             else if (obj is string)
-                answer += ((string)obj).Length << 1;
+            {
+                answer += ((string) obj).Length << 1;
+            }
             else if (obj is IEnumerable)
-                foreach (var m in (IEnumerable)obj)
+            {
+                foreach (var m in (IEnumerable) obj)
                 {
                     answer += EstimateSize(m);
                 }
+            }
 
             return Align(answer);
         }
@@ -70,12 +80,18 @@ namespace Mina.Filter.Executor
             int answer;
 
             if (Type2Size.TryGetValue(type, out answer))
+            {
                 return answer;
+            }
 
             if (visitedTypes == null)
+            {
                 visitedTypes = new HashSet<Type>();
+            }
             else if (visitedTypes.Contains(type))
+            {
                 return 0;
+            }
 
             visitedTypes.Add(type);
 
@@ -83,7 +99,9 @@ namespace Mina.Filter.Executor
 
             for (var t = type; t != null; t = t.BaseType)
             {
-                var fields = t.GetFields(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly);
+                var fields =
+                    t.GetFields(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic |
+                                BindingFlags.DeclaredOnly);
                 foreach (var fi in fields)
                 {
                     answer += EstimateSize(fi.FieldType, visitedTypes);
@@ -96,12 +114,16 @@ namespace Mina.Filter.Executor
             answer = Align(answer);
 
             // Put the final answer.
-            lock (((ICollection)Type2Size).SyncRoot)
+            lock (((ICollection) Type2Size).SyncRoot)
             {
                 if (Type2Size.ContainsKey(type))
+                {
                     answer = Type2Size[type];
+                }
                 else
+                {
                     Type2Size[type] = answer;
+                }
             }
 
             return answer;
