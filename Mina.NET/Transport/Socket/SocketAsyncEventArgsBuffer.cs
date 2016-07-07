@@ -51,7 +51,9 @@ namespace Mina.Transport.Socket
         public void SetBuffer()
         {
             if (SocketAsyncEventArgs.Count != Limit)
+            {
                 SocketAsyncEventArgs.SetBuffer(SocketAsyncEventArgs.Offset, Limit);
+            }
         }
 
         /// <inheritdoc/>
@@ -65,7 +67,9 @@ namespace Mina.Transport.Socket
         {
             CheckBounds(offset, length, dst.Length);
             if (length > Remaining)
+            {
                 throw new BufferUnderflowException();
+            }
             Array.Copy(SocketAsyncEventArgs.Buffer, Offset(Position), dst, offset, length);
             Position += length;
             return this;
@@ -119,7 +123,9 @@ namespace Mina.Transport.Socket
         {
             var array = src.GetRemaining();
             if (array.Count > Remaining)
+            {
                 throw new OverflowException();
+            }
             PutInternal(array.Array, array.Offset, array.Count);
             src.Position += array.Count;
         }
