@@ -98,7 +98,9 @@ namespace Mina.Filter.ErrorGenerating
             if (InsertByteProbability > _rng.Next(1000))
             {
                 if (Log.IsInfoEnabled)
+                {
                     Log.Info(buffer.GetHexDump());
+                }
 
                 // where to insert bytes ?
                 var pos = _rng.Next(buffer.Remaining) - 1;
@@ -108,10 +110,12 @@ namespace Mina.Filter.ErrorGenerating
 
                 var newBuff = IOBuffer.Allocate(buffer.Remaining + count);
                 for (var i = 0; i < pos; i++)
+                {
                     newBuff.Put(buffer.Get());
+                }
                 for (var i = 0; i < count; i++)
                 {
-                    newBuff.Put((byte)(_rng.Next(256)));
+                    newBuff.Put((byte) (_rng.Next(256)));
                 }
                 while (buffer.Remaining > 0)
                 {
@@ -134,22 +138,30 @@ namespace Mina.Filter.ErrorGenerating
             if ((buffer.Remaining > 0) && (RemoveByteProbability > _rng.Next(1000)))
             {
                 if (Log.IsInfoEnabled)
+                {
                     Log.Info(buffer.GetHexDump());
+                }
 
                 // where to remove bytes ?
                 var pos = _rng.Next(buffer.Remaining);
                 // how many byte to remove ?
                 var count = _rng.Next(buffer.Remaining - pos) + 1;
                 if (count == buffer.Remaining)
+                {
                     count = buffer.Remaining - 1;
+                }
 
                 var newBuff = IOBuffer.Allocate(buffer.Remaining - count);
                 for (var i = 0; i < pos; i++)
+                {
                     newBuff.Put(buffer.Get());
+                }
 
                 buffer.Skip(count); // hole
                 while (newBuff.Remaining > 0)
+                {
                     newBuff.Put(buffer.Get());
+                }
                 newBuff.Flip();
                 // copy the new buffer in the old one
                 buffer.Rewind();
@@ -165,7 +177,9 @@ namespace Mina.Filter.ErrorGenerating
             if ((buffer.Remaining > 0) && (ChangeByteProbability > _rng.Next(1000)))
             {
                 if (Log.IsInfoEnabled)
+                {
                     Log.Info(buffer.GetHexDump());
+                }
 
                 // how many byte to change ?
                 var count = _rng.Next(buffer.Remaining - 1) + 1;
