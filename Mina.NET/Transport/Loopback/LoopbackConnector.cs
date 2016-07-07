@@ -32,11 +32,14 @@ namespace Mina.Transport.Loopback
         public override ITransportMetadata TransportMetadata => LoopbackSession.Metadata;
 
         /// <inheritdoc/>
-        protected override IConnectFuture Connect0(EndPoint remoteEp, EndPoint localEp, Action<IOSession, IConnectFuture> sessionInitializer)
+        protected override IConnectFuture Connect0(EndPoint remoteEp, EndPoint localEp,
+            Action<IOSession, IConnectFuture> sessionInitializer)
         {
             LoopbackPipe entry;
             if (!LoopbackAcceptor.BoundHandlers.TryGetValue(remoteEp, out entry))
+            {
                 return DefaultConnectFuture.NewFailedFuture(new IOException("Endpoint unavailable: " + remoteEp));
+            }
 
             var future = new DefaultConnectFuture();
 
@@ -67,7 +70,9 @@ namespace Mina.Transport.Loopback
                 // The following sentences don't throw any exceptions.
                 var serviceSupport = this as IOServiceSupport;
                 if (serviceSupport != null)
+                {
                     serviceSupport.FireSessionCreated(localSession);
+                }
             }
             catch (Exception ex)
             {
@@ -77,7 +82,7 @@ namespace Mina.Transport.Loopback
 
             // initialize acceptor session
             var remoteSession = localSession.RemoteSession;
-            ((LoopbackAcceptor)remoteSession.Service).DoFinishSessionInitialization(remoteSession, null);
+            ((LoopbackAcceptor) remoteSession.Service).DoFinishSessionInitialization(remoteSession, null);
             try
             {
                 var filterChain = remoteSession.FilterChain;
@@ -86,7 +91,9 @@ namespace Mina.Transport.Loopback
                 // The following sentences don't throw any exceptions.
                 var serviceSupport = entry.Acceptor as IOServiceSupport;
                 if (serviceSupport != null)
+                {
                     serviceSupport.FireSessionCreated(remoteSession);
+                }
             }
             catch (Exception ex)
             {
@@ -96,8 +103,8 @@ namespace Mina.Transport.Loopback
 
             // Start chains, and then allow and messages read/written to be processed. This is to ensure that
             // sessionOpened gets received before a messageReceived
-            ((LoopbackFilterChain)localSession.FilterChain).Start();
-            ((LoopbackFilterChain)remoteSession.FilterChain).Start();
+            ((LoopbackFilterChain) localSession.FilterChain).Start();
+            ((LoopbackFilterChain) remoteSession.FilterChain).Start();
 
             return future;
         }
@@ -117,7 +124,9 @@ namespace Mina.Transport.Loopback
             lock (TakenLocalEPs)
             {
                 if (_nextLocalPort >= 0)
+                {
                     _nextLocalPort = -1;
+                }
                 for (var i = 0; i < int.MaxValue; i++)
                 {
                     var answer = new LoopbackEndPoint(_nextLocalPort--);
@@ -136,7 +145,7 @@ namespace Mina.Transport.Loopback
         {
             lock (TakenLocalEPs)
             {
-                TakenLocalEPs.Remove((LoopbackEndPoint)e.Future.Session.LocalEndPoint);
+                TakenLocalEPs.Remove((LoopbackEndPoint) e.Future.Session.LocalEndPoint);
             }
         }
     }
