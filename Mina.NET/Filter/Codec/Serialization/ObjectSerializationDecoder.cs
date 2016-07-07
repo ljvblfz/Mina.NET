@@ -24,7 +24,9 @@ namespace Mina.Filter.Codec.Serialization
             set
             {
                 if (value <= 0)
+                {
                     throw new ArgumentException("MaxObjectSize should be larger than zero.", nameof(value));
+                }
                 _maxObjectSize = value;
             }
         }
@@ -33,7 +35,9 @@ namespace Mina.Filter.Codec.Serialization
         protected override bool DoDecode(IOSession session, IOBuffer input, IProtocolDecoderOutput output)
         {
             if (!input.PrefixedDataAvailable(4, _maxObjectSize))
+            {
                 return false;
+            }
 
             input.GetInt32();
             output.Write(input.GetObject());
