@@ -16,7 +16,8 @@ namespace Mina.Transport.Socket
     /// <summary>
     /// <see cref="IOAcceptor"/> for datagram transport (UDP/IP).
     /// </summary>
-    public partial class AsyncDatagramAcceptor : AbstractIOAcceptor, IDatagramAcceptor, IIOProcessor<AsyncDatagramSession>
+    public partial class AsyncDatagramAcceptor : AbstractIOAcceptor, IDatagramAcceptor,
+        IIOProcessor<AsyncDatagramSession>
     {
         private static readonly IOSessionRecycler DefaultRecycler = new ExpiringSessionRecycler();
 
@@ -36,15 +37,15 @@ namespace Mina.Transport.Socket
         }
 
         /// <inheritdoc/>
-        public new IDatagramSessionConfig SessionConfig => (IDatagramSessionConfig)base.SessionConfig;
+        public new IDatagramSessionConfig SessionConfig => (IDatagramSessionConfig) base.SessionConfig;
 
         /// <inheritdoc/>
-        public new IPEndPoint LocalEndPoint => (IPEndPoint)base.LocalEndPoint;
+        public new IPEndPoint LocalEndPoint => (IPEndPoint) base.LocalEndPoint;
 
         /// <inheritdoc/>
         public new IPEndPoint DefaultLocalEndPoint
         {
-            get { return (IPEndPoint)base.DefaultLocalEndPoint; }
+            get { return (IPEndPoint) base.DefaultLocalEndPoint; }
             set { base.DefaultLocalEndPoint = value; }
         }
 
@@ -74,7 +75,9 @@ namespace Mina.Transport.Socket
                 lock (BindLock)
                 {
                     if (Active)
+                    {
                         throw new InvalidOperationException("SessionRecycler can't be set while the acceptor is bound.");
+                    }
 
                     _sessionRecycler = value == null ? DefaultRecycler : value;
                 }
@@ -84,18 +87,26 @@ namespace Mina.Transport.Socket
         public IOSession NewSession(EndPoint remoteEp, EndPoint localEp)
         {
             if (Disposed)
+            {
                 throw new ObjectDisposedException("AsyncDatagramAcceptor");
+            }
             if (remoteEp == null)
+            {
                 throw new ArgumentNullException(nameof(remoteEp));
+            }
 
             SocketContext ctx;
             if (!_listenSockets.TryGetValue(localEp, out ctx))
+            {
                 throw new ArgumentException("Unknown local endpoint: " + localEp, nameof(localEp));
+            }
 
             lock (BindLock)
             {
                 if (!Active)
+                {
                     throw new InvalidOperationException("Can't create a session from a unbound service.");
+                }
                 return NewSessionWithoutLock(remoteEp, ctx);
             }
         }
@@ -111,8 +122,11 @@ namespace Mina.Transport.Socket
                 {
                     var ep = localEp;
                     if (ep == null)
+                    {
                         ep = new IPEndPoint(IPAddress.Any, 0);
-                    var listenSocket = new System.Net.Sockets.Socket(ep.AddressFamily, SocketType.Dgram, ProtocolType.Udp);
+                    }
+                    var listenSocket = new System.Net.Sockets.Socket(ep.AddressFamily, SocketType.Dgram,
+                        ProtocolType.Udp);
                     new DatagramSessionConfigImpl(listenSocket).SetAll(SessionConfig);
                     listenSocket.Bind(ep);
                     newListeners[listenSocket.LocalEndPoint] = listenSocket;
@@ -155,7 +169,9 @@ namespace Mina.Transport.Socket
             {
                 SocketContext ctx;
                 if (!_listenSockets.TryGetValue(ep, out ctx))
+                {
                     continue;
+                }
                 _listenSockets.Remove(ep);
                 ctx.Close();
             }
@@ -178,7 +194,7 @@ namespace Mina.Transport.Socket
                         foreach (var ctx in _listenSockets.Values)
                         {
                             ctx.Close();
-                            ((IDisposable)ctx.Socket).Dispose();
+                            ((IDisposable) ctx.Socket).Dispose();
                         }
                     }
                     _idleStatusChecker.Dispose();
@@ -203,7 +219,9 @@ namespace Mina.Transport.Socket
                 session = _sessionRecycler.Recycle(remoteEp);
 
                 if (session != null)
+                {
                     return session;
+                }
 
                 // If a new session needs to be created.
                 session = new AsyncDatagramSession(this, this, ctx, remoteEp, ReuseBuffer);
@@ -218,7 +236,9 @@ namespace Mina.Transport.Socket
 
                 var serviceSupport = session.Service as IOServiceSupport;
                 if (serviceSupport != null)
+                {
                     serviceSupport.FireSessionCreated(session);
+                }
             }
             catch (Exception ex)
             {
@@ -231,7 +251,10 @@ namespace Mina.Transport.Socket
         internal partial class SocketContext
         {
             public readonly System.Net.Sockets.Socket _socket;
-            private readonly ConcurrentQueue<AsyncDatagramSession> _flushingSessions = new ConcurrentQueue<AsyncDatagramSession>();
+
+            private readonly ConcurrentQueue<AsyncDatagramSession> _flushingSessions =
+                new ConcurrentQueue<AsyncDatagramSession>();
+
             private int _writing;
 
             public System.Net.Sockets.Socket Socket => _socket;
@@ -239,7 +262,9 @@ namespace Mina.Transport.Socket
             public void Flush(AsyncDatagramSession session)
             {
                 if (ScheduleFlush(session))
+                {
                     Flush();
+                }
             }
 
             private bool ScheduleFlush(AsyncDatagramSession session)
@@ -255,7 +280,9 @@ namespace Mina.Transport.Socket
             private void Flush()
             {
                 if (Interlocked.CompareExchange(ref _writing, 1, 0) > 0)
+                {
                     return;
+                }
                 BeginSend(null);
             }
 
@@ -291,14 +318,19 @@ namespace Mina.Transport.Socket
 
                 var buf = req.Message as IOBuffer;
                 if (buf == null)
+                {
                     EndSend(session, new InvalidOperationException("Don't know how to handle message of type '"
-                            + req.Message.GetType().Name + "'.  Are you missing a protocol encoder?"));
+                                                                   + req.Message.GetType().Name +
+                                                                   "'.  Are you missing a protocol encoder?"));
+                }
 
                 if (buf.HasRemaining)
                 {
                     var destination = req.Destination;
                     if (destination == null)
+                    {
                         destination = session.RemoteEndPoint;
+                    }
                     BeginSend(session, buf, destination);
                 }
                 else
@@ -347,7 +379,9 @@ namespace Mina.Transport.Socket
             {
                 var req = session.CurrentWriteRequest;
                 if (req != null)
+                {
                     req.Future.Exception = ex;
+                }
                 session.FilterChain.FireExceptionCaught(ex);
                 BeginSend(session);
             }
@@ -380,7 +414,9 @@ namespace Mina.Transport.Socket
             SessionRecycler.Remove(session);
             var support = session.Service as IOServiceSupport;
             if (support != null)
+            {
                 support.FireSessionDestroyed(session);
+            }
         }
 
         /// <inheritdoc/>
@@ -391,27 +427,27 @@ namespace Mina.Transport.Socket
 
         void IOProcessor.Write(IOSession session, IWriteRequest writeRequest)
         {
-            Write((AsyncDatagramSession)session, writeRequest);
+            Write((AsyncDatagramSession) session, writeRequest);
         }
 
         void IOProcessor.Flush(IOSession session)
         {
-            Flush((AsyncDatagramSession)session);
+            Flush((AsyncDatagramSession) session);
         }
 
         void IOProcessor.Add(IOSession session)
         {
-            Add((AsyncDatagramSession)session);
+            Add((AsyncDatagramSession) session);
         }
 
         void IOProcessor.Remove(IOSession session)
         {
-            Remove((AsyncDatagramSession)session);
+            Remove((AsyncDatagramSession) session);
         }
 
         void IOProcessor.UpdateTrafficControl(IOSession session)
         {
-            UpdateTrafficControl((AsyncDatagramSession)session);
+            UpdateTrafficControl((AsyncDatagramSession) session);
         }
 
         #endregion
