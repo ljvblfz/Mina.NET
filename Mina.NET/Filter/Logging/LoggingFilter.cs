@@ -18,7 +18,8 @@ namespace Mina.Filter.Logging
         /// </summary>
         public LoggingFilter()
             : this(typeof(LoggingFilter).Name)
-        { }
+        {
+        }
 
         /// <summary>
         /// Create a new LoggingFilter using a class name
@@ -26,7 +27,8 @@ namespace Mina.Filter.Logging
         /// <param name="type">the cass which name will be used to create the logger</param>
         public LoggingFilter(Type type)
             : this(type.Name)
-        { }
+        {
+        }
 
         /// <summary>
         /// Create a new LoggingFilter using a name
@@ -124,14 +126,14 @@ namespace Mina.Filter.Logging
         /// <inheritdoc/>
         public override void SessionIdle(INextFilter nextFilter, IOSession session, IdleStatus status)
         {
-            Log(SessionIdleLevel, "IDLE"); 
+            Log(SessionIdleLevel, "IDLE");
             base.SessionIdle(nextFilter, session, status);
         }
 
         /// <inheritdoc/>
         public override void SessionClosed(INextFilter nextFilter, IOSession session)
         {
-            Log(SessionClosedLevel, "CLOSED"); 
+            Log(SessionClosedLevel, "CLOSED");
             base.SessionClosed(nextFilter, session);
         }
 
