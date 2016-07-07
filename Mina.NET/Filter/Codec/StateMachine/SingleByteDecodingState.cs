@@ -10,7 +10,9 @@ namespace Mina.Filter.Codec.StateMachine
         public IDecodingState Decode(IOBuffer input, IProtocolDecoderOutput output)
         {
             if (input.HasRemaining)
+            {
                 return FinishDecode(input.Get(), output);
+            }
 
             return this;
         }
