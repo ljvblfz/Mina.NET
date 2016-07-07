@@ -24,7 +24,9 @@ namespace Mina.Transport.Serial
             Processor = service;
             base.Config = new SessionConfigImpl(serialPort);
             if (service.SessionConfig != null)
+            {
                 Config.SetAll(service.SessionConfig);
+            }
             FilterChain = new DefaultIOFilterChain(this);
             SerialPort = serialPort;
             _endpoint = endpoint;
@@ -35,7 +37,9 @@ namespace Mina.Transport.Serial
         void _serialPort_DataReceived(object sender, SerialDataReceivedEventArgs e)
         {
             if (ReadSuspended || e.EventType == SerialData.Eof)
+            {
                 return;
+            }
 
             var bytesToRead = SerialPort.BytesToRead;
             var data = new byte[bytesToRead];
@@ -63,7 +67,7 @@ namespace Mina.Transport.Serial
 
         public override ITransportMetadata TransportMetadata => Metadata;
 
-        public new ISerialSessionConfig Config => (ISerialSessionConfig)base.Config;
+        public new ISerialSessionConfig Config => (ISerialSessionConfig) base.Config;
 
         public SerialPort SerialPort { get; }
 
@@ -87,9 +91,13 @@ namespace Mina.Transport.Serial
         public void Flush()
         {
             if (WriteSuspended)
+            {
                 return;
+            }
             if (Interlocked.CompareExchange(ref _writing, 1, 0) > 0)
+            {
                 return;
+            }
             BeginSend();
         }
 
@@ -118,13 +126,18 @@ namespace Mina.Transport.Serial
             if (buf == null)
             {
                 throw new InvalidOperationException("Don't know how to handle message of type '"
-                            + req.Message.GetType().Name + "'.  Are you missing a protocol encoder?");
+                                                    + req.Message.GetType().Name +
+                                                    "'.  Are you missing a protocol encoder?");
             }
             CurrentWriteRequest = req;
             if (buf.HasRemaining)
+            {
                 BeginSend(buf);
+            }
             else
+            {
                 EndSend(0);
+            }
         }
 
         private void BeginSend(IOBuffer buf)
@@ -146,7 +159,7 @@ namespace Mina.Transport.Serial
 
         private void SendCallback(IAsyncResult ar)
         {
-            var buf = (IOBuffer)ar.AsyncState;
+            var buf = (IOBuffer) ar.AsyncState;
             try
             {
                 SerialPort.BaseStream.EndWrite(ar);
@@ -197,7 +210,9 @@ namespace Mina.Transport.Serial
             }
 
             if (SerialPort.IsOpen)
+            {
                 BeginSend();
+            }
         }
 
         class SessionConfigImpl : IOSessionConfig, ISerialSessionConfig
@@ -215,7 +230,9 @@ namespace Mina.Transport.Serial
             public void SetAll(IOSessionConfig config)
             {
                 if (config == null)
+                {
                     throw new ArgumentNullException(nameof(config));
+                }
                 SetIdleTime(IdleStatus.BothIdle, config.GetIdleTime(IdleStatus.BothIdle));
                 SetIdleTime(IdleStatus.ReaderIdle, config.GetIdleTime(IdleStatus.ReaderIdle));
                 SetIdleTime(IdleStatus.WriterIdle, config.GetIdleTime(IdleStatus.WriterIdle));
