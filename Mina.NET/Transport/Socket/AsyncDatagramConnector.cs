@@ -14,10 +14,11 @@ namespace Mina.Transport.Socket
         /// </summary>
         public AsyncDatagramConnector()
             : base(new DefaultDatagramSessionConfig())
-        { }
+        {
+        }
 
         /// <inheritdoc/>
-        public new IDatagramSessionConfig SessionConfig => (IDatagramSessionConfig)base.SessionConfig;
+        public new IDatagramSessionConfig SessionConfig => (IDatagramSessionConfig) base.SessionConfig;
 
         /// <inheritdoc/>
         public override ITransportMetadata TransportMetadata => AsyncDatagramSession.Metadata;
@@ -40,7 +41,7 @@ namespace Mina.Transport.Socket
 
         private void ConnectCallback(IAsyncResult ar)
         {
-            var connector = (ConnectorContext)ar.AsyncState;
+            var connector = (ConnectorContext) ar.AsyncState;
             try
             {
                 connector.Socket.EndConnect(ar);
@@ -69,10 +70,10 @@ namespace Mina.Transport.Socket
             switch (e.LastOperation)
             {
                 case SocketAsyncOperation.ReceiveFrom:
-                    ((AsyncDatagramSession)e.UserToken).ProcessReceive(e);
+                    ((AsyncDatagramSession) e.UserToken).ProcessReceive(e);
                     break;
                 case SocketAsyncOperation.SendTo:
-                    ((AsyncDatagramSession)e.UserToken).ProcessSend(e);
+                    ((AsyncDatagramSession) e.UserToken).ProcessSend(e);
                     break;
             }
         }
