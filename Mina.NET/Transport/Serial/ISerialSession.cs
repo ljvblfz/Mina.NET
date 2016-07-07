@@ -10,10 +10,12 @@ namespace Mina.Transport.Serial
     {
         /// <inheritdoc/>
         new ISerialSessionConfig Config { get; }
+
         /// <summary>
         /// <seealso cref="System.IO.Ports.SerialPort.RtsEnable"/>
         /// </summary>
         bool RtsEnable { get; set; }
+
         /// <summary>
         /// <seealso cref="System.IO.Ports.SerialPort.DtrEnable"/>
         /// </summary>
