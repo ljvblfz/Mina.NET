@@ -41,7 +41,9 @@ namespace Mina.Filter.KeepAlive
         {
             public static readonly NoopHandler Instance = new NoopHandler();
 
-            private NoopHandler() { }
+            private NoopHandler()
+            {
+            }
 
             public void KeepAliveRequestTimedOut(KeepAliveFilter filter, IOSession session)
             {
@@ -53,13 +55,17 @@ namespace Mina.Filter.KeepAlive
         {
             public static readonly LogHandler Instance = new LogHandler();
 
-            private LogHandler() { }
+            private LogHandler()
+            {
+            }
 
             public void KeepAliveRequestTimedOut(KeepAliveFilter filter, IOSession session)
             {
                 if (log.IsWarnEnabled)
+                {
                     log.WarnFormat("A keep-alive response message was not received within {0} second(s).",
                         filter.RequestTimeout);
+                }
             }
         }
 
@@ -67,12 +73,14 @@ namespace Mina.Filter.KeepAlive
         {
             public static readonly ExceptionHandler Instance = new ExceptionHandler();
 
-            private ExceptionHandler() { }
+            private ExceptionHandler()
+            {
+            }
 
             public void KeepAliveRequestTimedOut(KeepAliveFilter filter, IOSession session)
             {
                 throw new KeepAliveRequestTimeoutException("A keep-alive response message was not received within "
-                   + filter.RequestTimeout + " second(s).");
+                                                           + filter.RequestTimeout + " second(s).");
             }
         }
 
@@ -80,13 +88,18 @@ namespace Mina.Filter.KeepAlive
         {
             public static readonly CloseHandler Instance = new CloseHandler();
 
-            private CloseHandler() { }
+            private CloseHandler()
+            {
+            }
 
             public void KeepAliveRequestTimedOut(KeepAliveFilter filter, IOSession session)
             {
                 if (log.IsWarnEnabled)
-                    log.WarnFormat("Closing the session because a keep-alive response message was not received within {0} second(s).",
+                {
+                    log.WarnFormat(
+                        "Closing the session because a keep-alive response message was not received within {0} second(s).",
                         filter.RequestTimeout);
+                }
                 session.Close(true);
             }
         }
@@ -95,7 +108,9 @@ namespace Mina.Filter.KeepAlive
         {
             public static readonly DeafSpeakerHandler Instance = new DeafSpeakerHandler();
 
-            private DeafSpeakerHandler() { }
+            private DeafSpeakerHandler()
+            {
+            }
 
             public void KeepAliveRequestTimedOut(KeepAliveFilter filter, IOSession session)
             {
