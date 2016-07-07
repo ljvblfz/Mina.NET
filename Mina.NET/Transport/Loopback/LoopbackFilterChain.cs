@@ -28,7 +28,7 @@ namespace Mina.Transport.Loopback
         {
             _flushEnabled = true;
             FlushEvents();
-            FlushPendingDataQueues((LoopbackSession)Session);
+            FlushPendingDataQueues((LoopbackSession) Session);
         }
 
         internal IIOProcessor<LoopbackSession> Processor { get; }
@@ -42,7 +42,9 @@ namespace Mina.Transport.Loopback
         {
             _eventQueue.Enqueue(e);
             if (flushNow)
+            {
                 FlushEvents();
+            }
         }
 
         private void FlushEvents()
@@ -56,7 +58,7 @@ namespace Mina.Transport.Loopback
 
         private void FireEvent(IOEvent e)
         {
-            var session = (LoopbackSession)Session;
+            var session = (LoopbackSession) Session;
             var data = e.Parameter;
             switch (e.EventType)
             {
@@ -85,13 +87,13 @@ namespace Mina.Transport.Loopback
                     }
                     break;
                 case IOEventType.Write:
-                    base.FireFilterWrite((IWriteRequest)data);
+                    base.FireFilterWrite((IWriteRequest) data);
                     break;
                 case IOEventType.MessageSent:
-                    base.FireMessageSent((IWriteRequest)data);
+                    base.FireMessageSent((IWriteRequest) data);
                     break;
                 case IOEventType.ExceptionCaught:
-                    base.FireExceptionCaught((Exception)data);
+                    base.FireExceptionCaught((Exception) data);
                     break;
                 case IOEventType.SessionCreated:
                     Monitor.Enter(session.Lock);
@@ -109,7 +111,7 @@ namespace Mina.Transport.Loopback
                     _sessionOpened = true;
                     break;
                 case IOEventType.SessionIdle:
-                    base.FireSessionIdle((IdleStatus)data);
+                    base.FireSessionIdle((IdleStatus) data);
                     break;
                 case IOEventType.SessionClosed:
                     FlushPendingDataQueues(session);
@@ -208,7 +210,9 @@ namespace Mina.Transport.Loopback
                         try
                         {
                             if (queue.IsEmpty(session))
+                            {
                                 return;
+                            }
 
                             IWriteRequest req;
                             var currentTime = DateTime.Now;
@@ -219,13 +223,17 @@ namespace Mina.Transport.Loopback
                                 session.RemoteSession.FilterChain.FireMessageReceived(GetMessageCopy(m));
                                 var buf = m as IOBuffer;
                                 if (buf != null)
+                                {
                                     session.IncreaseWrittenBytes(buf.Remaining, currentTime);
+                                }
                             }
                         }
                         finally
                         {
                             if (_chain._flushEnabled)
+                            {
                                 _chain.FlushEvents();
+                            }
                         }
                     }
 
@@ -260,7 +268,9 @@ namespace Mina.Transport.Loopback
                     {
                         var support = session.Service as IOServiceSupport;
                         if (support != null)
+                        {
                             support.FireSessionDestroyed(session);
+                        }
                         session.RemoteSession.Close(true);
                     }
                 }
@@ -302,27 +312,27 @@ namespace Mina.Transport.Loopback
 
             void IOProcessor.Write(IOSession session, IWriteRequest writeRequest)
             {
-                Write((LoopbackSession)session, writeRequest);
+                Write((LoopbackSession) session, writeRequest);
             }
 
             void IOProcessor.Flush(IOSession session)
             {
-                Flush((LoopbackSession)session);
+                Flush((LoopbackSession) session);
             }
 
             void IOProcessor.Add(IOSession session)
             {
-                Add((LoopbackSession)session);
+                Add((LoopbackSession) session);
             }
 
             void IOProcessor.Remove(IOSession session)
             {
-                Remove((LoopbackSession)session);
+                Remove((LoopbackSession) session);
             }
 
             void IOProcessor.UpdateTrafficControl(IOSession session)
             {
-                UpdateTrafficControl((LoopbackSession)session);
+                UpdateTrafficControl((LoopbackSession) session);
             }
         }
     }
