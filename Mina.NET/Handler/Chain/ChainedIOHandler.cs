@@ -14,14 +14,17 @@ namespace Mina.Handler.Chain
         /// </summary>
         public ChainedIOHandler()
             : this(new IOHandlerChain())
-        { }
+        {
+        }
 
         /// <summary>
         /// </summary>
         public ChainedIOHandler(IOHandlerChain chain)
         {
             if (chain == null)
+            {
                 throw new ArgumentNullException(nameof(chain));
+            }
             Chain = chain;
         }
 
