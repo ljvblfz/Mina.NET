@@ -21,7 +21,7 @@ namespace Mina.Filter.Stream
         protected readonly AttributeKey CurrentWriteRequest;
 
         protected AbstractStreamWriteFilter()
-        { 
+        {
             CurrentStream = new AttributeKey(GetType(), "stream");
             WriteRequestQueue = new AttributeKey(GetType(), "queue");
             CurrentWriteRequest = new AttributeKey(GetType(), "writeRequest");
@@ -37,7 +37,9 @@ namespace Mina.Filter.Stream
             set
             {
                 if (value < 1)
+                {
                     throw new ArgumentException("WriteBufferSize must be at least 1");
+                }
                 _writeBufferSize = value;
             }
         }
@@ -46,7 +48,9 @@ namespace Mina.Filter.Stream
         public override void OnPreAdd(IOFilterChain parent, string name, INextFilter nextFilter)
         {
             if (parent.Contains(GetType()))
+            {
                 throw new InvalidOperationException("Only one " + GetType().Name + " is permitted.");
+            }
         }
 
         /// <inheritdoc/>
@@ -102,7 +106,7 @@ namespace Mina.Filter.Stream
                 {
                     // EOF
                     session.RemoveAttribute(CurrentStream);
-                    var currentWriteRequest = (IWriteRequest)session.RemoveAttribute(CurrentWriteRequest);
+                    var currentWriteRequest = (IWriteRequest) session.RemoveAttribute(CurrentWriteRequest);
 
                     // Write queued WriteRequests.
                     var queue = RemoveWriteRequestQueue(session);
@@ -140,7 +144,7 @@ namespace Mina.Filter.Stream
 
         private ConcurrentQueue<IWriteRequest> RemoveWriteRequestQueue(IOSession session)
         {
-            return (ConcurrentQueue<IWriteRequest>)session.RemoveAttribute(WriteRequestQueue);
+            return (ConcurrentQueue<IWriteRequest>) session.RemoveAttribute(WriteRequestQueue);
         }
     }
 }
