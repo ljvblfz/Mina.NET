@@ -12,8 +12,9 @@ namespace Mina.Filter.Codec.Demux
     public class DemuxingProtocolEncoder : IProtocolEncoder
     {
         private readonly AttributeKey _state;
+
         private readonly Dictionary<Type, IMessageEncoderFactory> _type2EncoderFactory
-             = new Dictionary<Type, IMessageEncoderFactory>();
+            = new Dictionary<Type, IMessageEncoderFactory>();
 
         public DemuxingProtocolEncoder()
         {
@@ -25,7 +26,9 @@ namespace Mina.Filter.Codec.Demux
             var encoderType = typeof(TEncoder);
 
             if (encoderType.GetConstructor(DemuxingProtocolCodecFactory.EmptyParams) == null)
+            {
                 throw new ArgumentException("The specified class doesn't have a public default constructor.");
+            }
 
             AddMessageEncoder<TMessage>(new DefaultConstructorMessageEncoderFactory<TMessage>(encoderType));
         }
@@ -38,14 +41,18 @@ namespace Mina.Filter.Codec.Demux
         public void AddMessageEncoder<TMessage>(IMessageEncoderFactory<TMessage> factory)
         {
             if (factory == null)
+            {
                 throw new ArgumentNullException(nameof(factory));
+            }
 
             var messageType = typeof(TMessage);
             lock (_type2EncoderFactory)
             {
                 if (_type2EncoderFactory.ContainsKey(messageType))
+                {
                     throw new InvalidOperationException("The specified message type (" + messageType.Name
-                        + ") is registered already.");
+                                                        + ") is registered already.");
+                }
                 _type2EncoderFactory[messageType] = factory;
             }
         }
@@ -55,7 +62,9 @@ namespace Mina.Filter.Codec.Demux
             var state = GetState(session);
             var encoder = FindEncoder(state, message.GetType());
             if (encoder == null)
+            {
                 throw new UnknownMessageTypeException("No message encoder found for message: " + message);
+            }
             encoder.Encode(session, message, output);
         }
 
@@ -70,7 +79,7 @@ namespace Mina.Filter.Codec.Demux
             if (state == null)
             {
                 state = new State(_type2EncoderFactory);
-                var oldState = (State)session.SetAttributeIfAbsent(_state, state);
+                var oldState = (State) session.SetAttributeIfAbsent(_state, state);
                 if (oldState != null)
                 {
                     state = oldState;
@@ -89,11 +98,15 @@ namespace Mina.Filter.Codec.Demux
             IMessageEncoder encoder = null;
 
             if (triedClasses != null && triedClasses.Contains(type))
+            {
                 return null;
+            }
 
             // Try the cache first.
             if (state.FindEncoderCache.TryGetValue(type, out encoder))
+            {
                 return encoder;
+            }
 
             // Try the registered encoders for an immediate match.
             state.Type2Encoder.TryGetValue(type, out encoder);
@@ -102,14 +115,18 @@ namespace Mina.Filter.Codec.Demux
             {
                 // No immediate match could be found. Search the type's interfaces.
                 if (triedClasses == null)
+                {
                     triedClasses = new HashSet<Type>();
+                }
                 triedClasses.Add(type);
 
                 foreach (var ifc in type.GetInterfaces())
                 {
                     encoder = FindEncoder(state, ifc, triedClasses);
                     if (encoder != null)
+                    {
                         break;
+                    }
                 }
             }
 
@@ -118,7 +135,9 @@ namespace Mina.Filter.Codec.Demux
                 // No match in type's interfaces could be found. Search the superclass.
                 var baseType = type.BaseType;
                 if (baseType != null)
+                {
                     encoder = FindEncoder(state, baseType);
+                }
             }
 
             /*
@@ -138,6 +157,7 @@ namespace Mina.Filter.Codec.Demux
         {
             public readonly ConcurrentDictionary<Type, IMessageEncoder> FindEncoderCache
                 = new ConcurrentDictionary<Type, IMessageEncoder>();
+
             public ConcurrentDictionary<Type, IMessageEncoder> Type2Encoder
                 = new ConcurrentDictionary<Type, IMessageEncoder>();
 
@@ -157,7 +177,9 @@ namespace Mina.Filter.Codec.Demux
             public SingletonMessageEncoderFactory(IMessageEncoder<T> encoder)
             {
                 if (encoder == null)
+                {
                     throw new ArgumentNullException(nameof(encoder));
+                }
                 this._encoder = encoder;
             }
 
@@ -183,7 +205,7 @@ namespace Mina.Filter.Codec.Demux
 
             public IMessageEncoder<T> GetEncoder()
             {
-                return (IMessageEncoder<T>)Activator.CreateInstance(_encoderType);
+                return (IMessageEncoder<T>) Activator.CreateInstance(_encoderType);
             }
 
             IMessageEncoder IMessageEncoderFactory.GetEncoder()
