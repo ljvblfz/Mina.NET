@@ -8,26 +8,46 @@ namespace Mina.Transport.Socket
         {
             var cfg = config as ISocketSessionConfig;
             if (cfg == null)
+            {
                 return;
+            }
 
             if (cfg.ReceiveBufferSize.HasValue)
+            {
                 ReceiveBufferSize = cfg.ReceiveBufferSize;
+            }
             if (cfg.SendBufferSize.HasValue)
+            {
                 SendBufferSize = cfg.SendBufferSize;
+            }
             if (cfg.ReuseAddress.HasValue)
+            {
                 ReuseAddress = cfg.ReuseAddress;
+            }
             if (cfg.TrafficClass.HasValue)
+            {
                 TrafficClass = cfg.TrafficClass;
+            }
             if (cfg.ExclusiveAddressUse.HasValue)
+            {
                 ExclusiveAddressUse = cfg.ExclusiveAddressUse;
+            }
             if (cfg.KeepAlive.HasValue)
+            {
                 KeepAlive = cfg.KeepAlive;
+            }
             if (cfg.OobInline.HasValue)
+            {
                 OobInline = cfg.OobInline;
+            }
             if (cfg.NoDelay.HasValue)
+            {
                 NoDelay = cfg.NoDelay;
+            }
             if (cfg.SoLinger.HasValue)
+            {
                 SoLinger = cfg.SoLinger;
+            }
         }
 
         public abstract int? ReceiveBufferSize { get; set; }
