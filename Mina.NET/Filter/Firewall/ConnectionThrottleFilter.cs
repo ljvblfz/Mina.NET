@@ -24,7 +24,8 @@ namespace Mina.Filter.Firewall
         /// </summary>
         public ConnectionThrottleFilter()
             : this(DefaultTime)
-        { }
+        {
+        }
 
         /// <summary>
         /// Constructor that takes in a specified wait time.
@@ -46,7 +47,9 @@ namespace Mina.Filter.Firewall
             if (!IsConnectionOk(session))
             {
                 if (Log.IsWarnEnabled)
+                {
                     Log.Warn("Connections coming in too fast; closing.");
+                }
                 session.Close(true);
             }
             base.SessionCreated(nextFilter, session);
@@ -69,7 +72,9 @@ namespace Mina.Filter.Firewall
                 _clients.AddOrUpdate(addr, now, (k, v) =>
                 {
                     if (Log.IsDebugEnabled)
+                    {
                         Log.Debug("This is not a new client");
+                    }
                     lastConnTime = v;
                     return now;
                 });
@@ -81,7 +86,9 @@ namespace Mina.Filter.Firewall
                     if ((now - lastConnTime.Value).TotalMilliseconds < AllowedInterval)
                     {
                         if (Log.IsWarnEnabled)
+                        {
                             Log.Warn("Session connection interval too short");
+                        }
                         return false;
                     }
                 }
