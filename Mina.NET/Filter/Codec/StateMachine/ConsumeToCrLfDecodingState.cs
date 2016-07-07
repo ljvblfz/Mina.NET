@@ -11,11 +11,13 @@ namespace Mina.Filter.Codec.StateMachine
         /// <summary>
         /// Carriage return character
         /// </summary>
-        private static readonly byte Cr = 13;
+        private const byte CR = 13;
+
         /// <summary>
         /// Line feed character
         /// </summary>
-        private static readonly byte Lf = 10;
+        private const byte LF = 10;
+
         private bool _lastIsCr;
         private IOBuffer _buffer;
 
@@ -28,13 +30,13 @@ namespace Mina.Filter.Codec.StateMachine
             for (var i = beginPos; i < limit; i++)
             {
                 var b = input.Get(i);
-                if (b == Cr)
+                if (b == CR)
                 {
                     _lastIsCr = true;
                 }
                 else
                 {
-                    if (b == Lf && _lastIsCr)
+                    if (b == LF && _lastIsCr)
                     {
                         terminatorPos = i;
                         break;
