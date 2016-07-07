@@ -16,14 +16,17 @@ namespace Mina.Handler.Demux
         /// <summary>
         /// </summary>
         public ExceptionHandler()
-        { }
+        {
+        }
 
         /// <summary>
         /// </summary>
         public ExceptionHandler(Action<IOSession, TE> act)
         {
             if (act == null)
+            {
                 throw new ArgumentNullException(nameof(act));
+            }
             _act = act;
         }
 
@@ -31,18 +34,22 @@ namespace Mina.Handler.Demux
         public virtual void ExceptionCaught(IOSession session, TE cause)
         {
             if (_act != null)
+            {
                 _act(session, cause);
+            }
         }
 
         void IExceptionHandler.ExceptionCaught(IOSession session, Exception cause)
         {
-            ExceptionCaught(session, (TE)cause);
+            ExceptionCaught(session, (TE) cause);
         }
     }
 
     class NoopExceptionHandler : IExceptionHandler<Exception>
     {
-        internal NoopExceptionHandler() { }
+        internal NoopExceptionHandler()
+        {
+        }
 
         public void ExceptionCaught(IOSession session, Exception cause)
         {
@@ -52,7 +59,9 @@ namespace Mina.Handler.Demux
 
     class CloseExceptionHandler : IExceptionHandler<Exception>
     {
-        internal CloseExceptionHandler() { }
+        internal CloseExceptionHandler()
+        {
+        }
 
         public void ExceptionCaught(IOSession session, Exception cause)
         {
