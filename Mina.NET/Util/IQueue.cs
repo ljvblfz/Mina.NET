@@ -12,14 +12,17 @@ namespace Mina.Util
         /// Checks if this queue is empty.
         /// </summary>
         bool IsEmpty { get; }
+
         /// <summary>
         /// Enqueue an item.
         /// </summary>
         void Enqueue(T item);
+
         /// <summary>
         /// Dequeue an item.
         /// </summary>
         T Dequeue();
+
         /// <summary>
         /// Gets the count of items in this queue.
         /// </summary>
