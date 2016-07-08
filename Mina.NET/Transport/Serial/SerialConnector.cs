@@ -11,9 +11,9 @@ using Mina.Core.Write;
 namespace Mina.Transport.Serial
 {
     /// <summary>
-    /// <see cref="IoConnector"/> for serial communication transport.
+    /// <see cref="IOConnector"/> for serial communication transport.
     /// </summary>
-    public class SerialConnector : AbstractIoConnector, IoProcessor<SerialSession>
+    public class SerialConnector : AbstractIOConnector, IIOProcessor<SerialSession>
     {
         private readonly IdleStatusChecker _idleStatusChecker;
 
@@ -27,37 +27,42 @@ namespace Mina.Transport.Serial
         }
 
         /// <inheritdoc/>
-        public new ISerialSessionConfig SessionConfig
-        {
-            get { return (ISerialSessionConfig)base.SessionConfig; }
-        }
+        public new ISerialSessionConfig SessionConfig => (ISerialSessionConfig) base.SessionConfig;
 
         /// <inheritdoc/>
-        public override ITransportMetadata TransportMetadata
-        {
-            get { return SerialSession.Metadata; }
-        }
+        public override ITransportMetadata TransportMetadata => SerialSession.Metadata;
 
         /// <inheritdoc/>
-        protected override IConnectFuture Connect0(EndPoint remoteEP, EndPoint localEP, Action<IoSession, IConnectFuture> sessionInitializer)
+        protected override IConnectFuture Connect0(EndPoint remoteEp, EndPoint localEp,
+            Action<IOSession, IConnectFuture> sessionInitializer)
         {
-            ISerialSessionConfig config = (ISerialSessionConfig)SessionConfig;
-            SerialEndPoint sep = (SerialEndPoint)remoteEP;
+            var config = SessionConfig;
+            var sep = (SerialEndPoint) remoteEp;
 
-            SerialPort serialPort = new SerialPort(sep.PortName, sep.BaudRate, sep.Parity, sep.DataBits, sep.StopBits);
+            var serialPort = new SerialPort(sep.PortName, sep.BaudRate, sep.Parity, sep.DataBits, sep.StopBits);
             if (config.ReadBufferSize > 0)
+            {
                 serialPort.ReadBufferSize = config.ReadBufferSize;
+            }
             if (config.ReadTimeout > 0)
+            {
                 serialPort.ReadTimeout = config.ReadTimeout * 1000;
+            }
             if (config.WriteBufferSize > 0)
+            {
                 serialPort.WriteBufferSize = config.WriteBufferSize;
+            }
             if (config.WriteTimeout > 0)
+            {
                 serialPort.WriteTimeout = config.WriteTimeout * 1000;
+            }
             if (config.ReceivedBytesThreshold > 0)
+            {
                 serialPort.ReceivedBytesThreshold = config.ReceivedBytesThreshold;
+            }
 
             IConnectFuture future = new DefaultConnectFuture();
-            SerialSession session = new SerialSession(this, sep, serialPort);
+            var session = new SerialSession(this, sep, serialPort);
             InitSession(session, future, sessionInitializer);
 
             try
@@ -78,7 +83,7 @@ namespace Mina.Transport.Serial
         /// Disposes.
         /// </summary>
         /// <param name="disposing"></param>
-        protected override void Dispose(Boolean disposing)
+        protected override void Dispose(bool disposing)
         {
             if (disposing)
             {
@@ -95,19 +100,23 @@ namespace Mina.Transport.Serial
             session.Service.FilterChainBuilder.BuildFilterChain(session.FilterChain);
 
             // Propagate the SESSION_CREATED event up to the chain
-            IoServiceSupport serviceSupport = session.Service as IoServiceSupport;
+            var serviceSupport = session.Service as IOServiceSupport;
             if (serviceSupport != null)
+            {
                 serviceSupport.FireSessionCreated(session);
+            }
 
             session.Start();
         }
 
         private void Write(SerialSession session, IWriteRequest writeRequest)
         {
-            IWriteRequestQueue writeRequestQueue = session.WriteRequestQueue;
+            var writeRequestQueue = session.WriteRequestQueue;
             writeRequestQueue.Offer(session, writeRequest);
             if (!session.WriteSuspended)
+            {
                 Flush(session);
+            }
         }
 
         private void Flush(SerialSession session)
@@ -118,65 +127,69 @@ namespace Mina.Transport.Serial
         private void Remove(SerialSession session)
         {
             session.SerialPort.Close();
-            IoServiceSupport support = session.Service as IoServiceSupport;
+            var support = session.Service as IOServiceSupport;
             if (support != null)
+            {
                 support.FireSessionDestroyed(session);
+            }
         }
 
         private void UpdateTrafficControl(SerialSession session)
         {
             if (!session.WriteSuspended)
+            {
                 Flush(session);
+            }
         }
 
-        void IoProcessor<SerialSession>.Add(SerialSession session)
+        void IIOProcessor<SerialSession>.Add(SerialSession session)
         {
             Add(session);
         }
 
-        void IoProcessor<SerialSession>.Write(SerialSession session, IWriteRequest writeRequest)
+        void IIOProcessor<SerialSession>.Write(SerialSession session, IWriteRequest writeRequest)
         {
             Write(session, writeRequest);
         }
 
-        void IoProcessor<SerialSession>.Flush(SerialSession session)
+        void IIOProcessor<SerialSession>.Flush(SerialSession session)
         {
             Flush(session);
         }
 
-        void IoProcessor<SerialSession>.Remove(SerialSession session)
+        void IIOProcessor<SerialSession>.Remove(SerialSession session)
         {
             Remove(session);
         }
 
-        void IoProcessor<SerialSession>.UpdateTrafficControl(SerialSession session)
+        void IIOProcessor<SerialSession>.UpdateTrafficControl(SerialSession session)
         {
             UpdateTrafficControl(session);
         }
 
-        void IoProcessor.Add(IoSession session)
+        void IOProcessor.Add(IOSession session)
         {
-            Add((SerialSession)session);
+            Add((SerialSession) session);
         }
 
-        void IoProcessor.Write(IoSession session, IWriteRequest writeRequest)
+        void IOProcessor.Write(IOSession session, IWriteRequest writeRequest)
         {
-            Write((SerialSession)session, writeRequest);
+            Write((SerialSession) session, writeRequest);
         }
 
-        void IoProcessor.Flush(IoSession session)
+        void IOProcessor.Flush(IOSession session)
         {
-            Flush((SerialSession)session);
+            Flush((SerialSession) session);
         }
 
-        void IoProcessor.Remove(IoSession session)
+        void IOProcessor.Remove(IOSession session)
         {
-            Remove((SerialSession)session);
+            Remove((SerialSession) session);
         }
 
-        void IoProcessor.UpdateTrafficControl(IoSession session)
+        void IOProcessor.UpdateTrafficControl(IOSession session)
         {
-            UpdateTrafficControl((SerialSession)session);
+            UpdateTrafficControl((SerialSession) session);
         }
 
         #endregion

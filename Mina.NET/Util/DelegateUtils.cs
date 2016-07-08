@@ -11,15 +11,15 @@ namespace Mina.Util
         /// Safely invokes an <see cref="EventHandler"/>.
         /// All catched exceptions will be forwarded to <see cref="ExceptionMonitor"/>.
         /// </summary>
-        public static void SafeInvoke(EventHandler handler, Object sender)
+        public static void SafeInvoke(EventHandler handler, object sender)
         {
             if (handler != null)
             {
-                foreach (Delegate d in handler.GetInvocationList())
+                foreach (var d in handler.GetInvocationList())
                 {
                     try
                     {
-                        ((EventHandler)d)(sender, EventArgs.Empty);
+                        ((EventHandler) d)(sender, EventArgs.Empty);
                     }
                     catch (Exception e)
                     {
@@ -33,16 +33,16 @@ namespace Mina.Util
         /// Safely invokes an <see cref="EventHandler&lt;TEventArgs&gt;"/>.
         /// All catched exceptions will be forwarded to <see cref="ExceptionMonitor"/>.
         /// </summary>
-        public static void SafeInvoke<TEventArgs>(EventHandler<TEventArgs> handler, Object sender, TEventArgs e)
+        public static void SafeInvoke<TEventArgs>(EventHandler<TEventArgs> handler, object sender, TEventArgs e)
             where TEventArgs : EventArgs
         {
             if (handler != null)
             {
-                foreach (Delegate d in handler.GetInvocationList())
+                foreach (var d in handler.GetInvocationList())
                 {
                     try
                     {
-                        ((EventHandler<TEventArgs>)d)(sender, e);
+                        ((EventHandler<TEventArgs>) d)(sender, e);
                     }
                     catch (Exception ex)
                     {
@@ -60,11 +60,11 @@ namespace Mina.Util
         {
             if (act != null)
             {
-                foreach (Delegate d in act.GetInvocationList())
+                foreach (var d in act.GetInvocationList())
                 {
                     try
                     {
-                        ((Action)d)();
+                        ((Action) d)();
                     }
                     catch (Exception e)
                     {
@@ -82,11 +82,11 @@ namespace Mina.Util
         {
             if (act != null)
             {
-                foreach (Delegate d in act.GetInvocationList())
+                foreach (var d in act.GetInvocationList())
                 {
                     try
                     {
-                        ((Action<T>)d)(obj);
+                        ((Action<T>) d)(obj);
                     }
                     catch (Exception e)
                     {
@@ -104,11 +104,11 @@ namespace Mina.Util
         {
             if (act != null)
             {
-                foreach (Delegate d in act.GetInvocationList())
+                foreach (var d in act.GetInvocationList())
                 {
                     try
                     {
-                        ((Action<T1, T2>)d)(obj1, obj2);
+                        ((Action<T1, T2>) d)(obj1, obj2);
                     }
                     catch (Exception e)
                     {
@@ -126,11 +126,11 @@ namespace Mina.Util
         {
             if (act != null)
             {
-                foreach (Delegate d in act.GetInvocationList())
+                foreach (var d in act.GetInvocationList())
                 {
                     try
                     {
-                        ((Action<T1, T2, T3>)d)(obj1, obj2, obj3);
+                        ((Action<T1, T2, T3>) d)(obj1, obj2, obj3);
                     }
                     catch (Exception e)
                     {

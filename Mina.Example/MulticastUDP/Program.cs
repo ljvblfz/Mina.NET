@@ -2,7 +2,6 @@
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
-using Mina.Core.Session;
 using Mina.Filter.Codec;
 using Mina.Filter.Codec.TextLine;
 using Mina.Transport.Socket;
@@ -16,8 +15,8 @@ namespace MulticastUDP
     /// </summary>
     class Program
     {
-        static IPAddress mcastAddress;
-        static int mcastPort;
+        static IPAddress _mcastAddress;
+        static int _mcastPort;
 
         static void Main(string[] args)
         {
@@ -25,8 +24,8 @@ namespace MulticastUDP
             // Both address and port are selected from the allowed sets as 
             // defined in the related RFC documents. These are the same  
             // as the values used by the sender.
-            mcastAddress = IPAddress.Parse("224.168.100.2");
-            mcastPort = 11000;
+            _mcastAddress = IPAddress.Parse("224.168.100.2");
+            _mcastPort = 11000;
 
             StartMulticastAcceptor();
             StartMulticastConnector();
@@ -36,15 +35,15 @@ namespace MulticastUDP
 
         static void StartMulticastAcceptor()
         {
-            IPAddress localIPAddr = IPAddress.Any;
-            AsyncDatagramAcceptor acceptor = new AsyncDatagramAcceptor();
+            var localIpAddr = IPAddress.Any;
+            var acceptor = new AsyncDatagramAcceptor();
 
             acceptor.FilterChain.AddLast("codec", new ProtocolCodecFilter(new TextLineCodecFactory(Encoding.UTF8)));
 
             // Define a MulticastOption object specifying the multicast group  
             // address and the local IPAddress. 
             // The multicast group address is the same as the address used by the client.
-            MulticastOption mcastOption = new MulticastOption(mcastAddress, localIPAddr);
+            var mcastOption = new MulticastOption(_mcastAddress, localIpAddr);
             acceptor.SessionConfig.MulticastOption = mcastOption;
 
             acceptor.SessionOpened += (s, e) =>
@@ -56,7 +55,7 @@ namespace MulticastUDP
                 Console.WriteLine("Received from {0}: {1}", e.Session.RemoteEndPoint, e.Message);
             };
 
-            acceptor.Bind(new IPEndPoint(localIPAddr, mcastPort));
+            acceptor.Bind(new IPEndPoint(localIpAddr, _mcastPort));
 
             Console.WriteLine("Acceptor: current multicast group is: " + mcastOption.Group);
             Console.WriteLine("Acceptor: current multicast local address is: " + mcastOption.LocalAddress);
@@ -65,30 +64,30 @@ namespace MulticastUDP
 
         static void StartMulticastConnector()
         {
-            IPAddress localIPAddr = IPAddress.Any;
-            IPEndPoint mcastEP = new IPEndPoint(mcastAddress, mcastPort);
-            AsyncDatagramConnector connector = new AsyncDatagramConnector();
+            var localIpAddr = IPAddress.Any;
+            var mcastEp = new IPEndPoint(_mcastAddress, _mcastPort);
+            var connector = new AsyncDatagramConnector();
 
             connector.FilterChain.AddLast("codec", new ProtocolCodecFilter(new TextLineCodecFactory(Encoding.UTF8)));
 
             // Set the local IP address used by the listener and the sender to 
             // exchange multicast messages. 
-            connector.DefaultLocalEndPoint = new IPEndPoint(localIPAddr, 0);
+            connector.DefaultLocalEndPoint = new IPEndPoint(localIpAddr, 0);
 
             // Define a MulticastOption object specifying the multicast group  
             // address and the local IP address. 
             // The multicast group address is the same as the address used by the listener.
-            MulticastOption mcastOption = new MulticastOption(mcastAddress, localIPAddr);
+            var mcastOption = new MulticastOption(_mcastAddress, localIpAddr);
             connector.SessionConfig.MulticastOption = mcastOption;
 
             // Call Connect() to force binding to the local IP address,
             // and get the associated multicast session.
-            IoSession session = connector.Connect(mcastEP).Await().Session;
+            var session = connector.Connect(mcastEp).Await().Session;
 
             // Send multicast packets to the multicast endpoint.
-            session.Write("hello 1", mcastEP);
-            session.Write("hello 2", mcastEP);
-            session.Write("hello 3", mcastEP);
+            session.Write("hello 1", mcastEp);
+            session.Write("hello 2", mcastEp);
+            session.Write("hello 3", mcastEp);
         }
     }
 }

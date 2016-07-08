@@ -7,127 +7,109 @@ using Mina.Core.Buffer;
 using Mina.Core.Filterchain;
 using Mina.Core.Service;
 using Mina.Core.Session;
-using Mina.Core.Write;
-using Mina.Util;
 
 namespace Mina.Transport.Serial
 {
-    class SerialSession : AbstractIoSession, ISerialSession
+    class SerialSession : AbstractIOSession, ISerialSession
     {
         public static readonly ITransportMetadata Metadata
             = new DefaultTransportMetadata("mina", "serial", false, true, typeof(SerialEndPoint));
 
-        private readonly IoProcessor _processor;
         private readonly SerialEndPoint _endpoint;
-        private readonly SerialPort _serialPort;
-        private readonly IoFilterChain _filterChain;
-        private Int32 _writing;
+        private int _writing;
 
         public SerialSession(SerialConnector service, SerialEndPoint endpoint, SerialPort serialPort)
             : base(service)
         {
-            _processor = service;
+            Processor = service;
             base.Config = new SessionConfigImpl(serialPort);
             if (service.SessionConfig != null)
+            {
                 Config.SetAll(service.SessionConfig);
-            _filterChain = new DefaultIoFilterChain(this);
-            _serialPort = serialPort;
+            }
+            FilterChain = new DefaultIOFilterChain(this);
+            SerialPort = serialPort;
             _endpoint = endpoint;
 
-            _serialPort.DataReceived += new SerialDataReceivedEventHandler(_serialPort_DataReceived);
+            SerialPort.DataReceived += _serialPort_DataReceived;
         }
 
         void _serialPort_DataReceived(object sender, SerialDataReceivedEventArgs e)
         {
             if (ReadSuspended || e.EventType == SerialData.Eof)
+            {
                 return;
+            }
 
-            Int32 bytesToRead = _serialPort.BytesToRead;
-            Byte[] data = new Byte[bytesToRead];
-            Int32 read = _serialPort.Read(data, 0, bytesToRead);
+            var bytesToRead = SerialPort.BytesToRead;
+            var data = new byte[bytesToRead];
+            var read = SerialPort.Read(data, 0, bytesToRead);
             if (read > 0)
             {
                 try
                 {
-                    FilterChain.FireMessageReceived(IoBuffer.Wrap(data, 0, read));
+                    FilterChain.FireMessageReceived(IOBuffer.Wrap(data, 0, read));
                 }
                 catch (Exception ex)
                 {
-                    this.FilterChain.FireExceptionCaught(ex);
+                    FilterChain.FireExceptionCaught(ex);
                 }
             }
         }
 
-        public override IoProcessor Processor
+        public override IOProcessor Processor { get; }
+
+        public override IOFilterChain FilterChain { get; }
+
+        public override EndPoint LocalEndPoint => null;
+
+        public override EndPoint RemoteEndPoint => _endpoint;
+
+        public override ITransportMetadata TransportMetadata => Metadata;
+
+        public new ISerialSessionConfig Config => (ISerialSessionConfig) base.Config;
+
+        public SerialPort SerialPort { get; }
+
+        public bool RtsEnable
         {
-            get { return _processor; }
+            get { return SerialPort.RtsEnable; }
+            set { SerialPort.RtsEnable = value; }
         }
 
-        public override IoFilterChain FilterChain
+        public bool DtrEnable
         {
-            get { return _filterChain; }
-        }
-
-        public override EndPoint LocalEndPoint
-        {
-            get { return null; /* not applicable */ }
-        }
-
-        public override EndPoint RemoteEndPoint
-        {
-            get { return _endpoint; }
-        }
-
-        public override ITransportMetadata TransportMetadata
-        {
-            get { return Metadata; }
-        }
-
-        public new ISerialSessionConfig Config
-        {
-            get { return (ISerialSessionConfig)base.Config; }
-        }
-
-        public SerialPort SerialPort
-        {
-            get { return _serialPort; }
-        }
-
-        public Boolean RtsEnable
-        {
-            get { return _serialPort.RtsEnable; }
-            set { _serialPort.RtsEnable = value; }
-        }
-
-        public Boolean DtrEnable
-        {
-            get { return _serialPort.DtrEnable; }
-            set { _serialPort.DtrEnable = value; }
+            get { return SerialPort.DtrEnable; }
+            set { SerialPort.DtrEnable = value; }
         }
 
         public void Start()
         {
-            _serialPort.Open();
+            SerialPort.Open();
         }
 
         public void Flush()
         {
             if (WriteSuspended)
+            {
                 return;
+            }
             if (Interlocked.CompareExchange(ref _writing, 1, 0) > 0)
+            {
                 return;
+            }
             BeginSend();
         }
 
-        protected override void Dispose(Boolean disposing)
+        protected override void Dispose(bool disposing)
         {
             base.Dispose(disposing);
-            _serialPort.Dispose();
+            SerialPort.Dispose();
         }
 
         private void BeginSend()
         {
-            IWriteRequest req = CurrentWriteRequest;
+            var req = CurrentWriteRequest;
             if (req == null)
             {
                 req = WriteRequestQueue.Poll(this);
@@ -139,29 +121,31 @@ namespace Mina.Transport.Serial
                 }
             }
 
-            IoBuffer buf = req.Message as IoBuffer;
+            var buf = req.Message as IOBuffer;
 
             if (buf == null)
             {
                 throw new InvalidOperationException("Don't know how to handle message of type '"
-                            + req.Message.GetType().Name + "'.  Are you missing a protocol encoder?");
+                                                    + req.Message.GetType().Name +
+                                                    "'.  Are you missing a protocol encoder?");
+            }
+            CurrentWriteRequest = req;
+            if (buf.HasRemaining)
+            {
+                BeginSend(buf);
             }
             else
             {
-                CurrentWriteRequest = req;
-                if (buf.HasRemaining)
-                    BeginSend(buf);
-                else
-                    EndSend(0);
+                EndSend(0);
             }
         }
 
-        private void BeginSend(IoBuffer buf)
+        private void BeginSend(IOBuffer buf)
         {
-            ArraySegment<Byte> array = buf.GetRemaining();
+            var array = buf.GetRemaining();
             try
             {
-                _serialPort.BaseStream.BeginWrite(array.Array, array.Offset, array.Count, SendCallback, buf);
+                SerialPort.BaseStream.BeginWrite(array.Array, array.Offset, array.Count, SendCallback, buf);
             }
             catch (ObjectDisposedException)
             {
@@ -169,20 +153,20 @@ namespace Mina.Transport.Serial
             }
             catch (Exception ex)
             {
-                this.FilterChain.FireExceptionCaught(ex);
+                FilterChain.FireExceptionCaught(ex);
             }
         }
 
         private void SendCallback(IAsyncResult ar)
         {
-            IoBuffer buf = (IoBuffer)ar.AsyncState;
+            var buf = (IOBuffer) ar.AsyncState;
             try
             {
-                _serialPort.BaseStream.EndWrite(ar);
+                SerialPort.BaseStream.EndWrite(ar);
             }
             catch (Exception ex)
             {
-                this.FilterChain.FireExceptionCaught(ex);
+                FilterChain.FireExceptionCaught(ex);
 
                 // closed
                 Processor.Remove(this);
@@ -190,34 +174,34 @@ namespace Mina.Transport.Serial
                 return;
             }
 
-            Int32 written = buf.Remaining;
+            var written = buf.Remaining;
             buf.Position += written;
             EndSend(written);
         }
 
-        private void EndSend(Int32 bytesTransferred)
+        private void EndSend(int bytesTransferred)
         {
-            this.IncreaseWrittenBytes(bytesTransferred, DateTime.Now);
+            IncreaseWrittenBytes(bytesTransferred, DateTime.Now);
 
-            IWriteRequest req = CurrentWriteRequest;
+            var req = CurrentWriteRequest;
             if (req != null)
             {
-                IoBuffer buf = req.Message as IoBuffer;
+                var buf = req.Message as IOBuffer;
                 if (!buf.HasRemaining)
                 {
                     // Buffer has been sent, clear the current request.
-                    Int32 pos = buf.Position;
+                    var pos = buf.Position;
                     buf.Reset();
 
                     CurrentWriteRequest = null;
 
                     try
                     {
-                        this.FilterChain.FireMessageSent(req);
+                        FilterChain.FireMessageSent(req);
                     }
                     catch (Exception ex)
                     {
-                        this.FilterChain.FireExceptionCaught(ex);
+                        FilterChain.FireExceptionCaught(ex);
                     }
 
                     // And set it back to its position
@@ -225,27 +209,30 @@ namespace Mina.Transport.Serial
                 }
             }
 
-            if (_serialPort.IsOpen)
+            if (SerialPort.IsOpen)
+            {
                 BeginSend();
+            }
         }
 
-        class SessionConfigImpl : IoSessionConfig, ISerialSessionConfig
+        class SessionConfigImpl : IOSessionConfig, ISerialSessionConfig
         {
             private readonly SerialPort _serialPort;
-            private Int32 _idleTimeForRead;
-            private Int32 _idleTimeForWrite;
-            private Int32 _idleTimeForBoth;
-            private Int32 _throughputCalculationInterval = 3;
+            private int _idleTimeForRead;
+            private int _idleTimeForWrite;
+            private int _idleTimeForBoth;
 
             public SessionConfigImpl(SerialPort serialPort)
             {
                 _serialPort = serialPort;
             }
 
-            public void SetAll(IoSessionConfig config)
+            public void SetAll(IOSessionConfig config)
             {
                 if (config == null)
-                    throw new ArgumentNullException("config");
+                {
+                    throw new ArgumentNullException(nameof(config));
+                }
                 SetIdleTime(IdleStatus.BothIdle, config.GetIdleTime(IdleStatus.BothIdle));
                 SetIdleTime(IdleStatus.ReaderIdle, config.GetIdleTime(IdleStatus.ReaderIdle));
                 SetIdleTime(IdleStatus.WriterIdle, config.GetIdleTime(IdleStatus.WriterIdle));
@@ -254,71 +241,61 @@ namespace Mina.Transport.Serial
                 // other properties will be set in SerialConnector.Connect()
             }
 
-            public Int32 ReadTimeout
+            public int ReadTimeout
             {
                 get { return _serialPort.ReadTimeout; }
                 set { _serialPort.ReadTimeout = value; }
             }
 
-            public Int32 ReadBufferSize
+            public int ReadBufferSize
             {
                 get { return _serialPort.ReadBufferSize; }
                 set { _serialPort.ReadBufferSize = value; }
             }
 
-            public Int32 WriteTimeout
+            public int WriteTimeout
             {
                 get { return _serialPort.WriteTimeout; }
                 set { _serialPort.WriteTimeout = value; }
             }
 
-            public Int64 WriteTimeoutInMillis
-            {
-                get { return _serialPort.WriteTimeout * 1000L; }
-            }
+            public long WriteTimeoutInMillis => _serialPort.WriteTimeout * 1000L;
 
-            public Int32 WriteBufferSize
+            public int WriteBufferSize
             {
                 get { return _serialPort.WriteBufferSize; }
                 set { _serialPort.WriteBufferSize = value; }
             }
 
-            public Int32 ReceivedBytesThreshold
+            public int ReceivedBytesThreshold
             {
                 get { return _serialPort.ReceivedBytesThreshold; }
                 set { _serialPort.ReceivedBytesThreshold = value; }
             }
 
-            public Int32 ThroughputCalculationInterval
-            {
-                get { return _throughputCalculationInterval; }
-                set { _throughputCalculationInterval = value; }
-            }
+            public int ThroughputCalculationInterval { get; set; } = 3;
 
-            public Int64 ThroughputCalculationIntervalInMillis
-            {
-                get { return _throughputCalculationInterval * 1000L; }
-            }
+            public long ThroughputCalculationIntervalInMillis => ThroughputCalculationInterval * 1000L;
 
-            public Int32 ReaderIdleTime
+            public int ReaderIdleTime
             {
                 get { return GetIdleTime(IdleStatus.ReaderIdle); }
                 set { SetIdleTime(IdleStatus.ReaderIdle, value); }
             }
 
-            public Int32 WriterIdleTime
+            public int WriterIdleTime
             {
                 get { return GetIdleTime(IdleStatus.WriterIdle); }
                 set { SetIdleTime(IdleStatus.WriterIdle, value); }
             }
 
-            public Int32 BothIdleTime
+            public int BothIdleTime
             {
                 get { return GetIdleTime(IdleStatus.BothIdle); }
                 set { SetIdleTime(IdleStatus.BothIdle, value); }
             }
 
-            public Int32 GetIdleTime(IdleStatus status)
+            public int GetIdleTime(IdleStatus status)
             {
                 switch (status)
                 {
@@ -329,16 +306,16 @@ namespace Mina.Transport.Serial
                     case IdleStatus.BothIdle:
                         return _idleTimeForBoth;
                     default:
-                        throw new ArgumentException("Unknown status", "status");
+                        throw new ArgumentException("Unknown status", nameof(status));
                 }
             }
 
-            public Int64 GetIdleTimeInMillis(IdleStatus status)
+            public long GetIdleTimeInMillis(IdleStatus status)
             {
                 return GetIdleTime(status) * 1000L;
             }
 
-            public void SetIdleTime(IdleStatus status, Int32 idleTime)
+            public void SetIdleTime(IdleStatus status, int idleTime)
             {
                 switch (status)
                 {
@@ -352,7 +329,7 @@ namespace Mina.Transport.Serial
                         _idleTimeForBoth = idleTime;
                         break;
                     default:
-                        throw new ArgumentException("Unknown status", "status");
+                        throw new ArgumentException("Unknown status", nameof(status));
                 }
             }
         }

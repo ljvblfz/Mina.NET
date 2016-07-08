@@ -5,137 +5,133 @@ using Mina.Core.Buffer;
 namespace Mina.Transport.Socket
 {
     /// <summary>
-    /// <see cref="IoBuffer"/> that use <see cref="SocketAsyncEventArgs"/>
+    /// <see cref="IOBuffer"/> that use <see cref="SocketAsyncEventArgs"/>
     /// as internal implementation.
     /// </summary>
-    public class SocketAsyncEventArgsBuffer : AbstractIoBuffer, IDisposable
+    public class SocketAsyncEventArgsBuffer : AbstractIOBuffer, IDisposable
     {
-        private readonly SocketAsyncEventArgs _socketAsyncEventArgs;
-
         /// <summary>
         /// </summary>
         public SocketAsyncEventArgsBuffer(SocketAsyncEventArgs socketAsyncEventArgs)
-            : base((IoBufferAllocator)null, -1,0, socketAsyncEventArgs.Count, socketAsyncEventArgs.Count)
+            : base((IOBufferAllocator) null, -1, 0, socketAsyncEventArgs.Count, socketAsyncEventArgs.Count)
         {
-            _socketAsyncEventArgs = socketAsyncEventArgs;
+            SocketAsyncEventArgs = socketAsyncEventArgs;
         }
 
         /// <summary>
         /// </summary>
-        public SocketAsyncEventArgsBuffer(IoBufferAllocator allocator, Int32 cap, Int32 lim)
-            : this(allocator, new Byte[cap], 0, lim)
-        { }
+        public SocketAsyncEventArgsBuffer(IOBufferAllocator allocator, int cap, int lim)
+            : this(allocator, new byte[cap], 0, lim)
+        {
+        }
 
         /// <summary>
         /// </summary>
-        public SocketAsyncEventArgsBuffer(IoBufferAllocator allocator, Byte[] buffer, Int32 offset, Int32 count)
+        public SocketAsyncEventArgsBuffer(IOBufferAllocator allocator, byte[] buffer, int offset, int count)
             : base(allocator, -1, 0, count, buffer.Length)
         {
-            _socketAsyncEventArgs = new SocketAsyncEventArgs();
-            _socketAsyncEventArgs.SetBuffer(buffer, offset, count);
+            SocketAsyncEventArgs = new SocketAsyncEventArgs();
+            SocketAsyncEventArgs.SetBuffer(buffer, offset, count);
         }
 
         /// <summary>
         /// Gets the inner <see cref="SocketAsyncEventArgs"/>.
         /// </summary>
-        public SocketAsyncEventArgs SocketAsyncEventArgs
-        {
-            get { return _socketAsyncEventArgs; }
-        }
+        public SocketAsyncEventArgs SocketAsyncEventArgs { get; }
 
         /// <inheritdoc/>
-        public override Boolean ReadOnly
-        {
-            get { return false; }
-        }
+        public override bool ReadOnly => false;
 
         /// <inheritdoc/>
-        public override Boolean HasArray
-        {
-            get { return true; }
-        }
+        public override bool HasArray => true;
 
         /// <summary>
         /// Sets data buffer for inner <see cref="SocketAsyncEventArgs"/>.
         /// </summary>
         public void SetBuffer()
         {
-            if (_socketAsyncEventArgs.Count != Limit)
-                _socketAsyncEventArgs.SetBuffer(_socketAsyncEventArgs.Offset, Limit);
+            if (SocketAsyncEventArgs.Count != Limit)
+            {
+                SocketAsyncEventArgs.SetBuffer(SocketAsyncEventArgs.Offset, Limit);
+            }
         }
 
         /// <inheritdoc/>
-        public override Byte Get()
+        public override byte Get()
         {
-            return _socketAsyncEventArgs.Buffer[Offset(NextGetIndex())];
+            return SocketAsyncEventArgs.Buffer[Offset(NextGetIndex())];
         }
 
         /// <inheritdoc/>
-        public override IoBuffer Get(Byte[] dst, Int32 offset, Int32 length)
+        public override IOBuffer Get(byte[] dst, int offset, int length)
         {
             CheckBounds(offset, length, dst.Length);
             if (length > Remaining)
+            {
                 throw new BufferUnderflowException();
-            Array.Copy(_socketAsyncEventArgs.Buffer, Offset(Position), dst, offset, length);
+            }
+            Array.Copy(SocketAsyncEventArgs.Buffer, Offset(Position), dst, offset, length);
             Position += length;
             return this;
         }
 
         /// <inheritdoc/>
-        public override Byte Get(Int32 index)
+        public override byte Get(int index)
         {
-            return _socketAsyncEventArgs.Buffer[Offset(CheckIndex(index))];
+            return SocketAsyncEventArgs.Buffer[Offset(CheckIndex(index))];
         }
 
         /// <inheritdoc/>
-        public override ArraySegment<Byte> GetRemaining()
+        public override ArraySegment<byte> GetRemaining()
         {
-            return new ArraySegment<Byte>(_socketAsyncEventArgs.Buffer, _socketAsyncEventArgs.Offset, Limit);
+            return new ArraySegment<byte>(SocketAsyncEventArgs.Buffer, SocketAsyncEventArgs.Offset, Limit);
         }
 
         /// <inheritdoc/>
-        public override IoBuffer Shrink()
+        public override IOBuffer Shrink()
         {
             throw new NotSupportedException();
         }
 
         /// <inheritdoc/>
-        protected override Int32 Offset(Int32 pos)
+        protected override int Offset(int pos)
         {
-            return _socketAsyncEventArgs.Offset + pos;
+            return SocketAsyncEventArgs.Offset + pos;
         }
 
         /// <inheritdoc/>
-        protected override Byte GetInternal(Int32 i)
+        protected override byte GetInternal(int i)
         {
-            return _socketAsyncEventArgs.Buffer[i];
+            return SocketAsyncEventArgs.Buffer[i];
         }
 
         /// <inheritdoc/>
-        protected override void PutInternal(Int32 i, Byte b)
+        protected override void PutInternal(int i, byte b)
         {
-            _socketAsyncEventArgs.Buffer[i] = b;
+            SocketAsyncEventArgs.Buffer[i] = b;
         }
 
         /// <inheritdoc/>
-        protected override void PutInternal(Byte[] src, Int32 offset, Int32 length)
+        protected override void PutInternal(byte[] src, int offset, int length)
         {
-            System.Buffer.BlockCopy(src, offset, _socketAsyncEventArgs.Buffer, Offset(Position), length);
+            System.Buffer.BlockCopy(src, offset, SocketAsyncEventArgs.Buffer, Offset(Position), length);
             Position += length;
         }
 
         /// <inheritdoc/>
-        protected override void PutInternal(IoBuffer src)
+        protected override void PutInternal(IOBuffer src)
         {
-            ArraySegment<Byte> array = src.GetRemaining();
+            var array = src.GetRemaining();
             if (array.Count > Remaining)
+            {
                 throw new OverflowException();
+            }
             PutInternal(array.Array, array.Offset, array.Count);
             src.Position += array.Count;
         }
 
         /// <inheritdoc/>
-        public override IoBuffer Compact()
+        public override IOBuffer Compact()
         {
             throw new NotImplementedException();
         }
@@ -158,28 +154,28 @@ namespace Mina.Transport.Socket
         /// <summary>
         /// Dispose resources.
         /// </summary>
-        protected virtual void Dispose(Boolean disposing)
+        protected virtual void Dispose(bool disposing)
         {
             if (disposing)
             {
-                _socketAsyncEventArgs.Dispose();
+                SocketAsyncEventArgs.Dispose();
             }
         }
 
         /// <inheritdoc/>
-        protected override IoBuffer Slice0()
+        protected override IOBuffer Slice0()
         {
             throw new NotImplementedException();
         }
 
         /// <inheritdoc/>
-        protected override IoBuffer AsReadOnlyBuffer0()
+        protected override IOBuffer AsReadOnlyBuffer0()
         {
             throw new NotImplementedException();
         }
 
         /// <inheritdoc/>
-        protected override IoBuffer Duplicate0()
+        protected override IOBuffer Duplicate0()
         {
             throw new NotImplementedException();
         }

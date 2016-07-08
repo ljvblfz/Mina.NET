@@ -1,41 +1,37 @@
-﻿using System;
-using System.Collections.Concurrent;
+﻿using System.Collections.Concurrent;
 using Mina.Core.Session;
 
 namespace Mina.Core.Write
 {
     class DefaultWriteRequestQueue : IWriteRequestQueue
     {
-        private ConcurrentQueue<IWriteRequest> q = new ConcurrentQueue<IWriteRequest>();
+        private ConcurrentQueue<IWriteRequest> _q = new ConcurrentQueue<IWriteRequest>();
 
-        public Int32 Size
-        {
-            get { return q.Count; }
-        }
+        public int Size => _q.Count;
 
-        public IWriteRequest Poll(IoSession session)
+        public IWriteRequest Poll(IOSession session)
         {
             IWriteRequest request;
-            q.TryDequeue(out request);
+            _q.TryDequeue(out request);
             return request;
         }
 
-        public void Offer(IoSession session, IWriteRequest writeRequest)
+        public void Offer(IOSession session, IWriteRequest writeRequest)
         {
-            q.Enqueue(writeRequest);
+            _q.Enqueue(writeRequest);
         }
 
-        public Boolean IsEmpty(IoSession session)
+        public bool IsEmpty(IOSession session)
         {
-            return q.IsEmpty;
+            return _q.IsEmpty;
         }
 
-        public void Clear(IoSession session)
+        public void Clear(IOSession session)
         {
-            q = new ConcurrentQueue<IWriteRequest>();
+            _q = new ConcurrentQueue<IWriteRequest>();
         }
 
-        public void Dispose(IoSession session)
+        public void Dispose(IOSession session)
         {
             // Do nothing
         }

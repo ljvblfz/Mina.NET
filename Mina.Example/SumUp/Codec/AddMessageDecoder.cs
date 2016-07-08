@@ -7,17 +7,17 @@ namespace Mina.Example.SumUp.Codec
     class AddMessageDecoder : AbstractMessageDecoder
     {
         public AddMessageDecoder()
-            : base(Constants.ADD)
+            : base(Constants.Add)
         { }
 
-        protected override Message.AbstractMessage DecodeBody(IoSession session, IoBuffer input)
+        protected override AbstractMessage DecodeBody(IOSession session, IOBuffer input)
         {
-            if (input.Remaining < Constants.ADD_BODY_LEN)
+            if (input.Remaining < Constants.AddBodyLen)
             {
                 return null;
             }
 
-            AddMessage m = new AddMessage();
+            var m = new AddMessage();
             m.Value = input.GetInt32();
             return m;
         }

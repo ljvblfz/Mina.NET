@@ -1,5 +1,4 @@
 ﻿using System;
-using System.IO;
 using System.Net;
 using System.Threading;
 using Mina.Core.Buffer;
@@ -8,87 +7,68 @@ using Mina.Core.Filterchain;
 using Mina.Core.Service;
 using Mina.Core.Session;
 using Mina.Core.Write;
-using Mina.Util;
 
 namespace Mina.Transport.Socket
 {
     /// <summary>
-    /// Base implementation of <see cref="IoSession"/> for socket transport (TCP/IP).
+    /// Base implementation of <see cref="IOSession"/> for socket transport (TCP/IP).
     /// </summary>
-    public abstract class SocketSession : AbstractIoSession
+    public abstract class SocketSession : AbstractIOSession
     {
-        private static readonly Object dummy = IoBuffer.Wrap(new Byte[0]);
-        private readonly System.Net.Sockets.Socket _socket;
-        private readonly EndPoint _localEP;
-        private readonly EndPoint _remoteEP;
-        private readonly IoProcessor _processor;
-        private readonly IoFilterChain _filterChain;
-        private Int32 _writing;
-        private Object _pendingReceivedMessage = dummy;
+        private static readonly object Dummy = IOBuffer.Wrap(new byte[0]);
+        private int _writing;
+        private object _pendingReceivedMessage = Dummy;
 
         /// <summary>
         /// </summary>
-        protected SocketSession(IoService service, IoProcessor processor, IoSessionConfig config,
-            System.Net.Sockets.Socket socket, EndPoint localEP, EndPoint remoteEP, Boolean reuseBuffer)
+        protected SocketSession(IOService service, IOProcessor processor, IOSessionConfig config,
+            System.Net.Sockets.Socket socket, EndPoint localEp, EndPoint remoteEp, bool reuseBuffer)
             : base(service)
         {
-            _socket = socket;
-            _localEP = localEP;
-            _remoteEP = remoteEP;
+            Socket = socket;
+            LocalEndPoint = localEp;
+            RemoteEndPoint = remoteEp;
             Config = config;
             if (service.SessionConfig != null)
+            {
                 Config.SetAll(service.SessionConfig);
-            _processor = processor;
-            _filterChain = new DefaultIoFilterChain(this);
+            }
+            Processor = processor;
+            FilterChain = new DefaultIOFilterChain(this);
         }
 
         /// <inheritdoc/>
-        public override IoProcessor Processor
-        {
-            get { return _processor; }
-        }
+        public override IOProcessor Processor { get; }
 
         /// <inheritdoc/>
-        public override IoFilterChain FilterChain
-        {
-            get { return _filterChain; }
-        }
+        public override IOFilterChain FilterChain { get; }
 
         /// <inheritdoc/>
-        public override EndPoint LocalEndPoint
-        {
-            get { return _localEP; }
-        }
+        public override EndPoint LocalEndPoint { get; }
 
         /// <inheritdoc/>
-        public override EndPoint RemoteEndPoint
-        {
-            get { return _remoteEP; }
-        }
+        public override EndPoint RemoteEndPoint { get; }
 
         /// <summary>
         /// Gets the <see cref="System.Net.Sockets.Socket"/>
         /// associated with this session.
         /// </summary>
-        public System.Net.Sockets.Socket Socket
-        {
-            get { return _socket; }
-        }
+        public System.Net.Sockets.Socket Socket { get; }
 
         /// <summary>
         /// Gets or sets a value indicating whether to reuse the internal
         /// read buffer as the buffer sent to <see cref="SocketSession.FilterChain"/>
-        /// by <see cref="Core.Filterchain.IoFilterChain.FireMessageReceived(Object)"/>.
+        /// by <see cref="IOFilterChain.FireMessageReceived(object)"/>.
         /// </summary>
         /// <remarks>
         /// If any thread model, i.e. an <see cref="Filter.Executor.ExecutorFilter"/>,
-        /// is added before filters that process the incoming <see cref="Core.Buffer.IoBuffer"/>
-        /// in <see cref="Core.Filterchain.IoFilter.MessageReceived(Core.Filterchain.INextFilter, Core.Session.IoSession, Object)"/>,
+        /// is added before filters that process the incoming <see cref="Core.Buffer.IOBuffer"/>
+        /// in <see cref="IOFilter.MessageReceived(Core.FilterchIOSessionSession.IoSession, object)"/>,
         /// this must be set to <code>false</code> since the internal read buffer
         /// will be reset every time a session begins to receive.
         /// </remarks>
         /// <seealso cref="AbstractSocketAcceptor.ReuseBuffer"/>
-        public Boolean ReuseBuffer { get; set; }
+        public bool ReuseBuffer { get; set; }
 
         /// <summary>
         /// Starts this session.
@@ -96,12 +76,16 @@ namespace Mina.Transport.Socket
         public void Start()
         {
             if (ReadSuspended)
+            {
                 return;
+            }
 
             if (_pendingReceivedMessage != null)
             {
-                if (!Object.ReferenceEquals(_pendingReceivedMessage, dummy))
+                if (!ReferenceEquals(_pendingReceivedMessage, Dummy))
+                {
                     FilterChain.FireMessageReceived(_pendingReceivedMessage);
+                }
                 _pendingReceivedMessage = null;
                 BeginReceive();
             }
@@ -113,15 +97,19 @@ namespace Mina.Transport.Socket
         public void Flush()
         {
             if (WriteSuspended)
+            {
                 return;
+            }
             if (Interlocked.CompareExchange(ref _writing, 1, 0) > 0)
+            {
                 return;
+            }
             BeginSend();
         }
 
         private void BeginSend()
         {
-            IWriteRequest req = CurrentWriteRequest;
+            var req = CurrentWriteRequest;
             if (req == null)
             {
                 req = WriteRequestQueue.Poll(this);
@@ -131,21 +119,26 @@ namespace Mina.Transport.Socket
                     Interlocked.Exchange(ref _writing, 0);
                     return;
                 }
-                
+
                 CurrentWriteRequest = req;
             }
 
-            IoBuffer buf = req.Message as IoBuffer;
+            var buf = req.Message as IOBuffer;
 
             if (buf == null)
             {
-                IFileRegion file = req.Message as IFileRegion;
+                var file = req.Message as IFileRegion;
                 if (file == null)
+                {
                     EndSend(new InvalidOperationException("Don't know how to handle message of type '"
-                            + req.Message.GetType().Name + "'.  Are you missing a protocol encoder?"),
-                            true);
+                                                          + req.Message.GetType().Name +
+                                                          "'.  Are you missing a protocol encoder?"),
+                        true);
+                }
                 else
+                {
                     BeginSendFile(req, file);
+                }
             }
             else if (buf.HasRemaining)
             {
@@ -162,7 +155,7 @@ namespace Mina.Transport.Socket
         /// </summary>
         /// <param name="request">the current write request</param>
         /// <param name="buf">the buffer to send</param>
-        protected abstract void BeginSend(IWriteRequest request, IoBuffer buf);
+        protected abstract void BeginSend(IWriteRequest request, IOBuffer buf);
 
         /// <summary>
         /// Begins to send a file.
@@ -175,30 +168,26 @@ namespace Mina.Transport.Socket
         /// Ends send operation.
         /// </summary>
         /// <param name="bytesTransferred">the bytes transferred in last send operation</param>
-        protected void EndSend(Int32 bytesTransferred)
+        protected void EndSend(int bytesTransferred)
         {
-            this.IncreaseWrittenBytes(bytesTransferred, DateTime.Now);
+            IncreaseWrittenBytes(bytesTransferred, DateTime.Now);
 
-            IWriteRequest req = CurrentWriteRequest;
+            var req = CurrentWriteRequest;
             if (req != null)
             {
-                IoBuffer buf = req.Message as IoBuffer;
+                var buf = req.Message as IOBuffer;
                 if (buf == null)
                 {
-                    IFileRegion file = req.Message as IFileRegion;
+                    var file = req.Message as IFileRegion;
                     if (file != null)
                     {
                         FireMessageSent(req);
-                    }
-                    else
-                    {
-                        // we only send buffers and files so technically it shouldn't happen
                     }
                 }
                 else if (!buf.HasRemaining)
                 {
                     // Buffer has been sent, clear the current request.
-                    Int32 pos = buf.Position;
+                    var pos = buf.Position;
                     buf.Reset();
 
                     FireMessageSent(req);
@@ -211,7 +200,9 @@ namespace Mina.Transport.Socket
             }
 
             if (Socket.Connected)
+            {
                 BeginSend();
+            }
         }
 
         /// <summary>
@@ -228,23 +219,27 @@ namespace Mina.Transport.Socket
         /// </summary>
         /// <param name="ex">the exception caught</param>
         /// <param name="discardWriteRequest">discard the current write quest or not</param>
-        protected void EndSend(Exception ex, Boolean discardWriteRequest)
+        protected void EndSend(Exception ex, bool discardWriteRequest)
         {
-            IWriteRequest req = CurrentWriteRequest;
+            var req = CurrentWriteRequest;
             if (req != null)
             {
                 req.Future.Exception = ex;
                 if (discardWriteRequest)
                 {
                     CurrentWriteRequest = null;
-                    IoBuffer buf = req.Message as IoBuffer;
+                    var buf = req.Message as IOBuffer;
                     if (buf != null)
+                    {
                         buf.Free();
+                    }
                 }
             }
-            this.FilterChain.FireExceptionCaught(ex);
+            FilterChain.FireExceptionCaught(ex);
             if (Socket.Connected)
+            {
                 BeginSend();
+            }
         }
 
         /// <summary>
@@ -256,7 +251,7 @@ namespace Mina.Transport.Socket
         /// Ends receive operation.
         /// </summary>
         /// <param name="buf">the buffer received in last receive operation</param>
-        protected void EndReceive(IoBuffer buf)
+        protected void EndReceive(IOBuffer buf)
         {
             if (ReadSuspended)
             {
@@ -267,7 +262,9 @@ namespace Mina.Transport.Socket
                 FilterChain.FireMessageReceived(buf);
 
                 if (Socket.Connected)
+                {
                     BeginReceive();
+                }
             }
         }
 
@@ -277,9 +274,11 @@ namespace Mina.Transport.Socket
         /// <param name="ex">the exception caught</param>
         protected void EndReceive(Exception ex)
         {
-            this.FilterChain.FireExceptionCaught(ex);
+            FilterChain.FireExceptionCaught(ex);
             if (Socket.Connected && !ReadSuspended)
+            {
                 BeginReceive();
+            }
         }
 
         private void FireMessageSent(IWriteRequest req)
@@ -287,11 +286,11 @@ namespace Mina.Transport.Socket
             CurrentWriteRequest = null;
             try
             {
-                this.FilterChain.FireMessageSent(req);
+                FilterChain.FireMessageSent(req);
             }
             catch (Exception ex)
             {
-                this.FilterChain.FireExceptionCaught(ex);
+                FilterChain.FireExceptionCaught(ex);
             }
         }
     }

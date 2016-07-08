@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Net;
 using Mina.Core.Buffer;
-using Mina.Core.Future;
 using Mina.Core.Session;
 using Mina.Transport.Socket;
 
@@ -18,7 +17,7 @@ namespace Mina.Example.NetCat
             }
 
             // Create TCP/IP connector.
-            AsyncSocketConnector connector = new AsyncSocketConnector();
+            var connector = new AsyncSocketConnector();
 
             // Set connect timeout.
             connector.ConnectTimeoutInMillis = 30 * 1000L;
@@ -39,15 +38,15 @@ namespace Mina.Example.NetCat
 
             connector.MessageReceived += (s, e) =>
             {
-                IoBuffer buf = (IoBuffer)e.Message;
+                var buf = (IOBuffer)e.Message;
                 while (buf.HasRemaining)
                 {
-                    Console.Write((Char)buf.Get());
+                    Console.Write((char)buf.Get());
                 }
             };
 
             // Start communication.
-            IConnectFuture cf = connector.Connect(new IPEndPoint(Dns.GetHostEntry(args[0]).AddressList[3], Int32.Parse(args[1])));
+            var cf = connector.Connect(new IPEndPoint(Dns.GetHostEntry(args[0]).AddressList[3], int.Parse(args[1])));
 
             // Wait for the connection attempt to be finished.
             cf.Await();

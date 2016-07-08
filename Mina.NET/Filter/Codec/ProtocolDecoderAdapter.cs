@@ -1,5 +1,4 @@
-﻿using System;
-using Mina.Core.Buffer;
+﻿using Mina.Core.Buffer;
 using Mina.Core.Session;
 
 namespace Mina.Filter.Codec
@@ -12,16 +11,16 @@ namespace Mina.Filter.Codec
     public abstract class ProtocolDecoderAdapter : IProtocolDecoder
     {
         /// <inheritdoc/>
-        public abstract void Decode(IoSession session, IoBuffer input, IProtocolDecoderOutput output);
+        public abstract void Decode(IOSession session, IOBuffer input, IProtocolDecoderOutput output);
 
         /// <inheritdoc/>
-        public virtual void FinishDecode(IoSession session, IProtocolDecoderOutput output)
+        public virtual void FinishDecode(IOSession session, IProtocolDecoderOutput output)
         {
             // Do nothing
         }
 
         /// <inheritdoc/>
-        public virtual void Dispose(IoSession session)
+        public virtual void Dispose(IOSession session)
         {
             // Do nothing
         }

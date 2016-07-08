@@ -10,58 +10,43 @@ namespace Mina.Core.Write
         /// <summary>
         /// An empty message.
         /// </summary>
-        public static readonly Byte[] EmptyMessage = new Byte[0];
+        public static readonly byte[] EmptyMessage = new byte[0];
 
-        private readonly Object _message;
-        private readonly IWriteFuture _future;
-        private readonly EndPoint _destination;
-
-        public DefaultWriteRequest(Object message)
+        public DefaultWriteRequest(object message)
             : this(message, null, null)
-        { }
+        {
+        }
 
-        public DefaultWriteRequest(Object message, IWriteFuture future)
+        public DefaultWriteRequest(object message, IWriteFuture future)
             : this(message, future, null)
-        { }
+        {
+        }
 
-        public DefaultWriteRequest(Object message, IWriteFuture future, EndPoint destination)
+        public DefaultWriteRequest(object message, IWriteFuture future, EndPoint destination)
         {
             if (message == null)
-                throw new ArgumentNullException("message");
-            _message = message;
-            _future = future ?? UnusedFuture.Instance;
-            _destination = destination;
+            {
+                throw new ArgumentNullException(nameof(message));
+            }
+            Message = message;
+            Future = future ?? UnusedFuture.Instance;
+            Destination = destination;
         }
 
         /// <inheritdoc/>
-        public IWriteRequest OriginalRequest
-        {
-            get { return this; }
-        }
+        public IWriteRequest OriginalRequest => this;
 
         /// <inheritdoc/>
-        public Object Message
-        {
-            get { return _message; }
-        }
+        public object Message { get; }
 
         /// <inheritdoc/>
-        public EndPoint Destination
-        {
-            get { return _destination; }
-        }
+        public EndPoint Destination { get; }
 
         /// <inheritdoc/>
-        public IWriteFuture Future
-        {
-            get { return _future; }
-        }
+        public IWriteFuture Future { get; }
 
         /// <inheritdoc/>
-        public virtual Boolean Encoded
-        {
-            get { return false; }
-        }
+        public virtual bool Encoded => false;
 
         class UnusedFuture : IWriteFuture
         {
@@ -73,7 +58,7 @@ namespace Mina.Core.Write
                 remove { throw new NotSupportedException(); }
             }
 
-            public Boolean Written
+            public bool Written
             {
                 get { return false; }
                 set { }
@@ -85,27 +70,21 @@ namespace Mina.Core.Write
                 set { }
             }
 
-            public IoSession Session
-            {
-                get { return null; }
-            }
+            public IOSession Session => null;
 
-            public Boolean Done
-            {
-                get { return true; }
-            }
+            public bool Done => true;
 
             public IWriteFuture Await()
             {
                 return this;
             }
 
-            public Boolean Await(Int32 timeoutMillis)
+            public bool Await(int timeoutMillis)
             {
                 return true;
             }
 
-            IoFuture IoFuture.Await()
+            IOFuture IOFuture.Await()
             {
                 return Await();
             }

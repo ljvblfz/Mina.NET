@@ -1,8 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Net;
-using System.Text;
 using System.Threading;
 #if !NETFX_CORE
 using NUnit.Framework;
@@ -15,7 +13,6 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 #endif
 using Mina.Core.Service;
 using Mina.Core.Buffer;
-using Mina.Core.Future;
 using Mina.Core.Session;
 using Mina.Transport.Socket;
 
@@ -24,35 +21,35 @@ namespace Mina.Transport
     [TestClass]
     public abstract class AbstractBindTest
     {
-        protected Int32 port;
-        protected readonly IoAcceptor acceptor;
+        protected int Port;
+        protected readonly IOAcceptor Acceptor;
 
-        public AbstractBindTest(IoAcceptor acceptor)
+        public AbstractBindTest(IOAcceptor acceptor)
         {
-            this.acceptor = acceptor;
+            this.Acceptor = acceptor;
         }
 
         [TestCleanup]
         public void TearDown()
         {
-            acceptor.Unbind();
-            acceptor.Dispose();
-            acceptor.DefaultLocalEndPoint = null;
+            Acceptor.Unbind();
+            Acceptor.Dispose();
+            Acceptor.DefaultLocalEndPoint = null;
         }
 
         [TestMethod]
         public void TestAnonymousBind()
         {
-            acceptor.DefaultLocalEndPoint = null;
-            acceptor.Bind();
-            Assert.IsNotNull(acceptor.LocalEndPoint);;
-            acceptor.Unbind(acceptor.LocalEndPoint);
-            Assert.IsNull(acceptor.LocalEndPoint);
-            acceptor.DefaultLocalEndPoint = CreateEndPoint(0);
-            acceptor.Bind();
-            Assert.IsNotNull(acceptor.LocalEndPoint);
-            Assert.IsTrue(GetPort(acceptor.LocalEndPoint) != 0);
-            acceptor.Unbind(acceptor.LocalEndPoint);
+            Acceptor.DefaultLocalEndPoint = null;
+            Acceptor.Bind();
+            Assert.IsNotNull(Acceptor.LocalEndPoint);;
+            Acceptor.Unbind(Acceptor.LocalEndPoint);
+            Assert.IsNull(Acceptor.LocalEndPoint);
+            Acceptor.DefaultLocalEndPoint = CreateEndPoint(0);
+            Acceptor.Bind();
+            Assert.IsNotNull(Acceptor.LocalEndPoint);
+            Assert.IsTrue(GetPort(Acceptor.LocalEndPoint) != 0);
+            Acceptor.Unbind(Acceptor.LocalEndPoint);
         }
 
         [TestMethod]
@@ -62,7 +59,7 @@ namespace Mina.Transport
 
             try
             {
-                acceptor.Bind();
+                Acceptor.Bind();
                 Assert.Fail("Exception is not thrown");
             }
             catch (Exception)
@@ -78,10 +75,10 @@ namespace Mina.Transport
             Bind(false);
 
             // this should succeed
-            acceptor.Unbind();
+            Acceptor.Unbind();
 
             // this shouldn't fail
-            acceptor.Unbind();
+            Acceptor.Unbind();
         }
 
         [TestMethod]
@@ -89,10 +86,10 @@ namespace Mina.Transport
         {
             Bind(true);
 
-            for (Int32 i = 0; i < 1024; i++)
+            for (var i = 0; i < 1024; i++)
             {
-                acceptor.Unbind();
-                acceptor.Bind();
+                Acceptor.Unbind();
+                Acceptor.Bind();
             }
         }
 
@@ -100,30 +97,30 @@ namespace Mina.Transport
         public void TestUnbindDisconnectsClients()
         {
             Bind(true);
-            IoConnector connector = NewConnector();
-            IoSession[] sessions = new IoSession[5];
-            for (int i = 0; i < sessions.Length; i++)
+            var connector = NewConnector();
+            var sessions = new IOSession[5];
+            for (var i = 0; i < sessions.Length; i++)
             {
-                IConnectFuture future = connector.Connect(CreateEndPoint(port));
+                var future = connector.Connect(CreateEndPoint(Port));
                 future.Await();
                 sessions[i] = future.Session;
                 Assert.IsTrue(sessions[i].Connected);
-                Assert.IsTrue(sessions[i].Write(IoBuffer.Allocate(1)).Await().Written);
+                Assert.IsTrue(sessions[i].Write(IOBuffer.Allocate(1)).Await().Written);
             }
 
             // Wait for the server side sessions to be created.
             Thread.Sleep(500);
 
-            ICollection<IoSession> managedSessions = acceptor.ManagedSessions.Values;
+            var managedSessions = Acceptor.ManagedSessions.Values;
             Assert.AreEqual(5, managedSessions.Count);
 
-            acceptor.Unbind();
+            Acceptor.Unbind();
 
             // Wait for the client side sessions to close.
             Thread.Sleep(500);
 
             //Assert.AreEqual(0, managedSessions.Count);
-            foreach (IoSession element in managedSessions)
+            foreach (var element in managedSessions)
             {
                 Assert.IsFalse(element.Connected);
             }
@@ -133,28 +130,28 @@ namespace Mina.Transport
         public void TestUnbindResume()
         {
             Bind(true);
-            IoConnector connector = NewConnector();
-            IoSession session = null;
+            var connector = NewConnector();
+            IOSession session = null;
 
-            IConnectFuture future = connector.Connect(CreateEndPoint(port));
+            var future = connector.Connect(CreateEndPoint(Port));
             future.Await();
             session = future.Session;
             Assert.IsTrue(session.Connected);
-            Assert.IsTrue(session.Write(IoBuffer.Allocate(1)).Await().Written);
+            Assert.IsTrue(session.Write(IOBuffer.Allocate(1)).Await().Written);
 
             // Wait for the server side session to be created.
             Thread.Sleep(500);
 
-            ICollection<IoSession> managedSession = acceptor.ManagedSessions.Values;
+            var managedSession = Acceptor.ManagedSessions.Values;
             Assert.AreEqual(1, managedSession.Count);
 
-            acceptor.Unbind();
+            Acceptor.Unbind();
 
             // Wait for the client side sessions to close.
             Thread.Sleep(500);
 
             //Assert.AreEqual(0, managedSession.Count);
-            foreach (IoSession element in managedSession)
+            foreach (var element in managedSession)
             {
                 Assert.IsFalse(element.Connected);
             }
@@ -163,37 +160,37 @@ namespace Mina.Transport
             Bind(true);
 
             // Check again the connection
-            future = connector.Connect(CreateEndPoint(port));
+            future = connector.Connect(CreateEndPoint(Port));
             future.Await();
             session = future.Session;
             Assert.IsTrue(session.Connected);
-            Assert.IsTrue(session.Write(IoBuffer.Allocate(1)).Await().Written);
+            Assert.IsTrue(session.Write(IOBuffer.Allocate(1)).Await().Written);
 
             // Wait for the server side session to be created.
             Thread.Sleep(500);
 
-            managedSession = acceptor.ManagedSessions.Values;
+            managedSession = Acceptor.ManagedSessions.Values;
             Assert.AreEqual(1, managedSession.Count);
         }
 
-        protected abstract EndPoint CreateEndPoint(Int32 port);
-        protected abstract Int32 GetPort(EndPoint ep);
-        protected abstract IoConnector NewConnector();
+        protected abstract EndPoint CreateEndPoint(int port);
+        protected abstract int GetPort(EndPoint ep);
+        protected abstract IOConnector NewConnector();
 
-        protected void Bind(Boolean reuseAddress)
+        protected void Bind(bool reuseAddress)
         {
-            acceptor.Handler = new EchoProtocolHandler();
+            Acceptor.Handler = new EchoProtocolHandler();
 
             SetReuseAddress(reuseAddress);
 
-            Boolean socketBound = false;
-            for (port = 1024; port <= 65535; port++)
+            var socketBound = false;
+            for (Port = 1024; Port <= 65535; Port++)
             {
                 socketBound = false;
                 try
                 {
-                    acceptor.DefaultLocalEndPoint = CreateEndPoint(port);
-                    acceptor.Bind();
+                    Acceptor.DefaultLocalEndPoint = CreateEndPoint(Port);
+                    Acceptor.Bind();
                     socketBound = true;
                     break;
                 }
@@ -205,39 +202,39 @@ namespace Mina.Transport
                 throw new IOException("Cannot bind any test port.");
         }
 
-        private void SetReuseAddress(Boolean reuseAddress)
+        private void SetReuseAddress(bool reuseAddress)
         {
-            if (acceptor is ISocketAcceptor)
+            if (Acceptor is ISocketAcceptor)
             {
-                ((ISocketAcceptor)acceptor).ReuseAddress = reuseAddress;
+                ((ISocketAcceptor)Acceptor).ReuseAddress = reuseAddress;
             }
         }
 
-        class EchoProtocolHandler : IoHandlerAdapter
+        class EchoProtocolHandler : IOHandlerAdapter
         {
-            public override void SessionCreated(IoSession session)
+            public override void SessionCreated(IOSession session)
             {
                 session.Config.SetIdleTime(IdleStatus.BothIdle, 10);
             }
 
-            public override void SessionIdle(IoSession session, IdleStatus status)
+            public override void SessionIdle(IOSession session, IdleStatus status)
             {
                 Console.WriteLine("*** IDLE #" + session.GetIdleCount(IdleStatus.BothIdle) + " ***");
             }
 
-            public override void ExceptionCaught(IoSession session, Exception cause)
+            public override void ExceptionCaught(IOSession session, Exception cause)
             {
                 session.Close(true);
             }
 
-            public override void MessageReceived(IoSession session, Object message)
+            public override void MessageReceived(IOSession session, object message)
             {
-                IoBuffer rb = message as IoBuffer;
+                var rb = message as IOBuffer;
                 if (rb == null)
                     return;
 
                 // Write the received data back to remote peer
-                IoBuffer wb = IoBuffer.Allocate(rb.Remaining);
+                var wb = IOBuffer.Allocate(rb.Remaining);
                 wb.Put(rb);
                 wb.Flip();
                 session.Write(wb);

@@ -1,5 +1,4 @@
-﻿using System;
-using Mina.Core.Buffer;
+﻿using Mina.Core.Buffer;
 
 namespace Mina.Filter.Codec.StateMachine
 {
@@ -9,17 +8,17 @@ namespace Mina.Filter.Codec.StateMachine
     /// </summary>
     public abstract class ConsumeToDynamicTerminatorDecodingState : IDecodingState
     {
-        private IoBuffer _buffer;
+        private IOBuffer _buffer;
 
-        public IDecodingState Decode(IoBuffer input, IProtocolDecoderOutput output)
+        public IDecodingState Decode(IOBuffer input, IProtocolDecoderOutput output)
         {
-            Int32 beginPos = input.Position;
-            Int32 terminatorPos = -1;
-            Int32 limit = input.Limit;
+            var beginPos = input.Position;
+            var terminatorPos = -1;
+            var limit = input.Limit;
 
-            for (Int32 i = beginPos; i < limit; i++)
+            for (var i = beginPos; i < limit; i++)
             {
-                Byte b = input.Get(i);
+                var b = input.Get(i);
                 if (IsTerminator(b))
                 {
                     terminatorPos = i;
@@ -29,7 +28,7 @@ namespace Mina.Filter.Codec.StateMachine
 
             if (terminatorPos >= 0)
             {
-                IoBuffer product;
+                IOBuffer product;
 
                 if (beginPos < terminatorPos)
                 {
@@ -53,7 +52,7 @@ namespace Mina.Filter.Codec.StateMachine
                     // When input contained only terminator rather than actual data...
                     if (_buffer == null)
                     {
-                        product = IoBuffer.Allocate(0);
+                        product = IOBuffer.Allocate(0);
                     }
                     else
                     {
@@ -67,7 +66,7 @@ namespace Mina.Filter.Codec.StateMachine
 
             if (_buffer == null)
             {
-                _buffer = IoBuffer.Allocate(input.Remaining);
+                _buffer = IOBuffer.Allocate(input.Remaining);
                 _buffer.AutoExpand = true;
             }
             _buffer.Put(input);
@@ -76,11 +75,11 @@ namespace Mina.Filter.Codec.StateMachine
 
         public IDecodingState FinishDecode(IProtocolDecoderOutput output)
         {
-            IoBuffer product;
+            IOBuffer product;
             // When input contained only terminator rather than actual data...
             if (_buffer == null)
             {
-                product = IoBuffer.Allocate(0);
+                product = IOBuffer.Allocate(0);
             }
             else
             {
@@ -95,7 +94,7 @@ namespace Mina.Filter.Codec.StateMachine
         /// </summary>
         /// <param name="b">the <code>byte</code> to check</param>
         /// <returns><code>true</code> if <code>b</code> is a terminator, otherwise false</returns>
-        protected abstract Boolean IsTerminator(Byte b);
+        protected abstract bool IsTerminator(byte b);
 
         /// <summary>
         /// Invoked when this state has reached the terminator byte.
@@ -107,6 +106,6 @@ namespace Mina.Filter.Codec.StateMachine
         /// <code>this</code> for loop transitions) or <code>null</code> if 
         /// the state machine has reached its end.
         /// </returns>
-        protected abstract IDecodingState FinishDecode(IoBuffer product, IProtocolDecoderOutput output);
+        protected abstract IDecodingState FinishDecode(IOBuffer product, IProtocolDecoderOutput output);
     }
 }

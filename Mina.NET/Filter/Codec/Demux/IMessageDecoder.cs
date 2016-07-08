@@ -12,11 +12,11 @@ namespace Mina.Filter.Codec.Demux
         /// Checks the specified buffer is decodable by this decoder.
         /// </summary>
         /// <returns>
-        /// <see cref="MessageDecoderResult.OK"/> if this decoder can decode the specified buffer.
-        /// <see cref="MessageDecoderResult.NotOK"/> if this decoder cannot decode the specified buffer.
+        /// <see cref="MessageDecoderResult.Ok"/> if this decoder can decode the specified buffer.
+        /// <see cref="MessageDecoderResult.NotOk"/> if this decoder cannot decode the specified buffer.
         /// <see cref="MessageDecoderResult.NeedData"/> if more data is required to determine if the specified buffer is decodable or not.
         /// </returns>
-        MessageDecoderResult Decodable(IoSession session, IoBuffer input);
+        MessageDecoderResult Decodable(IOSession session, IOBuffer input);
 
         /// <summary>
         /// Decodes binary or protocol-specific content into higher-level message objects.
@@ -27,11 +27,11 @@ namespace Mina.Filter.Codec.Demux
         /// messages into <see cref="IProtocolDecoderOutput"/>.
         /// </remarks>
         /// <returns>
-        /// <see cref="MessageDecoderResult.OK"/> if you finished decoding messages successfully.
+        /// <see cref="MessageDecoderResult.Ok"/> if you finished decoding messages successfully.
         /// <see cref="MessageDecoderResult.NeedData"/> if you need more data to finish decoding current message.
-        /// <see cref="MessageDecoderResult.NotOK"/> if you cannot decode current message due to protocol specification violation.
+        /// <see cref="MessageDecoderResult.NotOk"/> if you cannot decode current message due to protocol specification violation.
         /// </returns>
-        MessageDecoderResult Decode(IoSession session, IoBuffer input, IProtocolDecoderOutput output);
+        MessageDecoderResult Decode(IOSession session, IOBuffer input, IProtocolDecoderOutput output);
 
         /// <summary>
         /// Invoked when the specified <code>session</code> is closed while this decoder was
@@ -40,6 +40,6 @@ namespace Mina.Filter.Codec.Demux
         /// header. Implement this method to process the remaining data that
         /// <code>Decode(IoSession, IoBuffer, ProtocolDecoderOutput)</code> method didn't process completely.
         /// </summary>
-        void FinishDecode(IoSession session, IProtocolDecoderOutput output);
+        void FinishDecode(IOSession session, IProtocolDecoderOutput output);
     }
 }

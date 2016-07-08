@@ -1,29 +1,31 @@
-﻿using System;
-using Mina.Core.Session;
+﻿using Mina.Core.Session;
 
 namespace Mina.Core.Future
 {
     /// <summary>
     /// A default implementation of <see cref="ICloseFuture"/>.
     /// </summary>
-    public class DefaultCloseFuture : DefaultIoFuture, ICloseFuture
+    public class DefaultCloseFuture : DefaultIOFuture, ICloseFuture
     {
         /// <summary>
         /// </summary>
-        public DefaultCloseFuture(IoSession session)
+        public DefaultCloseFuture(IOSession session)
             : base(session)
-        { }
+        {
+        }
 
         /// <inheritdoc/>
-        public Boolean Closed
+        public bool Closed
         {
             get
             {
                 if (Done)
                 {
-                    Object v = Value;
-                    if (v is Boolean)
-                        return (Boolean)v;
+                    var v = Value;
+                    if (v is bool)
+                    {
+                        return (bool) v;
+                    }
                 }
                 return false;
             }
@@ -33,7 +35,7 @@ namespace Mina.Core.Future
         /// <inheritdoc/>
         public new ICloseFuture Await()
         {
-            return (ICloseFuture)base.Await();
+            return (ICloseFuture) base.Await();
         }
     }
 }

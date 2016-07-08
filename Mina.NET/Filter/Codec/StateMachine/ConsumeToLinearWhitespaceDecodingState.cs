@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace Mina.Filter.Codec.StateMachine
+﻿namespace Mina.Filter.Codec.StateMachine
 {
     /// <summary>
     /// <see cref="IDecodingState"/> which consumes all bytes until a space (0x20) or tab 
@@ -8,7 +6,7 @@ namespace Mina.Filter.Codec.StateMachine
     /// </summary>
     public abstract class ConsumeToLinearWhitespaceDecodingState : ConsumeToDynamicTerminatorDecodingState
     {
-        protected override Boolean IsTerminator(Byte b)
+        protected override bool IsTerminator(byte b)
         {
             return (b == ' ') || (b == '\t');
         }

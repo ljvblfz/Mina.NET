@@ -16,49 +16,49 @@ namespace Mina.Filter.Codec.Demux
     {
         internal static readonly Type[] EmptyParams = new Type[0];
 
-        private readonly DemuxingProtocolEncoder encoder = new DemuxingProtocolEncoder();
-        private readonly DemuxingProtocolDecoder decoder = new DemuxingProtocolDecoder();
+        private readonly DemuxingProtocolEncoder _encoder = new DemuxingProtocolEncoder();
+        private readonly DemuxingProtocolDecoder _decoder = new DemuxingProtocolDecoder();
 
         /// <inheritdoc/>
-        public IProtocolEncoder GetEncoder(IoSession session)
+        public IProtocolEncoder GetEncoder(IOSession session)
         {
-            return encoder;
+            return _encoder;
         }
 
         /// <inheritdoc/>
-        public IProtocolDecoder GetDecoder(IoSession session)
+        public IProtocolDecoder GetDecoder(IOSession session)
         {
-            return decoder;
+            return _decoder;
         }
 
         public void AddMessageEncoder<TMessage, TEncoder>() where TEncoder : IMessageEncoder
         {
-            this.encoder.AddMessageEncoder<TMessage, TEncoder>();
+            _encoder.AddMessageEncoder<TMessage, TEncoder>();
         }
 
         public void AddMessageEncoder<TMessage>(IMessageEncoder<TMessage> encoder)
         {
-            this.encoder.AddMessageEncoder<TMessage>(encoder);
+            _encoder.AddMessageEncoder<TMessage>(encoder);
         }
 
         public void AddMessageEncoder<TMessage>(IMessageEncoderFactory<TMessage> factory)
         {
-            this.encoder.AddMessageEncoder<TMessage>(factory);
+            _encoder.AddMessageEncoder<TMessage>(factory);
         }
 
         public void AddMessageDecoder<TDecoder>() where TDecoder : IMessageDecoder
         {
-            this.decoder.AddMessageDecoder<TDecoder>();
+            _decoder.AddMessageDecoder<TDecoder>();
         }
 
         public void AddMessageDecoder(IMessageDecoder decoder)
         {
-            this.decoder.AddMessageDecoder(decoder);
+            _decoder.AddMessageDecoder(decoder);
         }
 
         public void AddMessageDecoder(IMessageDecoderFactory factory)
         {
-            this.decoder.AddMessageDecoder(factory);
+            _decoder.AddMessageDecoder(factory);
         }
     }
 }

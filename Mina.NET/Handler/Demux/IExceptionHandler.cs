@@ -4,7 +4,7 @@ using Mina.Core.Session;
 namespace Mina.Handler.Demux
 {
     /// <summary>
-    /// A handler interface that <see cref="DemuxingIoHandler"/> forwards
+    /// A handler interface that <see cref="DemuxingIOHandler"/> forwards
     /// <code>ExceptionCaught</code> events to.
     /// </summary>
     public interface IExceptionHandler
@@ -13,20 +13,20 @@ namespace Mina.Handler.Demux
         /// Invoked when the specific type of exception is caught from the
         /// specified <code>session</code>.
         /// </summary>
-        void ExceptionCaught(IoSession session, Exception cause);
+        void ExceptionCaught(IOSession session, Exception cause);
     }
 
     /// <summary>
-    /// A handler interface that <see cref="DemuxingIoHandler"/> forwards
+    /// A handler interface that <see cref="DemuxingIOHandler"/> forwards
     /// <code>ExceptionCaught</code> events to.
     /// </summary>
-    /// <typeparam name="E"></typeparam>
-    public interface IExceptionHandler<in E> : IExceptionHandler where E : Exception
+    /// <typeparam name="TE"></typeparam>
+    public interface IExceptionHandler<in TE> : IExceptionHandler where TE : Exception
     {
         /// <summary>
         /// Invoked when the specific type of exception is caught from the
         /// specified <code>session</code>.
         /// </summary>
-        void ExceptionCaught(IoSession session, E cause);
+        void ExceptionCaught(IOSession session, TE cause);
     }
 }

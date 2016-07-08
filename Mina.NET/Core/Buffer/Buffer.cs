@@ -3,55 +3,59 @@
 namespace Mina.Core.Buffer
 {
     /// <summary>
-    /// A container for data of a specific primitive type. 
+    /// A container for data of a specific primitive type.
     /// </summary>
     public abstract class Buffer
     {
-        private Int32 _mark = -1;
-        private Int32 _position = 0;
-        private Int32 _limit;
-        private Int32 _capacity;
+        private int _position;
+        private int _limit;
 
         /// <summary>
         /// Creates a new buffer with the given mark, position, limit, and capacity,
         /// after checking invariants.
         /// </summary>
-        protected Buffer(Int32 mark, Int32 pos, Int32 lim, Int32 cap)
+        protected Buffer(int mark, int position, int limit, int capacity)
         {
-            if (cap < 0)
-                throw new ArgumentException("Capacity should be >= 0", "cap");
-            _capacity = cap;
-            Limit = lim;
-            Position = pos;
+            if (capacity < 0)
+            {
+                throw new ArgumentException("Capacity should be >= 0", nameof(capacity));
+            }
+            Capacity = capacity;
+            Limit = limit;
+            Position = position;
             if (mark >= 0)
             {
-                if (mark > pos)
-                    throw new ArgumentException("Invalid mark position", "mark");
-                _mark = mark;
+                if (mark > position)
+                {
+                    throw new ArgumentException("Invalid mark position", nameof(mark));
+                }
+                MarkValue = mark;
             }
         }
 
         /// <summary>
         /// Gets this buffer's capacity.
         /// </summary>
-        public Int32 Capacity
-        {
-            get { return _capacity; }
-        }
+        public int Capacity { get; private set; }
 
         /// <summary>
         /// Gets or sets this buffer's position.
         /// If the mark is defined and larger than the new position then it is discarded.
         /// </summary>
-        public Int32 Position
+        public int Position
         {
             get { return _position; }
             set
             {
                 if ((value > _limit) || (value < 0))
-                    throw new ArgumentException("Invalid position", "value");
+                {
+                    throw new ArgumentException("Invalid position", nameof(value));
+                }
                 _position = value;
-                if (_mark > _position) _mark = -1;
+                if (MarkValue > _position)
+                {
+                    MarkValue = -1;
+                }
             }
         }
 
@@ -60,46 +64,48 @@ namespace Mina.Core.Buffer
         /// If the position is larger than the new limit then it is set to the new limit.
         /// If the mark is defined and larger than the new limit then it is discarded.
         /// </summary>
-        public Int32 Limit
+        public int Limit
         {
             get { return _limit; }
             set
             {
-                if ((value > _capacity) || (value < 0))
-                    throw new ArgumentException("Invalid limit", "value");
+                if ((value > Capacity) || (value < 0))
+                {
+                    throw new ArgumentException("Invalid limit", nameof(value));
+                }
                 _limit = value;
-                if (_position > _limit) _position = _limit;
-                if (_mark > _limit) _mark = -1;
+                if (_position > _limit)
+                {
+                    _position = _limit;
+                }
+                if (MarkValue > _limit)
+                {
+                    MarkValue = -1;
+                }
             }
         }
 
         /// <summary>
         /// Gets the number of elements between the current position and the limit.
         /// </summary>
-        public Int32 Remaining
-        {
-            get { return _limit - _position; }
-        }
+        public int Remaining => _limit - _position;
 
         /// <summary>
         /// Tells whether there are any elements between the current position and the limit.
         /// </summary>
-        public Boolean HasRemaining
-        {
-            get { return _position < _limit; }
-        }
+        public bool HasRemaining => _position < _limit;
 
         /// <summary>
         /// Tells whether or not this buffer is read-only.
         /// </summary>
-        public abstract Boolean ReadOnly { get; }
+        public abstract bool ReadOnly { get; }
 
         /// <summary>
         /// Sets this buffer's mark at its position.
         /// </summary>
         public Buffer Mark()
         {
-            _mark = _position;
+            MarkValue = _position;
             return this;
         }
 
@@ -108,9 +114,11 @@ namespace Mina.Core.Buffer
         /// </summary>
         public Buffer Reset()
         {
-            Int32 m = _mark;
+            var m = MarkValue;
             if (m < 0)
+            {
                 throw new InvalidOperationException();
+            }
             _position = m;
             return this;
         }
@@ -122,8 +130,8 @@ namespace Mina.Core.Buffer
         public Buffer Clear()
         {
             _position = 0;
-            _limit = _capacity;
-            _mark = -1;
+            _limit = Capacity;
+            MarkValue = -1;
             return this;
         }
 
@@ -136,7 +144,7 @@ namespace Mina.Core.Buffer
         {
             _limit = _position;
             _position = 0;
-            _mark = -1;
+            MarkValue = -1;
             return this;
         }
 
@@ -147,26 +155,22 @@ namespace Mina.Core.Buffer
         public Buffer Rewind()
         {
             _position = 0;
-            _mark = -1;
+            MarkValue = -1;
             return this;
         }
 
         /// <summary>
         /// Gets current mark.
         /// </summary>
-        protected Int32 MarkValue
-        {
-            get { return _mark; }
-            set { _mark = value; }
-        }
+        protected int MarkValue { get; set; } = -1;
 
         /// <summary>
         /// Sets capacity.
         /// </summary>
         /// <param name="capacity">the new capacity</param>
-        protected void Recapacity(Int32 capacity)
+        protected void Recapacity(int capacity)
         {
-            _capacity = capacity;
+            Capacity = capacity;
         }
 
         /// <summary>
@@ -175,10 +179,12 @@ namespace Mina.Core.Buffer
         /// <exception cref="IndexOutOfRangeException">
         /// the index is not smaller than the limit or is smaller than zero
         /// </exception>
-        protected Int32 CheckIndex(Int32 i)
+        protected int CheckIndex(int i)
         {
             if ((i < 0) || (i >= _limit))
+            {
                 throw new IndexOutOfRangeException();
+            }
             return i;
         }
 
@@ -188,10 +194,12 @@ namespace Mina.Core.Buffer
         /// <exception cref="IndexOutOfRangeException">
         /// the index + number of bytes is not smaller than the limit or is smaller than zero
         /// </exception>
-        protected Int32 CheckIndex(Int32 i, Int32 nb)
+        protected int CheckIndex(int i, int nb)
         {
             if ((i < 0) || (nb > _limit - i))
+            {
                 throw new IndexOutOfRangeException();
+            }
             return i;
         }
 
@@ -203,10 +211,12 @@ namespace Mina.Core.Buffer
         /// <exception cref="BufferUnderflowException">
         /// the current position is not smaller than the limit
         /// </exception>
-        protected Int32 NextGetIndex()
+        protected int NextGetIndex()
         {
             if (_position >= _limit)
+            {
                 throw new BufferUnderflowException();
+            }
             return _position++;
         }
 
@@ -218,11 +228,13 @@ namespace Mina.Core.Buffer
         /// <exception cref="BufferUnderflowException">
         /// the current position is not enough for the given number of bytes
         /// </exception>
-        protected Int32 NextGetIndex(Int32 nb)
+        protected int NextGetIndex(int nb)
         {
             if (_limit - _position < nb)
+            {
                 throw new BufferUnderflowException();
-            Int32 p = _position;
+            }
+            var p = _position;
             _position += nb;
             return p;
         }
@@ -235,10 +247,12 @@ namespace Mina.Core.Buffer
         /// <exception cref="OverflowException">
         /// the current position is not smaller than the limit
         /// </exception>
-        protected Int32 NextPutIndex()
+        protected int NextPutIndex()
         {
             if (_position >= _limit)
+            {
                 throw new OverflowException();
+            }
             return _position++;
         }
 
@@ -250,11 +264,13 @@ namespace Mina.Core.Buffer
         /// <exception cref="OverflowException">
         /// the current position is not enough for the given number of bytes
         /// </exception>
-        protected Int32 NextPutIndex(Int32 nb)
+        protected int NextPutIndex(int nb)
         {
             if (_limit - _position < nb)
+            {
                 throw new OverflowException();
-            Int32 p = _position;
+            }
+            var p = _position;
             _position += nb;
             return p;
         }
@@ -263,10 +279,12 @@ namespace Mina.Core.Buffer
         /// Checks the bounds.
         /// </summary>
         /// <exception cref="IndexOutOfRangeException"></exception>
-        protected static void CheckBounds(Int32 off, Int32 len, Int32 size)
+        protected static void CheckBounds(int off, int len, int size)
         {
             if ((off | len | (off + len) | (size - (off + len))) < 0)
+            {
                 throw new IndexOutOfRangeException();
+            }
         }
     }
 

@@ -8,48 +8,50 @@ namespace Mina.Filter.Statistic
 {
     /// <summary>
     /// This class will measure the time it takes for a
-    /// method in the <see cref="IoFilter"/> class to execute.
+    /// method in the <see cref="IOFilter"/> class to execute.
     /// </summary>
-    public class ProfilerTimerFilter : IoFilterAdapter
+    public class ProfilerTimerFilter : IOFilterAdapter
     {
         private volatile TimeUnit _timeUnit;
 
-        private Boolean _profileMessageReceived;
+        private bool _profileMessageReceived;
         private TimerWorker _messageReceivedTimerWorker;
-        private Boolean _profileMessageSent;
+        private bool _profileMessageSent;
         private TimerWorker _messageSentTimerWorker;
-        private Boolean _profileSessionCreated;
+        private bool _profileSessionCreated;
         private TimerWorker _sessionCreatedTimerWorker;
-        private Boolean _profileSessionOpened;
+        private bool _profileSessionOpened;
         private TimerWorker _sessionOpenedTimerWorker;
-        private Boolean _profileSessionIdle;
+        private bool _profileSessionIdle;
         private TimerWorker _sessionIdleTimerWorker;
-        private Boolean _profileSessionClosed;
+        private bool _profileSessionClosed;
         private TimerWorker _sessionClosedTimerWorker;
 
         /// <summary>
-        /// Creates a profiler on event <see cref="IoEventType.MessageReceived"/>
-        /// and <see cref="IoEventType.MessageSent"/> in milliseconds.
+        /// Creates a profiler on event <see cref="IOEventType.MessageReceived"/>
+        /// and <see cref="IOEventType.MessageSent"/> in milliseconds.
         /// </summary>
         public ProfilerTimerFilter()
-            : this(TimeUnit.Milliseconds, IoEventType.MessageReceived | IoEventType.MessageSent)
-        { }
+            : this(TimeUnit.Milliseconds, IOEventType.MessageReceived | IOEventType.MessageSent)
+        {
+        }
 
         /// <summary>
-        /// Creates a profiler on event <see cref="IoEventType.MessageReceived"/>
-        /// and <see cref="IoEventType.MessageSent"/>.
+        /// Creates a profiler on event <see cref="IOEventType.MessageReceived"/>
+        /// and <see cref="IOEventType.MessageSent"/>.
         /// </summary>
         /// <param name="timeUnit">the time unit being used</param>
         public ProfilerTimerFilter(TimeUnit timeUnit)
-            : this(timeUnit, IoEventType.MessageReceived | IoEventType.MessageSent)
-        { }
+            : this(timeUnit, IOEventType.MessageReceived | IOEventType.MessageSent)
+        {
+        }
 
         /// <summary>
         /// Creates a profiler.
         /// </summary>
         /// <param name="timeUnit">the time unit being used</param>
         /// <param name="eventTypes">the event types to profile</param>
-        public ProfilerTimerFilter(TimeUnit timeUnit, IoEventType eventTypes)
+        public ProfilerTimerFilter(TimeUnit timeUnit, IOEventType eventTypes)
         {
             _timeUnit = timeUnit;
             SetProfilers(eventTypes);
@@ -65,26 +67,38 @@ namespace Mina.Filter.Statistic
         }
 
         /// <summary>
-        /// Gets or sets the <see cref="IoEventType"/>s to profile.
+        /// Gets or sets the <see cref="IOEventType"/>s to profile.
         /// </summary>
-        public IoEventType EventsToProfile
+        public IOEventType EventsToProfile
         {
             get
             {
-                IoEventType et = default(IoEventType);
-                
+                var et = default(IOEventType);
+
                 if (_profileMessageReceived)
-                    et |= IoEventType.MessageReceived;
+                {
+                    et |= IOEventType.MessageReceived;
+                }
                 if (_profileMessageSent)
-                    et |= IoEventType.MessageSent;
+                {
+                    et |= IOEventType.MessageSent;
+                }
                 if (_profileSessionCreated)
-                    et |= IoEventType.SessionCreated;
+                {
+                    et |= IOEventType.SessionCreated;
+                }
                 if (_profileSessionOpened)
-                    et |= IoEventType.SessionOpened;
+                {
+                    et |= IOEventType.SessionOpened;
+                }
                 if (_profileSessionIdle)
-                    et |= IoEventType.SessionIdle;
+                {
+                    et |= IOEventType.SessionIdle;
+                }
                 if (_profileSessionClosed)
-                    et |= IoEventType.SessionClosed;
+                {
+                    et |= IOEventType.SessionClosed;
+                }
 
                 return et;
             }
@@ -92,89 +106,90 @@ namespace Mina.Filter.Statistic
         }
 
         /// <summary>
-        /// Get the average time for the specified method represented by the <see cref="IoEventType"/>.
+        /// Get the average time for the specified method represented by the <see cref="IOEventType"/>.
         /// </summary>
-        public Double GetAverageTime(IoEventType type)
+        public double GetAverageTime(IOEventType type)
         {
             return GetTimerWorker(type).Average;
         }
 
         /// <summary>
         /// Gets the total number of times the method has been called that is represented
-        /// by the <see cref="IoEventType"/>.
+        /// by the <see cref="IOEventType"/>.
         /// </summary>
-        public Int64 GetTotalCalls(IoEventType type)
+        public long GetTotalCalls(IOEventType type)
         {
-            return GetTimerWorker(type).callsNumber;
+            return GetTimerWorker(type).CallsNumber;
         }
 
         /// <summary>
         /// Gets the total time this method has been executing.
         /// </summary>
-        public Int64 GetTotalTime(IoEventType type)
+        public long GetTotalTime(IOEventType type)
         {
-            return GetTimerWorker(type).total;
+            return GetTimerWorker(type).Total;
         }
 
         /// <summary>
-        /// Gets minimum time the method represented by <see cref="IoEventType"/> has executed.
+        /// Gets minimum time the method represented by <see cref="IOEventType"/> has executed.
         /// </summary>
-        public Int64 GetMinimumTime(IoEventType type)
+        public long GetMinimumTime(IOEventType type)
         {
-            return GetTimerWorker(type).minimum;
+            return GetTimerWorker(type).Minimum;
         }
 
         /// <summary>
-        /// Gets maximum time the method represented by <see cref="IoEventType"/> has executed.
+        /// Gets maximum time the method represented by <see cref="IOEventType"/> has executed.
         /// </summary>
-        public Int64 GetMaximumTime(IoEventType type)
+        public long GetMaximumTime(IOEventType type)
         {
-            return GetTimerWorker(type).maximum;
+            return GetTimerWorker(type).Maximum;
         }
 
         /// <inheritdoc/>
-        public override void MessageReceived(INextFilter nextFilter, IoSession session, Object message)
+        public override void MessageReceived(INextFilter nextFilter, IOSession session, object message)
         {
-            Profile(_profileMessageReceived, _messageReceivedTimerWorker, () => nextFilter.MessageReceived(session, message));
+            Profile(_profileMessageReceived, _messageReceivedTimerWorker,
+                () => nextFilter.MessageReceived(session, message));
         }
 
         /// <inheritdoc/>
-        public override void MessageSent(INextFilter nextFilter, IoSession session, IWriteRequest writeRequest)
+        public override void MessageSent(INextFilter nextFilter, IOSession session, IWriteRequest writeRequest)
         {
             Profile(_profileMessageSent, _messageSentTimerWorker, () => nextFilter.MessageSent(session, writeRequest));
         }
 
         /// <inheritdoc/>
-        public override void SessionCreated(INextFilter nextFilter, IoSession session)
+        public override void SessionCreated(INextFilter nextFilter, IOSession session)
         {
             Profile(_profileSessionCreated, _sessionCreatedTimerWorker, () => nextFilter.SessionCreated(session));
         }
 
         /// <inheritdoc/>
-        public override void SessionOpened(INextFilter nextFilter, IoSession session)
+        public override void SessionOpened(INextFilter nextFilter, IOSession session)
         {
             Profile(_profileSessionOpened, _sessionOpenedTimerWorker, () => nextFilter.SessionOpened(session));
         }
 
         /// <inheritdoc/>
-        public override void SessionIdle(INextFilter nextFilter, IoSession session, IdleStatus status)
+        public override void SessionIdle(INextFilter nextFilter, IOSession session, IdleStatus status)
         {
             Profile(_profileSessionIdle, _sessionIdleTimerWorker, () => nextFilter.SessionIdle(session, status));
         }
 
         /// <inheritdoc/>
-        public override void SessionClosed(INextFilter nextFilter, IoSession session)
+        public override void SessionClosed(INextFilter nextFilter, IOSession session)
         {
             Profile(_profileSessionClosed, _sessionClosedTimerWorker, () => nextFilter.SessionClosed(session));
         }
 
-        private void Profile(Boolean profile, TimerWorker worker, Action action)
+        private void Profile(bool profile, TimerWorker worker, Action action)
         {
             if (profile)
             {
-                Int64 start = TimeNow();
+                var start = TimeNow();
                 action();
-                Int64 end = TimeNow();
+                var end = TimeNow();
                 worker.AddNewDuration(end - start);
             }
             else
@@ -183,31 +198,31 @@ namespace Mina.Filter.Statistic
             }
         }
 
-        private TimerWorker GetTimerWorker(IoEventType type)
+        private TimerWorker GetTimerWorker(IOEventType type)
         {
             switch (type)
             {
-                case IoEventType.MessageReceived:
+                case IOEventType.MessageReceived:
                     if (_profileMessageReceived)
                         return _messageReceivedTimerWorker;
                     break;
-                case IoEventType.MessageSent:
+                case IOEventType.MessageSent:
                     if (_profileMessageSent)
                         return _messageSentTimerWorker;
                     break;
-                case IoEventType.SessionCreated:
+                case IOEventType.SessionCreated:
                     if (_profileSessionCreated)
                         return _sessionCreatedTimerWorker;
                     break;
-                case IoEventType.SessionOpened:
+                case IOEventType.SessionOpened:
                     if (_profileSessionOpened)
                         return _sessionOpenedTimerWorker;
                     break;
-                case IoEventType.SessionIdle:
+                case IOEventType.SessionIdle:
                     if (_profileSessionIdle)
                         return _sessionIdleTimerWorker;
                     break;
-                case IoEventType.SessionClosed:
+                case IOEventType.SessionClosed:
                     if (_profileSessionClosed)
                         return _sessionClosedTimerWorker;
                     break;
@@ -218,50 +233,50 @@ namespace Mina.Filter.Statistic
             throw new ArgumentException("You are not monitoring this event. Please add this event first.");
         }
 
-        private void SetProfilers(IoEventType eventTypes)
+        private void SetProfilers(IOEventType eventTypes)
         {
-            if ((eventTypes & IoEventType.MessageReceived) == IoEventType.MessageReceived)
+            if ((eventTypes & IOEventType.MessageReceived) == IOEventType.MessageReceived)
             {
                 _messageReceivedTimerWorker = new TimerWorker();
                 _profileMessageReceived = true;
             }
-            if ((eventTypes & IoEventType.MessageSent) == IoEventType.MessageSent)
+            if ((eventTypes & IOEventType.MessageSent) == IOEventType.MessageSent)
             {
                 _messageSentTimerWorker = new TimerWorker();
                 _profileMessageSent = true;
             }
-            if ((eventTypes & IoEventType.SessionCreated) == IoEventType.SessionCreated)
+            if ((eventTypes & IOEventType.SessionCreated) == IOEventType.SessionCreated)
             {
                 _sessionCreatedTimerWorker = new TimerWorker();
                 _profileSessionCreated = true;
             }
-            if ((eventTypes & IoEventType.SessionOpened) == IoEventType.SessionOpened)
+            if ((eventTypes & IOEventType.SessionOpened) == IOEventType.SessionOpened)
             {
                 _sessionOpenedTimerWorker = new TimerWorker();
                 _profileSessionOpened = true;
             }
-            if ((eventTypes & IoEventType.SessionIdle) == IoEventType.SessionIdle)
+            if ((eventTypes & IOEventType.SessionIdle) == IOEventType.SessionIdle)
             {
                 _sessionIdleTimerWorker = new TimerWorker();
                 _profileSessionIdle = true;
             }
-            if ((eventTypes & IoEventType.SessionClosed) == IoEventType.SessionClosed)
+            if ((eventTypes & IOEventType.SessionClosed) == IOEventType.SessionClosed)
             {
                 _sessionClosedTimerWorker = new TimerWorker();
                 _profileSessionClosed = true;
             }
         }
 
-        private Int64 TimeNow()
+        private long TimeNow()
         {
             switch (_timeUnit)
             {
                 case TimeUnit.Seconds:
-                    return DateTime.Now.Ticks / TimeSpan.TicksPerSecond;
+                    return DateTime.Now.Ticks/TimeSpan.TicksPerSecond;
                 case TimeUnit.Ticks:
                     return DateTime.Now.Ticks;
                 default:
-                    return DateTime.Now.Ticks / TimeSpan.TicksPerMillisecond;
+                    return DateTime.Now.Ticks/TimeSpan.TicksPerMillisecond;
             }
         }
 
@@ -270,39 +285,43 @@ namespace Mina.Filter.Statistic
             /// <summary>
             /// The sum of all operation durations
             /// </summary>
-            public Int64 total;
+            public long Total;
+
             /// <summary>
             /// The number of calls
             /// </summary>
-            public Int64 callsNumber;
+            public long CallsNumber;
+
             /// <summary>
             /// The fastest operation
             /// </summary>
-            public Int64 minimum = Int64.MaxValue;
+            public long Minimum = long.MaxValue;
+
             /// <summary>
             /// The slowest operation
             /// </summary>
-            public Int64 maximum;
+            public long Maximum;
 
-            private Object _syncRoot = new Byte[0];
+            private object _syncRoot = new byte[0];
 
-            public void AddNewDuration(Int64 duration)
+            public void AddNewDuration(long duration)
             {
-                Interlocked.Increment(ref callsNumber);
-                Interlocked.Add(ref total, duration);
+                Interlocked.Increment(ref CallsNumber);
+                Interlocked.Add(ref Total, duration);
                 lock (_syncRoot)
                 {
-                    if (duration < minimum)
-                        minimum = duration;
-                    if (duration > maximum)
-                        maximum = duration;
+                    if (duration < Minimum)
+                    {
+                        Minimum = duration;
+                    }
+                    if (duration > Maximum)
+                    {
+                        Maximum = duration;
+                    }
                 }
             }
 
-            public Double Average
-            {
-                get { return total / callsNumber; }
-            }
+            public double Average => Total/CallsNumber;
         }
     }
 
@@ -315,10 +334,12 @@ namespace Mina.Filter.Statistic
         /// Seconds
         /// </summary>
         Seconds,
+
         /// <summary>
         /// Milliseconds
         /// </summary>
         Milliseconds,
+
         /// <summary>
         /// Ticks
         /// </summary>

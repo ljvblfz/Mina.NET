@@ -1,5 +1,4 @@
-﻿using System;
-using System.IO;
+﻿using System.IO;
 #if !NETFX_CORE
 using NUnit.Framework;
 using TestClass = NUnit.Framework.TestFixtureAttribute;
@@ -18,7 +17,7 @@ namespace Mina.Filter.Stream
             return new StreamWriteFilter();
         }
 
-        protected override System.IO.Stream CreateMessage(Byte[] data)
+        protected override System.IO.Stream CreateMessage(byte[] data)
         {
             return new MemoryStream(data);
         }

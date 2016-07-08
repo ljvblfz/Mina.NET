@@ -3,7 +3,6 @@
     class TennisBall
     {
         private readonly bool _ping;
-        private readonly int _ttl;
 
         /// <summary>
         /// Creates a new ball with the specified TTL (Time To Live) value.
@@ -17,17 +16,14 @@
         /// </summary>
         private TennisBall(int ttl, bool ping)
         {
-            _ttl = ttl;
+            Ttl = ttl;
             _ping = ping;
         }
 
         /// <summary>
         /// Gets the TTL value of this ball.
         /// </summary>
-        public int TTL
-        {
-            get { return _ttl; }
-        }
+        public int Ttl { get; }
 
         /// <summary>
         /// Returns the ball after <see cref="TennisPlayer"/>'s stroke.
@@ -35,15 +31,14 @@
         /// </summary>
         public TennisBall Stroke()
         {
-            return new TennisBall(_ttl - 1, !_ping);
+            return new TennisBall(Ttl - 1, !_ping);
         }
 
         public override string ToString()
         {
             if (_ping)
-                return "PING (" + _ttl + ")";
-            else
-                return "PONG (" + _ttl + ")";
+                return "PING (" + Ttl + ")";
+            return "PONG (" + Ttl + ")";
         }
     }
 }

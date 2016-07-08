@@ -1,5 +1,4 @@
-﻿using System;
-using Mina.Core.Buffer;
+﻿using Mina.Core.Buffer;
 
 namespace Mina.Filter.Codec.StateMachine
 {
@@ -11,44 +10,44 @@ namespace Mina.Filter.Codec.StateMachine
     /// </summary>
     public abstract class FixedLengthDecodingState : IDecodingState
     {
-        private readonly Int32 _length;
-        private IoBuffer _buffer;
+        private readonly int _length;
+        private IOBuffer _buffer;
 
         /// <summary>
         /// Constructs a new instance using the specified decode length.
         /// </summary>
         /// <param name="length">the number of bytes to read</param>
-        protected FixedLengthDecodingState(Int32 length)
+        protected FixedLengthDecodingState(int length)
         {
             _length = length;
         }
 
-        public IDecodingState Decode(IoBuffer input, IProtocolDecoderOutput output)
+        public IDecodingState Decode(IOBuffer input, IProtocolDecoderOutput output)
         {
             if (_buffer == null)
             {
                 if (input.Remaining >= _length)
                 {
-                    Int32 limit = input.Limit;
+                    var limit = input.Limit;
                     input.Limit = input.Position + _length;
-                    IoBuffer product = input.Slice();
+                    var product = input.Slice();
                     input.Position = input.Position + _length;
                     input.Limit = limit;
                     return FinishDecode(product, output);
                 }
 
-                _buffer = IoBuffer.Allocate(_length);
+                _buffer = IOBuffer.Allocate(_length);
                 _buffer.Put(input);
                 return this;
             }
 
             if (input.Remaining >= _length - _buffer.Position)
             {
-                Int32 limit = input.Limit;
+                var limit = input.Limit;
                 input.Limit = input.Position + _length - _buffer.Position;
                 _buffer.Put(input);
                 input.Limit = limit;
-                IoBuffer product = _buffer;
+                var product = _buffer;
                 _buffer = null;
                 return FinishDecode(product.Flip(), output);
             }
@@ -59,10 +58,10 @@ namespace Mina.Filter.Codec.StateMachine
 
         public IDecodingState FinishDecode(IProtocolDecoderOutput output)
         {
-            IoBuffer readData;
+            IOBuffer readData;
             if (_buffer == null)
             {
-                readData = IoBuffer.Allocate(0);
+                readData = IOBuffer.Allocate(0);
             }
             else
             {
@@ -82,6 +81,6 @@ namespace Mina.Filter.Codec.StateMachine
         /// <code>this</code> for loop transitions) or <code>null</code> if 
         /// the state machine has reached its end.
         /// </returns>
-        protected abstract IDecodingState FinishDecode(IoBuffer product, IProtocolDecoderOutput output);
+        protected abstract IDecodingState FinishDecode(IOBuffer product, IProtocolDecoderOutput output);
     }
 }

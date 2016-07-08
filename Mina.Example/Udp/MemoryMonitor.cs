@@ -12,11 +12,11 @@ namespace Mina.Example.Udp
     /// </summary>
     class MemoryMonitor
     {
-        public const int port = 18567;
+        public const int Port = 18567;
 
         static void Main(string[] args)
         {
-            AsyncDatagramAcceptor acceptor = new AsyncDatagramAcceptor();
+            var acceptor = new AsyncDatagramAcceptor();
 
             acceptor.FilterChain.AddLast("logger", new LoggingFilter());
             acceptor.SessionConfig.ReuseAddress = true;
@@ -28,7 +28,7 @@ namespace Mina.Example.Udp
             };
             acceptor.MessageReceived += (s, e) =>
             {
-                IoBuffer buf = e.Message as IoBuffer;
+                var buf = e.Message as IOBuffer;
                 if (buf != null)
                 {
                     Console.WriteLine("New value for {0}: {1}", e.Session.RemoteEndPoint, buf.GetInt64());
@@ -51,8 +51,8 @@ namespace Mina.Example.Udp
                 Console.WriteLine("Session idle...");
             };
 
-            acceptor.Bind(new IPEndPoint(IPAddress.Any, port));
-            Console.WriteLine("UDPServer listening on port " + port);
+            acceptor.Bind(new IPEndPoint(IPAddress.Any, Port));
+            Console.WriteLine("UDPServer listening on port " + Port);
             Console.ReadLine();
         }
     }

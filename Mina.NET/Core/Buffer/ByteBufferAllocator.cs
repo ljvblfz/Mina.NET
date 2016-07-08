@@ -3,26 +3,28 @@
 namespace Mina.Core.Buffer
 {
     /// <summary>
-    /// A simplistic <see cref="IoBufferAllocator"/> which simply allocates a new
+    /// A simplistic <see cref="IOBufferAllocator"/> which simply allocates a new
     /// buffer every time.
     /// </summary>
-    public class ByteBufferAllocator : IoBufferAllocator
+    public class ByteBufferAllocator : IOBufferAllocator
     {
         /// <summary>
-        /// Static instace of <see cref="ByteBufferAllocator"/>.
+        /// Static instance of <see cref="ByteBufferAllocator"/>.
         /// </summary>
         public static readonly ByteBufferAllocator Instance = new ByteBufferAllocator();
 
         /// <inheritdoc/>
-        public IoBuffer Allocate(Int32 capacity)
+        public IOBuffer Allocate(int capacity)
         {
             if (capacity < 0)
-                throw new ArgumentException("Capacity should be >= 0", "capacity");
+            {
+                throw new ArgumentException("Capacity should be >= 0", nameof(capacity));
+            }
             return new ByteBuffer(this, capacity, capacity);
         }
 
         /// <inheritdoc/>
-        public IoBuffer Wrap(Byte[] array, Int32 offset, Int32 length)
+        public IOBuffer Wrap(byte[] array, int offset, int length)
         {
             try
             {
@@ -35,7 +37,7 @@ namespace Mina.Core.Buffer
         }
 
         /// <inheritdoc/>
-        public IoBuffer Wrap(Byte[] array)
+        public IOBuffer Wrap(byte[] array)
         {
             return Wrap(array, 0, array.Length);
         }

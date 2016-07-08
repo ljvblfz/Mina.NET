@@ -1,5 +1,4 @@
-﻿using System;
-using System.Net;
+﻿using System.Net;
 using System.Text;
 using System.Threading;
 #if !NETFX_CORE
@@ -21,43 +20,43 @@ namespace Mina.Transport
     [TestClass]
     public abstract class AbstractTrafficControlTest
     {
-        protected Int32 port;
-        protected readonly IoAcceptor acceptor;
+        protected int Port;
+        protected readonly IOAcceptor Acceptor;
 
-        public AbstractTrafficControlTest(IoAcceptor acceptor)
+        public AbstractTrafficControlTest(IOAcceptor acceptor)
         {
-            this.acceptor = acceptor;
+            this.Acceptor = acceptor;
         }
 
         [TestInitialize]
         public void SetUp()
         {
-            acceptor.MessageReceived += (s, e) =>
+            Acceptor.MessageReceived += (s, e) =>
             {
                 // Just echo the received bytes.
-                IoBuffer rb = (IoBuffer)e.Message;
-                IoBuffer wb = IoBuffer.Allocate(rb.Remaining);
+                var rb = (IOBuffer)e.Message;
+                var wb = IOBuffer.Allocate(rb.Remaining);
                 wb.Put(rb);
                 wb.Flip();
                 e.Session.Write(wb);
             };
-            acceptor.Bind(CreateServerEndPoint(0));
-            port = GetPort(acceptor.LocalEndPoint);
+            Acceptor.Bind(CreateServerEndPoint(0));
+            Port = GetPort(Acceptor.LocalEndPoint);
         }
 
         [TestCleanup]
         public void TearDown()
         {
-            acceptor.Unbind();
-            acceptor.Dispose();
+            Acceptor.Unbind();
+            Acceptor.Dispose();
         }
 
         [TestMethod]
         public void TestSuspendResumeReadWrite()
         {
-            IConnectFuture future = Connect(port, new ClientIoHandler());
+            var future = Connect(Port, new ClientIoHandler());
             future.Await();
-            IoSession session = future.Session;
+            var session = future.Session;
 
             // We wait for the SessionCreated() event is fired because we
             // cannot guarantee that it is invoked already.
@@ -66,7 +65,7 @@ namespace Mina.Transport
                 Thread.Yield();
             }
 
-            Object sync = session.GetAttribute("lock");
+            var sync = session.GetAttribute("lock");
             lock (sync)
             {
                 Write(session, "1");
@@ -146,85 +145,85 @@ namespace Mina.Transport
             session.Close(true).Await();
         }
 
-        protected abstract EndPoint CreateServerEndPoint(Int32 port);
-        protected abstract Int32 GetPort(EndPoint ep);
-        protected abstract IConnectFuture Connect(Int32 port, IoHandler handler);
+        protected abstract EndPoint CreateServerEndPoint(int port);
+        protected abstract int GetPort(EndPoint ep);
+        protected abstract IConnectFuture Connect(int port, IOHandler handler);
 
-        private void Write(IoSession session, String s)
+        private void Write(IOSession session, string s)
         {
-            session.Write(IoBuffer.Wrap(Encoding.ASCII.GetBytes(s)));
+            session.Write(IOBuffer.Wrap(Encoding.ASCII.GetBytes(s)));
         }
 
-        private Char Read(IoSession session)
+        private char Read(IOSession session)
         {
-            Int32 pos = session.GetAttribute<Int32>("pos");
-            for (Int32 i = 0; i < 10 && pos == GetReceived(session).Length; i++)
+            var pos = session.GetAttribute<int>("pos");
+            for (var i = 0; i < 10 && pos == GetReceived(session).Length; i++)
             {
-                Object sync = session.GetAttribute("lock");
+                var sync = session.GetAttribute("lock");
                 lock (sync)
                 {
                     Monitor.Wait(sync, 200);
                 }
             }
             session.SetAttribute("pos", pos + 1);
-            String received = GetReceived(session);
+            var received = GetReceived(session);
             Assert.IsTrue(received.Length > pos);
             return GetReceived(session)[pos];
         }
 
-        private String GetReceived(IoSession session)
+        private string GetReceived(IOSession session)
         {
             return session.GetAttribute("received").ToString();
         }
 
-        private String GetSent(IoSession session)
+        private string GetSent(IOSession session)
         {
             return session.GetAttribute("sent").ToString();
         }
 
-        private Boolean CanRead(IoSession session)
+        private bool CanRead(IOSession session)
         {
-            Int32 pos = session.GetAttribute<Int32>("pos");
-            Object sync = session.GetAttribute("lock");
+            var pos = session.GetAttribute<int>("pos");
+            var sync = session.GetAttribute("lock");
             lock (sync)
             {
                 Monitor.Wait(sync, 250);
             }
-            String received = GetReceived(session);
+            var received = GetReceived(session);
             return pos < received.Length;
         }
 
-        class ClientIoHandler : IoHandlerAdapter
+        class ClientIoHandler : IOHandlerAdapter
         {
-            public override void SessionCreated(IoSession session)
+            public override void SessionCreated(IOSession session)
             {
                 session.SetAttribute("pos", 0);
                 session.SetAttribute("received", new StringBuilder());
                 session.SetAttribute("sent", new StringBuilder());
-                session.SetAttribute("lock", new Object());
+                session.SetAttribute("lock", new object());
             }
 
-            public override void MessageReceived(IoSession session, Object message)
+            public override void MessageReceived(IOSession session, object message)
             {
-                IoBuffer buffer = (IoBuffer)message;
-                Byte[] data = new Byte[buffer.Remaining];
+                var buffer = (IOBuffer)message;
+                var data = new byte[buffer.Remaining];
                 buffer.Get(data, 0, data.Length);
-                Object sync = session.GetAttribute("lock");
+                var sync = session.GetAttribute("lock");
                 lock (sync)
                 {
-                    StringBuilder sb = session.GetAttribute<StringBuilder>("received");
+                    var sb = session.GetAttribute<StringBuilder>("received");
                     sb.Append(Encoding.ASCII.GetString(data));
                     Monitor.PulseAll(sync);
                 }
             }
 
-            public override void MessageSent(IoSession session, Object message)
+            public override void MessageSent(IOSession session, object message)
             {
-                IoBuffer buffer = (IoBuffer)message;
+                var buffer = (IOBuffer)message;
                 buffer.Rewind();
-                Byte[] data = new Byte[buffer.Remaining];
+                var data = new byte[buffer.Remaining];
                 buffer.Get(data, 0, data.Length);
-                StringBuilder sb = session.GetAttribute<StringBuilder>("sent");
+                var sb = session.GetAttribute<StringBuilder>("sent");
                 sb.Append(Encoding.ASCII.GetString(data));
             }
         }

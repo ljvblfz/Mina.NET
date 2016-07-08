@@ -1,5 +1,4 @@
-﻿using System;
-using Mina.Core.Session;
+﻿using Mina.Core.Session;
 
 namespace Mina.Filter.Codec
 {
@@ -10,10 +9,10 @@ namespace Mina.Filter.Codec
     public abstract class ProtocolEncoderAdapter : IProtocolEncoder
     {
         /// <inheritdoc/>
-        public abstract void Encode(IoSession session, Object message, IProtocolEncoderOutput output);
+        public abstract void Encode(IOSession session, object message, IProtocolEncoderOutput output);
 
         /// <inheritdoc/>
-        public virtual void Dispose(IoSession session)
+        public virtual void Dispose(IOSession session)
         {
             // Do nothing
         }

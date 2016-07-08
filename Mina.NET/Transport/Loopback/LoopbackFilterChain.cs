@@ -10,62 +10,60 @@ using Mina.Core.Write;
 
 namespace Mina.Transport.Loopback
 {
-    class LoopbackFilterChain : VirtualDefaultIoFilterChain
+    class LoopbackFilterChain : VirtualDefaultIOFilterChain
     {
-        private readonly ConcurrentQueue<IoEvent> _eventQueue = new ConcurrentQueue<IoEvent>();
-        private readonly IoProcessor<LoopbackSession> _processor;
-        private volatile Boolean _flushEnabled;
-        private volatile Boolean sessionOpened;
+        private readonly ConcurrentQueue<IOEvent> _eventQueue = new ConcurrentQueue<IOEvent>();
+        private volatile bool _flushEnabled;
+        private volatile bool _sessionOpened;
 
         /// <summary>
         /// </summary>
-        public LoopbackFilterChain(AbstractIoSession session)
+        public LoopbackFilterChain(AbstractIOSession session)
             : base(session)
         {
-            _processor = new LoopbackIoProcessor(this);
+            Processor = new LoopbackIOProcessor(this);
         }
 
         public void Start()
         {
             _flushEnabled = true;
             FlushEvents();
-            FlushPendingDataQueues((LoopbackSession)Session);
+            FlushPendingDataQueues((LoopbackSession) Session);
         }
 
-        internal IoProcessor<LoopbackSession> Processor
-        {
-            get { return _processor; }
-        }
+        internal IIOProcessor<LoopbackSession> Processor { get; }
 
-        private void PushEvent(IoEvent e)
+        private void PushEvent(IOEvent e)
         {
             PushEvent(e, _flushEnabled);
         }
 
-        private void PushEvent(IoEvent e, Boolean flushNow)
+        private void PushEvent(IOEvent e, bool flushNow)
         {
             _eventQueue.Enqueue(e);
             if (flushNow)
+            {
                 FlushEvents();
+            }
         }
 
         private void FlushEvents()
         {
-            IoEvent e;
+            IOEvent e;
             while (_eventQueue.TryDequeue(out e))
             {
                 FireEvent(e);
             }
         }
 
-        private void FireEvent(IoEvent e)
+        private void FireEvent(IOEvent e)
         {
-            LoopbackSession session = (LoopbackSession)Session;
-            Object data = e.Parameter;
+            var session = (LoopbackSession) Session;
+            var data = e.Parameter;
             switch (e.EventType)
             {
-                case IoEventType.MessageReceived:
-                    if (sessionOpened && (!session.ReadSuspended) && Monitor.TryEnter(session.Lock))
+                case IOEventType.MessageReceived:
+                    if (_sessionOpened && (!session.ReadSuspended) && Monitor.TryEnter(session.Lock))
                     {
                         try
                         {
@@ -88,16 +86,16 @@ namespace Mina.Transport.Loopback
                         session.ReceivedMessageQueue.Enqueue(data);
                     }
                     break;
-                case IoEventType.Write:
-                    base.FireFilterWrite((IWriteRequest)data);
+                case IOEventType.Write:
+                    base.FireFilterWrite((IWriteRequest) data);
                     break;
-                case IoEventType.MessageSent:
-                    base.FireMessageSent((IWriteRequest)data);
+                case IOEventType.MessageSent:
+                    base.FireMessageSent((IWriteRequest) data);
                     break;
-                case IoEventType.ExceptionCaught:
-                    base.FireExceptionCaught((Exception)data);
+                case IOEventType.ExceptionCaught:
+                    base.FireExceptionCaught((Exception) data);
                     break;
-                case IoEventType.SessionCreated:
+                case IOEventType.SessionCreated:
                     Monitor.Enter(session.Lock);
                     try
                     {
@@ -108,18 +106,18 @@ namespace Mina.Transport.Loopback
                         Monitor.Exit(session.Lock);
                     }
                     break;
-                case IoEventType.SessionOpened:
+                case IOEventType.SessionOpened:
                     base.FireSessionOpened();
-                    sessionOpened = true;
+                    _sessionOpened = true;
                     break;
-                case IoEventType.SessionIdle:
-                    base.FireSessionIdle((IdleStatus)data);
+                case IOEventType.SessionIdle:
+                    base.FireSessionIdle((IdleStatus) data);
                     break;
-                case IoEventType.SessionClosed:
+                case IOEventType.SessionClosed:
                     FlushPendingDataQueues(session);
                     base.FireSessionClosed();
                     break;
-                case IoEventType.Close:
+                case IOEventType.Close:
                     base.FireFilterClose();
                     break;
                 default:
@@ -135,54 +133,54 @@ namespace Mina.Transport.Loopback
 
         public override void FireSessionCreated()
         {
-            PushEvent(new IoEvent(IoEventType.SessionCreated, Session, null));
+            PushEvent(new IOEvent(IOEventType.SessionCreated, Session, null));
         }
 
         public override void FireSessionOpened()
         {
-            PushEvent(new IoEvent(IoEventType.SessionOpened, Session, null));
+            PushEvent(new IOEvent(IOEventType.SessionOpened, Session, null));
         }
 
         public override void FireSessionClosed()
         {
-            PushEvent(new IoEvent(IoEventType.SessionClosed, Session, null));
+            PushEvent(new IOEvent(IOEventType.SessionClosed, Session, null));
         }
 
         public override void FireSessionIdle(IdleStatus status)
         {
-            PushEvent(new IoEvent(IoEventType.SessionIdle, Session, status));
+            PushEvent(new IOEvent(IOEventType.SessionIdle, Session, status));
         }
 
-        public override void FireMessageReceived(Object message)
+        public override void FireMessageReceived(object message)
         {
-            PushEvent(new IoEvent(IoEventType.MessageReceived, Session, message));
+            PushEvent(new IOEvent(IOEventType.MessageReceived, Session, message));
         }
 
         public override void FireMessageSent(IWriteRequest request)
         {
-            PushEvent(new IoEvent(IoEventType.MessageSent, Session, request));
+            PushEvent(new IOEvent(IOEventType.MessageSent, Session, request));
         }
 
         public override void FireExceptionCaught(Exception cause)
         {
-            PushEvent(new IoEvent(IoEventType.ExceptionCaught, Session, cause));
+            PushEvent(new IOEvent(IOEventType.ExceptionCaught, Session, cause));
         }
 
         public override void FireFilterWrite(IWriteRequest writeRequest)
         {
-            PushEvent(new IoEvent(IoEventType.Write, Session, writeRequest));
+            PushEvent(new IOEvent(IOEventType.Write, Session, writeRequest));
         }
 
         public override void FireFilterClose()
         {
-            PushEvent(new IoEvent(IoEventType.Close, Session, null));
+            PushEvent(new IOEvent(IOEventType.Close, Session, null));
         }
 
-        class LoopbackIoProcessor : IoProcessor<LoopbackSession>
+        class LoopbackIOProcessor : IIOProcessor<LoopbackSession>
         {
             private readonly LoopbackFilterChain _chain;
 
-            public LoopbackIoProcessor(LoopbackFilterChain chain)
+            public LoopbackIOProcessor(LoopbackFilterChain chain)
             {
                 _chain = chain;
             }
@@ -204,7 +202,7 @@ namespace Mina.Transport.Loopback
 
             public void Flush(LoopbackSession session)
             {
-                IWriteRequestQueue queue = session.WriteRequestQueue;
+                var queue = session.WriteRequestQueue;
                 if (!session.Closing)
                 {
                     lock (session.Lock)
@@ -212,24 +210,30 @@ namespace Mina.Transport.Loopback
                         try
                         {
                             if (queue.IsEmpty(session))
+                            {
                                 return;
+                            }
 
                             IWriteRequest req;
-                            DateTime currentTime = DateTime.Now;
+                            var currentTime = DateTime.Now;
                             while ((req = queue.Poll(session)) != null)
                             {
-                                Object m = req.Message;
-                                _chain.PushEvent(new IoEvent(IoEventType.MessageSent, session, req), false);
+                                var m = req.Message;
+                                _chain.PushEvent(new IOEvent(IOEventType.MessageSent, session, req), false);
                                 session.RemoteSession.FilterChain.FireMessageReceived(GetMessageCopy(m));
-                                IoBuffer buf = m as IoBuffer;
+                                var buf = m as IOBuffer;
                                 if (buf != null)
+                                {
                                     session.IncreaseWrittenBytes(buf.Remaining, currentTime);
+                                }
                             }
                         }
                         finally
                         {
                             if (_chain._flushEnabled)
+                            {
                                 _chain.FlushEvents();
+                            }
                         }
                     }
 
@@ -237,7 +241,7 @@ namespace Mina.Transport.Loopback
                 }
                 else
                 {
-                    List<IWriteRequest> failedRequests = new List<IWriteRequest>();
+                    var failedRequests = new List<IWriteRequest>();
                     IWriteRequest req;
                     while ((req = queue.Poll(session)) != null)
                     {
@@ -246,8 +250,8 @@ namespace Mina.Transport.Loopback
 
                     if (failedRequests.Count > 0)
                     {
-                        WriteToClosedSessionException cause = new WriteToClosedSessionException(failedRequests);
-                        foreach (IWriteRequest r in failedRequests)
+                        var cause = new WriteToClosedSessionException(failedRequests);
+                        foreach (var r in failedRequests)
                         {
                             r.Future.Exception = cause;
                         }
@@ -262,9 +266,11 @@ namespace Mina.Transport.Loopback
                 {
                     if (!session.CloseFuture.Closed)
                     {
-                        IoServiceSupport support = session.Service as IoServiceSupport;
+                        var support = session.Service as IOServiceSupport;
                         if (support != null)
+                        {
                             support.FireSessionDestroyed(session);
+                        }
                         session.RemoteSession.Close(true);
                     }
                 }
@@ -274,8 +280,8 @@ namespace Mina.Transport.Loopback
             {
                 if (!session.ReadSuspended)
                 {
-                    ConcurrentQueue<Object> queue = session.ReceivedMessageQueue;
-                    Object item;
+                    var queue = session.ReceivedMessageQueue;
+                    object item;
                     while (queue.TryDequeue(out item))
                     {
                         _chain.FireMessageReceived(item);
@@ -288,14 +294,14 @@ namespace Mina.Transport.Loopback
                 }
             }
 
-            private Object GetMessageCopy(Object message)
+            private object GetMessageCopy(object message)
             {
-                Object messageCopy = message;
-                IoBuffer rb = message as IoBuffer;
+                var messageCopy = message;
+                var rb = message as IOBuffer;
                 if (rb != null)
                 {
                     rb.Mark();
-                    IoBuffer wb = IoBuffer.Allocate(rb.Remaining);
+                    var wb = IOBuffer.Allocate(rb.Remaining);
                     wb.Put(rb);
                     wb.Flip();
                     rb.Reset();
@@ -304,29 +310,29 @@ namespace Mina.Transport.Loopback
                 return messageCopy;
             }
 
-            void IoProcessor.Write(IoSession session, IWriteRequest writeRequest)
+            void IOProcessor.Write(IOSession session, IWriteRequest writeRequest)
             {
-                Write((LoopbackSession)session, writeRequest);
+                Write((LoopbackSession) session, writeRequest);
             }
 
-            void IoProcessor.Flush(IoSession session)
+            void IOProcessor.Flush(IOSession session)
             {
-                Flush((LoopbackSession)session);
+                Flush((LoopbackSession) session);
             }
 
-            void IoProcessor.Add(IoSession session)
+            void IOProcessor.Add(IOSession session)
             {
-                Add((LoopbackSession)session);
+                Add((LoopbackSession) session);
             }
 
-            void IoProcessor.Remove(IoSession session)
+            void IOProcessor.Remove(IOSession session)
             {
-                Remove((LoopbackSession)session);
+                Remove((LoopbackSession) session);
             }
 
-            void IoProcessor.UpdateTrafficControl(IoSession session)
+            void IOProcessor.UpdateTrafficControl(IOSession session)
             {
-                UpdateTrafficControl((LoopbackSession)session);
+                UpdateTrafficControl((LoopbackSession) session);
             }
         }
     }

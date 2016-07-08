@@ -11,7 +11,6 @@ using TestCleanup = NUnit.Framework.TearDownAttribute;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 #endif
 using Mina.Core.Buffer;
-using Mina.Core.Future;
 using Mina.Core.Session;
 using Mina.Transport.Socket;
 
@@ -20,31 +19,31 @@ namespace Mina.Filter.KeepAlive
     [TestClass]
     public class KeepAliveFilterTest
     {
-        static readonly IoBuffer PING = IoBuffer.Wrap(new Byte[] { 1 });
-        static readonly IoBuffer PONG = IoBuffer.Wrap(new Byte[] { 2 });
-        private static readonly Int32 INTERVAL = 5;
-        private static readonly Int32 TIMEOUT = 1;
+        static readonly IOBuffer Ping = IOBuffer.Wrap(new byte[] { 1 });
+        static readonly IOBuffer Pong = IOBuffer.Wrap(new byte[] { 2 });
+        private static readonly int Interval = 5;
+        private static readonly int Timeout = 1;
 
-        private Int32 port;
-        private AsyncSocketAcceptor acceptor;
+        private int _port;
+        private AsyncSocketAcceptor _acceptor;
 
         [TestInitialize]
         public void SetUp()
         {
-            acceptor = new AsyncSocketAcceptor();
+            _acceptor = new AsyncSocketAcceptor();
             IKeepAliveMessageFactory factory = new ServerFactory();
-            KeepAliveFilter filter = new KeepAliveFilter(factory, IdleStatus.BothIdle);
-            acceptor.FilterChain.AddLast("keep-alive", filter);
-            acceptor.DefaultLocalEndPoint = new IPEndPoint(IPAddress.Loopback, 0);
-            acceptor.Bind();
-            port = ((IPEndPoint)acceptor.LocalEndPoint).Port;
+            var filter = new KeepAliveFilter(factory, IdleStatus.BothIdle);
+            _acceptor.FilterChain.AddLast("keep-alive", filter);
+            _acceptor.DefaultLocalEndPoint = new IPEndPoint(IPAddress.Loopback, 0);
+            _acceptor.Bind();
+            _port = _acceptor.LocalEndPoint.Port;
         }
 
         [TestCleanup]
         public void TearDown()
         {
-            acceptor.Unbind();
-            acceptor.Dispose();
+            _acceptor.Unbind();
+            _acceptor.Dispose();
         }
 
         [TestMethod]
@@ -67,13 +66,13 @@ namespace Mina.Filter.KeepAlive
 
         private void KeepAliveFilterForIdleStatus(IdleStatus status)
         {
-            using (AsyncSocketConnector connector = new AsyncSocketConnector())
+            using (var connector = new AsyncSocketConnector())
             {
-                KeepAliveFilter filter = new KeepAliveFilter(new ClientFactory(), status, KeepAliveRequestTimeoutHandler.Exception, INTERVAL, TIMEOUT);
+                var filter = new KeepAliveFilter(new ClientFactory(), status, KeepAliveRequestTimeoutHandler.Exception, Interval, Timeout);
                 filter.ForwardEvent = true;
                 connector.FilterChain.AddLast("keep-alive", filter);
 
-                Boolean gotException = false;
+                var gotException = false;
                 connector.ExceptionCaught += (s, e) =>
                 {
                     // A KeepAliveRequestTimeoutException will be thrown if no keep-alive response is received.
@@ -81,11 +80,11 @@ namespace Mina.Filter.KeepAlive
                     gotException = true;
                 };
 
-                IConnectFuture future = connector.Connect(new IPEndPoint(IPAddress.Loopback, port)).Await();
-                IoSession session = future.Session;
+                var future = connector.Connect(new IPEndPoint(IPAddress.Loopback, _port)).Await();
+                var session = future.Session;
                 Assert.IsNotNull(session);
 
-                Thread.Sleep((INTERVAL + TIMEOUT + 3) * 1000);
+                Thread.Sleep((Interval + Timeout + 3) * 1000);
 
                 Assert.IsFalse(gotException, "got an exception on the client");
 
@@ -93,48 +92,48 @@ namespace Mina.Filter.KeepAlive
             }
         }
 
-        static Boolean CheckRequest(IoBuffer message)
+        static bool CheckRequest(IOBuffer message)
         {
-            IoBuffer buff = message;
-            Boolean check = buff.Get() == 1;
+            var buff = message;
+            var check = buff.Get() == 1;
             buff.Rewind();
             return check;
         }
 
-        static Boolean CheckResponse(IoBuffer message)
+        static bool CheckResponse(IOBuffer message)
         {
-            IoBuffer buff = message;
-            Boolean check = buff.Get() == 2;
+            var buff = message;
+            var check = buff.Get() == 2;
             buff.Rewind();
             return check;
         }
 
         class ServerFactory : IKeepAliveMessageFactory
         {
-            public Object GetRequest(IoSession session)
+            public object GetRequest(IOSession session)
             {
                 return null;
             }
 
-            public Object GetResponse(IoSession session, Object request)
+            public object GetResponse(IOSession session, object request)
             {
-                return PONG.Duplicate();
+                return Pong.Duplicate();
             }
 
-            public Boolean IsRequest(IoSession session, Object message)
+            public bool IsRequest(IOSession session, object message)
             {
-                if (message is IoBuffer)
+                if (message is IOBuffer)
                 {
-                    return CheckRequest((IoBuffer)message);
+                    return CheckRequest((IOBuffer)message);
                 }
                 return false;
             }
 
-            public Boolean IsResponse(IoSession session, Object message)
+            public bool IsResponse(IOSession session, object message)
             {
-                if (message is IoBuffer)
+                if (message is IOBuffer)
                 {
-                    return CheckResponse((IoBuffer)message);
+                    return CheckResponse((IOBuffer)message);
                 }
                 return false;
             }
@@ -142,30 +141,30 @@ namespace Mina.Filter.KeepAlive
 
         class ClientFactory : IKeepAliveMessageFactory
         {
-            public Object GetRequest(IoSession session)
+            public object GetRequest(IOSession session)
             {
-                return PING.Duplicate();
+                return Ping.Duplicate();
             }
 
-            public Object GetResponse(IoSession session, Object request)
+            public object GetResponse(IOSession session, object request)
             {
                 return null;
             }
 
-            public Boolean IsRequest(IoSession session, Object message)
+            public bool IsRequest(IOSession session, object message)
             {
-                if (message is IoBuffer)
+                if (message is IOBuffer)
                 {
-                    return CheckRequest((IoBuffer)message);
+                    return CheckRequest((IOBuffer)message);
                 }
                 return false;
             }
 
-            public Boolean IsResponse(IoSession session, Object message)
+            public bool IsResponse(IOSession session, object message)
             {
-                if (message is IoBuffer)
+                if (message is IOBuffer)
                 {
-                    return CheckResponse((IoBuffer)message);
+                    return CheckResponse((IOBuffer)message);
                 }
                 return false;
             }

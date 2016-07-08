@@ -1,10 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.IO;
 using System.Net;
-using System.Text;
-using System.Text.RegularExpressions;
-using System.Threading;
 #if !NETFX_CORE
 using NUnit.Framework;
 using TestClass = NUnit.Framework.TestFixtureAttribute;
@@ -14,9 +9,6 @@ using TestCleanup = NUnit.Framework.TearDownAttribute;
 #else
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 #endif
-using Mina.Core.Service;
-using Mina.Core.Buffer;
-using Mina.Core.Future;
 using Mina.Core.Session;
 
 namespace Mina.Transport.Socket
@@ -24,89 +16,74 @@ namespace Mina.Transport.Socket
     [TestClass]
     public class DatagramSessionIdleTest
     {
-        private Boolean readerIdleReceived;
-        private Boolean writerIdleReceived;
-        private Boolean bothIdleReceived;
-        private Object mutex = new Object();
+        private bool _readerIdleReceived;
+        private bool _writerIdleReceived;
+        private bool _bothIdleReceived;
+        private object _mutex = new object();
 
         [TestMethod]
         public void TestSessionIdle()
         {
-            int READER_IDLE_TIME = 3;//seconds
-            int WRITER_IDLE_TIME = READER_IDLE_TIME + 2;//seconds
-            int BOTH_IDLE_TIME = WRITER_IDLE_TIME + 2;//seconds
+            var readerIdleTime = 3;//seconds
+            var writerIdleTime = readerIdleTime + 2;//seconds
+            var bothIdleTime = writerIdleTime + 2;//seconds
 
-            AsyncDatagramAcceptor acceptor = new AsyncDatagramAcceptor();
-            acceptor.SessionConfig.SetIdleTime(IdleStatus.BothIdle, BOTH_IDLE_TIME);
-            acceptor.SessionConfig.SetIdleTime(IdleStatus.ReaderIdle, READER_IDLE_TIME);
-            acceptor.SessionConfig.SetIdleTime(IdleStatus.WriterIdle, WRITER_IDLE_TIME);
-            IPEndPoint ep = new IPEndPoint(IPAddress.Loopback, 1234);
+            var acceptor = new AsyncDatagramAcceptor();
+            acceptor.SessionConfig.SetIdleTime(IdleStatus.BothIdle, bothIdleTime);
+            acceptor.SessionConfig.SetIdleTime(IdleStatus.ReaderIdle, readerIdleTime);
+            acceptor.SessionConfig.SetIdleTime(IdleStatus.WriterIdle, writerIdleTime);
+            var ep = new IPEndPoint(IPAddress.Loopback, 1234);
             acceptor.SessionIdle += (s, e) =>
             {
                 if (e.IdleStatus == IdleStatus.BothIdle)
                 {
-                    bothIdleReceived = true;
+                    _bothIdleReceived = true;
                 }
                 else if (e.IdleStatus == IdleStatus.ReaderIdle)
                 {
-                    readerIdleReceived = true;
+                    _readerIdleReceived = true;
                 }
                 else if (e.IdleStatus == IdleStatus.WriterIdle)
                 {
-                    writerIdleReceived = true;
+                    _writerIdleReceived = true;
                 }
 
-                lock (mutex)
+                lock (_mutex)
                 {
-                    System.Threading.Monitor.PulseAll(mutex);
+                    System.Threading.Monitor.PulseAll(_mutex);
                 }
             };
             acceptor.Bind(ep);
-            IoSession session = acceptor.NewSession(new IPEndPoint(IPAddress.Loopback, 1024), ep);
+            var session = acceptor.NewSession(new IPEndPoint(IPAddress.Loopback, 1024), ep);
 
             //check properties to be copied from acceptor to session
-            Assert.AreEqual(BOTH_IDLE_TIME, session.Config.BothIdleTime);
-            Assert.AreEqual(READER_IDLE_TIME, session.Config.ReaderIdleTime);
-            Assert.AreEqual(WRITER_IDLE_TIME, session.Config.WriterIdleTime);
+            Assert.AreEqual(bothIdleTime, session.Config.BothIdleTime);
+            Assert.AreEqual(readerIdleTime, session.Config.ReaderIdleTime);
+            Assert.AreEqual(writerIdleTime, session.Config.WriterIdleTime);
 
             //verify that IDLE events really received by handler
-            DateTime startTime = DateTime.Now;
+            var startTime = DateTime.Now;
 
-            lock (mutex)
+            lock (_mutex)
             {
-                while (!readerIdleReceived && (DateTime.Now - startTime).TotalMilliseconds < (READER_IDLE_TIME + 1) * 1000)
+                while (!_readerIdleReceived && (DateTime.Now - startTime).TotalMilliseconds < (readerIdleTime + 1) * 1000)
                     try
                     {
-                        System.Threading.Monitor.Wait(mutex, READER_IDLE_TIME * 1000);                    }
+                        System.Threading.Monitor.Wait(_mutex, readerIdleTime * 1000);                    }
                     catch (Exception e)
                     {
                         Console.WriteLine(e);
                     }
             }
 
-            Assert.IsTrue(readerIdleReceived);
+            Assert.IsTrue(_readerIdleReceived);
 
-            lock (mutex)
+            lock (_mutex)
             {
-                while (!writerIdleReceived && (DateTime.Now - startTime).TotalMilliseconds < (WRITER_IDLE_TIME + 1) * 1000)
+                while (!_writerIdleReceived && (DateTime.Now - startTime).TotalMilliseconds < (writerIdleTime + 1) * 1000)
                     try
                     {
-                        System.Threading.Monitor.Wait(mutex, (WRITER_IDLE_TIME - READER_IDLE_TIME) * 1000);
-                    }
-                    catch (Exception e)
-                    {
-                        Console.WriteLine(e);
-                    }
-            }
-
-            Assert.IsTrue(writerIdleReceived);
-
-            lock (mutex)
-            {
-                while (!bothIdleReceived && (DateTime.Now - startTime).TotalMilliseconds < (BOTH_IDLE_TIME + 1) * 1000)
-                    try
-                    {
-                        System.Threading.Monitor.Wait(mutex, (BOTH_IDLE_TIME - WRITER_IDLE_TIME) * 1000);
+                        System.Threading.Monitor.Wait(_mutex, (writerIdleTime - readerIdleTime) * 1000);
                     }
                     catch (Exception e)
                     {
@@ -114,7 +91,22 @@ namespace Mina.Transport.Socket
                     }
             }
 
-            Assert.IsTrue(bothIdleReceived);
+            Assert.IsTrue(_writerIdleReceived);
+
+            lock (_mutex)
+            {
+                while (!_bothIdleReceived && (DateTime.Now - startTime).TotalMilliseconds < (bothIdleTime + 1) * 1000)
+                    try
+                    {
+                        System.Threading.Monitor.Wait(_mutex, (bothIdleTime - writerIdleTime) * 1000);
+                    }
+                    catch (Exception e)
+                    {
+                        Console.WriteLine(e);
+                    }
+            }
+
+            Assert.IsTrue(_bothIdleReceived);
         }
     }
 }

@@ -4,19 +4,21 @@ using Mina.Core.Session;
 namespace Mina.Core.Future
 {
     /// <summary>
-    /// An <see cref="IoFuture"/> for asynchronous connect requests.
+    /// An <see cref="IOFuture"/> for asynchronous connect requests.
     /// </summary>
-    public interface IConnectFuture : IoFuture
+    public interface IConnectFuture : IOFuture
     {
         /// <summary>
         /// Returns <code>true</code> if the connect operation is finished successfully.
         /// </summary>
-        Boolean Connected { get; }
+        bool Connected { get; }
+
         /// <summary>
         /// Returns <code>true</code> if the connect operation has been
         /// canceled by <see cref="Cancel()"/>.
         /// </summary>
-        Boolean Canceled { get; }
+        bool Canceled { get; }
+
         /// <summary>
         /// Gets or sets the cause of the connection failure.
         /// </summary>
@@ -25,11 +27,13 @@ namespace Mina.Core.Future
         /// or if the connection attempt is successful.
         /// </remarks>
         Exception Exception { get; set; }
+
         /// <summary>
         /// Sets the newly connected session and notifies all threads waiting for this future.
         /// </summary>
         /// <param name="session"></param>
-        void SetSession(IoSession session);
+        void SetSession(IOSession session);
+
         /// <summary>
         /// Cancels the connection attempt and notifies all threads waiting for this future.
         /// <returns>
@@ -37,7 +41,8 @@ namespace Mina.Core.Future
         /// <code>false</code>if the future was already cancelled.
         /// </returns>
         /// </summary>
-        Boolean Cancel();
+        bool Cancel();
+
         /// <inheritdoc/>
         new IConnectFuture Await();
     }

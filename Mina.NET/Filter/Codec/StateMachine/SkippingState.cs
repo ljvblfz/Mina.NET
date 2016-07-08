@@ -1,5 +1,4 @@
-﻿using System;
-using Mina.Core.Buffer;
+﻿using Mina.Core.Buffer;
 
 namespace Mina.Filter.Codec.StateMachine
 {
@@ -8,19 +7,19 @@ namespace Mina.Filter.Codec.StateMachine
     /// </summary>
     public abstract class SkippingState : IDecodingState
     {
-        private Int32 _skippedBytes;
+        private int _skippedBytes;
 
-        public IDecodingState Decode(IoBuffer input, IProtocolDecoderOutput output)
+        public IDecodingState Decode(IOBuffer input, IProtocolDecoderOutput output)
         {
-            Int32 beginPos = input.Position;
-            Int32 limit = input.Limit;
-            for (Int32 i = beginPos; i < limit; i++)
+            var beginPos = input.Position;
+            var limit = input.Limit;
+            for (var i = beginPos; i < limit; i++)
             {
-                Byte b = input.Get(i);
+                var b = input.Get(i);
                 if (!CanSkip(b))
                 {
                     input.Position = i;
-                    Int32 answer = _skippedBytes;
+                    var answer = _skippedBytes;
                     _skippedBytes = 0;
                     return FinishDecode(answer);
                 }
@@ -42,7 +41,7 @@ namespace Mina.Filter.Codec.StateMachine
         /// </summary>
         /// <param name="b">the byte to check</param>
         /// <returns><code>true</code> if the byte can be skipped</returns>
-        protected abstract Boolean CanSkip(Byte b);
+        protected abstract bool CanSkip(byte b);
 
         /// <summary>
         /// Invoked when this state cannot skip any more bytes.
@@ -51,6 +50,6 @@ namespace Mina.Filter.Codec.StateMachine
         /// <returns>the next state if a state transition was triggered (use 
         /// <code>this</code> for loop transitions) or <code>null</code> if 
         /// the state machine has reached its end.</returns>
-        protected abstract IDecodingState FinishDecode(Int32 skippedBytes);
+        protected abstract IDecodingState FinishDecode(int skippedBytes);
     }
 }

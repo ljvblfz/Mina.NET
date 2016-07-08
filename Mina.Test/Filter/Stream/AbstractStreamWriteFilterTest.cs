@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Net;
 using System.Security.Cryptography;
@@ -19,14 +18,14 @@ using Mina.Transport.Socket;
 namespace Mina.Filter.Stream
 {
     [TestClass]
-    public abstract class AbstractStreamWriteFilterTest<M, U>
-        where M : class
-        where U : AbstractStreamWriteFilter<M>
+    public abstract class AbstractStreamWriteFilterTest<TM, TU>
+        where TM : class
+        where TU : AbstractStreamWriteFilter<TM>
     {
         [TestMethod]
         public void TestSetWriteBufferSize()
         {
-            AbstractStreamWriteFilter<M> filter = CreateFilter();
+            var filter = CreateFilter();
 
             try
             {
@@ -61,137 +60,137 @@ namespace Mina.Filter.Stream
         [TestMethod]
         public void TestWriteUsingSocketTransport()
         {
-            AsyncSocketAcceptor acceptor = new AsyncSocketAcceptor();
+            var acceptor = new AsyncSocketAcceptor();
             acceptor.ReuseAddress = true;
-            IPEndPoint ep = new IPEndPoint(IPAddress.Loopback, 12345);
+            var ep = new IPEndPoint(IPAddress.Loopback, 12345);
 
-            AsyncSocketConnector connector = new AsyncSocketConnector();
+            var connector = new AsyncSocketConnector();
 
             // Generate 4MB of random data
-            Byte[] data = new Byte[4 * 1024 * 1024];
+            var data = new byte[4 * 1024 * 1024];
             new Random().NextBytes(data);
 
-            Byte[] expectedMd5;
-            using (MD5 md5 = MD5.Create())
+            byte[] expectedMd5;
+            using (var md5 = MD5.Create())
             {
                 expectedMd5 = md5.ComputeHash(data);
             }
 
-            M message = CreateMessage(data);
+            var message = CreateMessage(data);
 
-            SenderHandler sender = new SenderHandler(message);
-            ReceiverHandler receiver = new ReceiverHandler(data.Length);
+            var sender = new SenderHandler(message);
+            var receiver = new ReceiverHandler(data.Length);
 
             acceptor.Handler = sender;
             connector.Handler = receiver;
 
             acceptor.Bind(ep);
             connector.Connect(ep);
-            sender.countdown.Wait();
-            receiver.countdown.Wait();
+            sender.Countdown.Wait();
+            receiver.Countdown.Wait();
 
             acceptor.Dispose();
             connector.Dispose();
 
-            Assert.AreEqual(data.Length, receiver.ms.Length);
-            Byte[] actualMd5;
-            using (MD5 md5 = MD5.Create())
+            Assert.AreEqual(data.Length, receiver.Ms.Length);
+            byte[] actualMd5;
+            using (var md5 = MD5.Create())
             {
-                actualMd5 = md5.ComputeHash(receiver.ms.ToArray());
+                actualMd5 = md5.ComputeHash(receiver.Ms.ToArray());
             }
             Assert.AreEqual(expectedMd5.Length, actualMd5.Length);
-            for (Int32 i = 0; i < expectedMd5.Length; i++)
+            for (var i = 0; i < expectedMd5.Length; i++)
             {
                 Assert.AreEqual(expectedMd5[i], actualMd5[i]);
             }
         }
 
-        protected abstract AbstractStreamWriteFilter<M> CreateFilter();
-        protected abstract M CreateMessage(Byte[] data);
+        protected abstract AbstractStreamWriteFilter<TM> CreateFilter();
+        protected abstract TM CreateMessage(byte[] data);
 
-        class SenderHandler : IoHandlerAdapter
+        class SenderHandler : IOHandlerAdapter
         {
-            M message;
-            StreamWriteFilter streamWriteFilter = new StreamWriteFilter();
-            public CountdownEvent countdown = new CountdownEvent(1);
+            TM _message;
+            StreamWriteFilter _streamWriteFilter = new StreamWriteFilter();
+            public CountdownEvent Countdown = new CountdownEvent(1);
 
-            public SenderHandler(M m)
+            public SenderHandler(TM tm)
             {
-                message = m;
+                _message = tm;
             }
 
-            public override void SessionCreated(IoSession session)
+            public override void SessionCreated(IOSession session)
             {
-                session.FilterChain.AddLast("codec", streamWriteFilter);
+                session.FilterChain.AddLast("codec", _streamWriteFilter);
             }
 
-            public override void SessionOpened(IoSession session)
+            public override void SessionOpened(IOSession session)
             {
-                session.Write(message);
+                session.Write(_message);
             }
 
-            public override void ExceptionCaught(IoSession session, Exception cause)
+            public override void ExceptionCaught(IOSession session, Exception cause)
             {
-                countdown.Signal();
+                Countdown.Signal();
             }
 
-            public override void SessionClosed(IoSession session)
+            public override void SessionClosed(IOSession session)
             {
-                countdown.Signal();
+                Countdown.Signal();
             }
 
-            public override void SessionIdle(IoSession session, IdleStatus status)
+            public override void SessionIdle(IOSession session, IdleStatus status)
             {
-                countdown.Signal();
+                Countdown.Signal();
             }
 
-            public override void MessageSent(IoSession session, Object message)
+            public override void MessageSent(IOSession session, object message)
             {
-                if (message == this.message)
+                if (message == this._message)
                 {
-                    countdown.Signal();
+                    Countdown.Signal();
                 }
             }
         }
 
-        class ReceiverHandler : IoHandlerAdapter
+        class ReceiverHandler : IOHandlerAdapter
         {
-            Int64 size;
-            public CountdownEvent countdown = new CountdownEvent(1);
-            public MemoryStream ms = new MemoryStream();
+            long _size;
+            public CountdownEvent Countdown = new CountdownEvent(1);
+            public MemoryStream Ms = new MemoryStream();
 
-            public ReceiverHandler(Int64 size)
+            public ReceiverHandler(long size)
             {
-                this.size = size;
+                this._size = size;
             }
 
-            public override void SessionCreated(IoSession session)
+            public override void SessionCreated(IOSession session)
             {
                 session.Config.SetIdleTime(IdleStatus.ReaderIdle, 5);
             }
 
-            public override void SessionIdle(IoSession session, IdleStatus status)
+            public override void SessionIdle(IOSession session, IdleStatus status)
             {
                 session.Close(true);
             }
 
-            public override void ExceptionCaught(IoSession session, Exception cause)
+            public override void ExceptionCaught(IOSession session, Exception cause)
             {
-                countdown.Signal();
+                Countdown.Signal();
             }
 
-            public override void SessionClosed(IoSession session)
+            public override void SessionClosed(IOSession session)
             {
-                countdown.Signal();
+                Countdown.Signal();
             }
 
-            public override void MessageReceived(IoSession session, Object message)
+            public override void MessageReceived(IOSession session, object message)
             {
-                IoBuffer buf = (IoBuffer)message;
-                Byte[] bytes = new Byte[buf.Remaining];
+                var buf = (IOBuffer)message;
+                var bytes = new byte[buf.Remaining];
                 buf.Get(bytes, 0, bytes.Length);
-                ms.Write(bytes, 0, bytes.Length);
-                if (ms.Length >= size)
+                Ms.Write(bytes, 0, bytes.Length);
+                if (Ms.Length >= _size)
                     session.Close(true);
             }
         }

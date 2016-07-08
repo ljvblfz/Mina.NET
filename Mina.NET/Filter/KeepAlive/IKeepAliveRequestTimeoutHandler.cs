@@ -12,6 +12,6 @@ namespace Mina.Filter.KeepAlive
         /// Invoked when <see cref="KeepAliveFilter"/> couldn't receive the response for
         /// the sent keep alive message.
         /// </summary>
-        void KeepAliveRequestTimedOut(KeepAliveFilter filter, IoSession session);
+        void KeepAliveRequestTimedOut(KeepAliveFilter filter, IOSession session);
     }
 }

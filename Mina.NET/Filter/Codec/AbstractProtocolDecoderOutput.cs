@@ -10,22 +10,19 @@ namespace Mina.Filter.Codec
     /// </summary>
     public abstract class AbstractProtocolDecoderOutput : IProtocolDecoderOutput
     {
-        private readonly IQueue<Object> _queue = new Queue<Object>();
-
-        public IQueue<Object> MessageQueue
-        {
-            get { return _queue; }
-        }
+        public IQueue<object> MessageQueue { get; } = new Queue<object>();
 
         /// <inheritdoc/>
-        public void Write(Object message)
+        public void Write(object message)
         {
             if (message == null)
-                throw new ArgumentNullException("message");
-            _queue.Enqueue(message);
+            {
+                throw new ArgumentNullException(nameof(message));
+            }
+            MessageQueue.Enqueue(message);
         }
 
         /// <inheritdoc/>
-        public abstract void Flush(INextFilter nextFilter, IoSession session);
+        public abstract void Flush(INextFilter nextFilter, IOSession session);
     }
 }

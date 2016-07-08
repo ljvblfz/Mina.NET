@@ -12,7 +12,7 @@ namespace Mina.Example.Haiku
 {
     class HaikuValidationServer
     {
-        private const int port = 42458;
+        private const int Port = 42458;
 
         static void Main(string[] args)
         {
@@ -20,7 +20,7 @@ namespace Mina.Example.Haiku
              * ReuseBuffer needs to be false since we have a ExecutorFilter before
              * ProtocolCodecFilter which processes incoming IoBuffer.
              */
-            IoAcceptor acceptor = new AsyncSocketAcceptor() { ReuseBuffer = false };
+            IOAcceptor acceptor = new AsyncSocketAcceptor() { ReuseBuffer = false };
 
             acceptor.FilterChain.AddLast("logger", new LoggingFilter());
             acceptor.FilterChain.AddLast("executor", new ExecutorFilter());
@@ -30,10 +30,10 @@ namespace Mina.Example.Haiku
 
             acceptor.ExceptionCaught += (s, e) => e.Session.Close(true);
 
-            HaikuValidator validator = new HaikuValidator();
+            var validator = new HaikuValidator();
             acceptor.MessageReceived += (s, e) =>
             {
-                Haiku haiku = (Haiku)e.Message;
+                var haiku = (Haiku)e.Message;
 
                 try
                 {
@@ -46,7 +46,7 @@ namespace Mina.Example.Haiku
                 }
             };
 
-            acceptor.Bind(new IPEndPoint(IPAddress.Any, port));
+            acceptor.Bind(new IPEndPoint(IPAddress.Any, Port));
 
             Console.WriteLine("Listening on " + acceptor.LocalEndPoint);
             Console.ReadLine();

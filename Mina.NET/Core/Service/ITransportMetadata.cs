@@ -3,29 +3,33 @@
 namespace Mina.Core.Service
 {
     /// <summary>
-    /// Provides meta-information that describes an <see cref="IoService"/>.
+    /// Provides meta-information that describes an <see cref="IOService"/>.
     /// </summary>
     public interface ITransportMetadata
     {
         /// <summary>
         /// Gets the name of the service provider.
         /// </summary>
-        String ProviderName { get; }
+        string ProviderName { get; }
+
         /// <summary>
         /// Gets the name of the service.
         /// </summary>
-        String Name { get; }
+        string Name { get; }
+
         /// <summary>
         /// Returns <code>true</code> if the session of this transport type is
         /// <a href="http://en.wikipedia.org/wiki/Connectionless">connectionless</a>.
         /// </summary>
-        Boolean Connectionless { get; }
+        bool Connectionless { get; }
+
         /// <summary>
         /// Returns <code>true</code> if the messages exchanged by the service can be
         /// <a href="http://en.wikipedia.org/wiki/IPv4#Fragmentation_and_reassembly">fragmented
         /// or reassembled</a> by its underlying transport.
         /// </summary>
-        Boolean HasFragmentation { get; }
+        bool HasFragmentation { get; }
+
         /// <summary>
         /// Gets the type of the endpoint in this transport.
         /// </summary>

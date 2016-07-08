@@ -10,13 +10,13 @@ using Mina.Util;
 namespace Mina.Transport.Socket
 {
     /// <summary>
-    /// <see cref="IoAcceptor"/> for socket transport (TCP/IP).
+    /// <see cref="IOAcceptor"/> for socket transport (TCP/IP).
     /// </summary>
     public class AsyncSocketAcceptor : AbstractSocketAcceptor
     {
-        private static readonly ILog log = LogManager.GetLogger(typeof(AsyncSocketAcceptor));
+        private static readonly ILog Log = LogManager.GetLogger(typeof(AsyncSocketAcceptor));
 
-        const Int32 opsToPreAlloc = 2;
+        const int OpsToPreAlloc = 2;
         private BufferManager _bufferManager;
         private Pool<SocketAsyncEventArgsBuffer> _readWritePool;
 
@@ -25,16 +25,17 @@ namespace Mina.Transport.Socket
         /// </summary>
         public AsyncSocketAcceptor()
             : this(1024)
-        { }
+        {
+        }
 
         /// <summary>
         /// Instantiates.
         /// </summary>
         /// <param name="maxConnections">the max connections allowed</param>
-        public AsyncSocketAcceptor(Int32 maxConnections)
+        public AsyncSocketAcceptor(int maxConnections)
             : base(maxConnections)
         {
-            this.SessionDestroyed += OnSessionDestroyed;
+            SessionDestroyed += OnSessionDestroyed;
         }
 
         /// <inheritdoc/>
@@ -46,23 +47,23 @@ namespace Mina.Transport.Socket
 
         private void InitBuffer()
         {
-            Int32 bufferSize = SessionConfig.ReadBufferSize;
+            var bufferSize = SessionConfig.ReadBufferSize;
             if (_bufferManager == null || _bufferManager.BufferSize != bufferSize)
             {
                 // TODO free previous pool
 
-                _bufferManager = new BufferManager(bufferSize * MaxConnections * opsToPreAlloc, bufferSize);
+                _bufferManager = new BufferManager(bufferSize * MaxConnections * OpsToPreAlloc, bufferSize);
                 _bufferManager.InitBuffer();
 
-                var list = new List<SocketAsyncEventArgsBuffer>(MaxConnections * opsToPreAlloc);
-                for (Int32 i = 0; i < MaxConnections * opsToPreAlloc; i++)
+                var list = new List<SocketAsyncEventArgsBuffer>(MaxConnections * OpsToPreAlloc);
+                for (var i = 0; i < MaxConnections * OpsToPreAlloc; i++)
                 {
-                    SocketAsyncEventArgs readWriteEventArg = new SocketAsyncEventArgs();
+                    var readWriteEventArg = new SocketAsyncEventArgs();
                     _bufferManager.SetBuffer(readWriteEventArg);
-                    SocketAsyncEventArgsBuffer buf = new SocketAsyncEventArgsBuffer(readWriteEventArg);
+                    var buf = new SocketAsyncEventArgsBuffer(readWriteEventArg);
                     list.Add(buf);
 
-                    readWriteEventArg.Completed += new EventHandler<SocketAsyncEventArgs>(readWriteEventArg_Completed);
+                    readWriteEventArg.Completed += readWriteEventArg_Completed;
                 }
                 _readWritePool = new Pool<SocketAsyncEventArgsBuffer>(list);
             }
@@ -70,29 +71,27 @@ namespace Mina.Transport.Socket
 
         void readWriteEventArg_Completed(object sender, SocketAsyncEventArgs e)
         {
-            AsyncSocketSession session = e.UserToken as AsyncSocketSession;
+            var session = e.UserToken as AsyncSocketSession;
 
             if (session == null)
+            {
                 return;
+            }
 
             if (e.LastOperation == SocketAsyncOperation.Receive)
             {
                 session.ProcessReceive(e);
             }
             else if (e.LastOperation == SocketAsyncOperation.Send
-                || e.LastOperation == SocketAsyncOperation.SendPackets)
+                     || e.LastOperation == SocketAsyncOperation.SendPackets)
             {
                 session.ProcessSend(e);
             }
-            else
-            {
-                // TODO handle other Socket operations
-            }
         }
 
-        private void OnSessionDestroyed(Object sender, IoSessionEventArgs e)
+        private void OnSessionDestroyed(object sender, IOSessionEventArgs e)
         {
-            AsyncSocketSession s = e.Session as AsyncSocketSession;
+            var s = e.Session as AsyncSocketSession;
             if (s != null && _readWritePool != null)
             {
                 // clear the buffer and reset its count to original capacity if changed
@@ -109,12 +108,12 @@ namespace Mina.Transport.Socket
         /// <inheritdoc/>
         protected override void BeginAccept(ListenerContext listener)
         {
-            SocketAsyncEventArgs acceptEventArg = (SocketAsyncEventArgs)listener.Tag;
+            var acceptEventArg = (SocketAsyncEventArgs) listener.Tag;
             if (acceptEventArg == null)
             {
                 acceptEventArg = new SocketAsyncEventArgs();
                 acceptEventArg.UserToken = listener;
-                acceptEventArg.Completed += new EventHandler<SocketAsyncEventArgs>(AcceptEventArg_Completed);
+                acceptEventArg.Completed += AcceptEventArg_Completed;
             }
             else
             {
@@ -122,7 +121,7 @@ namespace Mina.Transport.Socket
                 acceptEventArg.AcceptSocket = null;
             }
 
-            Boolean willRaiseEvent;
+            bool willRaiseEvent;
             try
             {
                 willRaiseEvent = listener.Socket.AcceptAsync(acceptEventArg);
@@ -137,7 +136,7 @@ namespace Mina.Transport.Socket
             }
         }
 
-        private void AcceptEventArg_Completed(Object sender, SocketAsyncEventArgs e)
+        private void AcceptEventArg_Completed(object sender, SocketAsyncEventArgs e)
         {
             ProcessAccept(e);
         }
@@ -146,31 +145,31 @@ namespace Mina.Transport.Socket
         {
             if (e.SocketError == SocketError.Success)
             {
-                EndAccept(e.AcceptSocket, (ListenerContext)e.UserToken);
+                EndAccept(e.AcceptSocket, (ListenerContext) e.UserToken);
             }
             else if (e.SocketError != SocketError.OperationAborted
-                && e.SocketError != SocketError.Interrupted)
+                     && e.SocketError != SocketError.Interrupted)
             {
-                ExceptionMonitor.Instance.ExceptionCaught(new SocketException((Int32)e.SocketError));
+                ExceptionMonitor.Instance.ExceptionCaught(new SocketException((int) e.SocketError));
             }
         }
 
         /// <inheritdoc/>
-        protected override IoSession NewSession(IoProcessor<SocketSession> processor, System.Net.Sockets.Socket socket)
+        protected override IOSession NewSession(IIOProcessor<SocketSession> processor, System.Net.Sockets.Socket socket)
         {
-            SocketAsyncEventArgsBuffer readBuffer = _readWritePool.Pop();
-            SocketAsyncEventArgsBuffer writeBuffer = _readWritePool.Pop();
+            var readBuffer = _readWritePool.Pop();
+            var writeBuffer = _readWritePool.Pop();
 
             if (readBuffer == null)
             {
-                readBuffer = (SocketAsyncEventArgsBuffer)
+                readBuffer =
                     SocketAsyncEventArgsBufferAllocator.Instance.Allocate(SessionConfig.ReadBufferSize);
                 readBuffer.SocketAsyncEventArgs.Completed += readWriteEventArg_Completed;
             }
 
             if (writeBuffer == null)
             {
-                writeBuffer = (SocketAsyncEventArgsBuffer)
+                writeBuffer =
                     SocketAsyncEventArgsBufferAllocator.Instance.Allocate(SessionConfig.ReadBufferSize);
                 writeBuffer.SocketAsyncEventArgs.Completed += readWriteEventArg_Completed;
             }

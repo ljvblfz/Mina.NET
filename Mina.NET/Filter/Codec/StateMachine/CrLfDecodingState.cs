@@ -1,5 +1,4 @@
-﻿using System;
-using Mina.Core.Buffer;
+﻿using Mina.Core.Buffer;
 
 namespace Mina.Filter.Codec.StateMachine
 {
@@ -17,30 +16,31 @@ namespace Mina.Filter.Codec.StateMachine
         /// <summary>
         /// Carriage return character
         /// </summary>
-        private static readonly Byte CR = 13;
+        private static readonly byte Cr = 13;
+
         /// <summary>
         /// Line feed character
         /// </summary>
-        private static readonly Byte LF = 10;
+        private static readonly byte Lf = 10;
 
-        private Boolean _hasCR;
+        private bool _hasCr;
 
-        public IDecodingState Decode(IoBuffer input, IProtocolDecoderOutput output)
+        public IDecodingState Decode(IOBuffer input, IProtocolDecoderOutput output)
         {
-            Boolean found = false;
-            Boolean finished = false;
+            var found = false;
+            var finished = false;
             while (input.HasRemaining)
             {
-                Byte b = input.Get();
-                if (!_hasCR)
+                var b = input.Get();
+                if (!_hasCr)
                 {
-                    if (b == CR)
+                    if (b == Cr)
                     {
-                        _hasCR = true;
+                        _hasCr = true;
                     }
                     else
                     {
-                        if (b == LF)
+                        if (b == Lf)
                         {
                             found = true;
                         }
@@ -55,7 +55,7 @@ namespace Mina.Filter.Codec.StateMachine
                 }
                 else
                 {
-                    if (b == LF)
+                    if (b == Lf)
                     {
                         found = true;
                         finished = true;
@@ -68,7 +68,7 @@ namespace Mina.Filter.Codec.StateMachine
 
             if (finished)
             {
-                _hasCR = false;
+                _hasCr = false;
                 return FinishDecode(found, output);
             }
 
@@ -83,13 +83,13 @@ namespace Mina.Filter.Codec.StateMachine
         /// <summary>
         /// Invoked when this state has found a <code>CRLF</code>.
         /// </summary>
-        /// <param name="foundCRLF"><code>true</code> if <code>CRLF</code> was found</param>
+        /// <param name="foundCrlf"><code>true</code> if <code>CRLF</code> was found</param>
         /// <param name="output">the current <see cref="IProtocolDecoderOutput"/> used to write decoded messages.</param>
         /// <returns>
         /// the next state if a state transition was triggered (use 
         /// <code>this</code> for loop transitions) or <code>null</code> if 
         /// the state machine has reached its end.
         /// </returns>
-        protected abstract IDecodingState FinishDecode(Boolean foundCRLF, IProtocolDecoderOutput output);
+        protected abstract IDecodingState FinishDecode(bool foundCrlf, IProtocolDecoderOutput output);
     }
 }

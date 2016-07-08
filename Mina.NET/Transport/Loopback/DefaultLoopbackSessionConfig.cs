@@ -2,9 +2,9 @@
 
 namespace Mina.Transport.Loopback
 {
-    class DefaultLoopbackSessionConfig : AbstractIoSessionConfig
+    class DefaultLoopbackSessionConfig : AbstractIOSessionConfig
     {
-        protected override void DoSetAll(IoSessionConfig config)
+        protected override void DoSetAll(IOSessionConfig config)
         {
             // do nothing
         }

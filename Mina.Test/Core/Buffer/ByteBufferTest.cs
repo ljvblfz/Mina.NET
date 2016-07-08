@@ -20,11 +20,11 @@ namespace Mina.Core.Buffer
         [TestMethod]
         public void TestSliceAutoExpand()
         {
-            IoBuffer buffer = ByteBufferAllocator.Instance.Allocate(8);
+            var buffer = ByteBufferAllocator.Instance.Allocate(8);
             buffer.AutoExpand = true;
             Assert.IsTrue(buffer.AutoExpand, "Should AutoExpand");
 
-            IoBuffer slice = buffer.Slice();
+            var slice = buffer.Slice();
             Assert.IsFalse(buffer.AutoExpand, "Should *NOT* AutoExpand");
             Assert.IsFalse(slice.AutoExpand, "Should *NOT* AutoExpand");
         }
@@ -33,48 +33,48 @@ namespace Mina.Core.Buffer
         public void TestNormalizeCapacity()
         {
             // A few sanity checks
-            Assert.AreEqual(Int32.MaxValue, IoBuffer.NormalizeCapacity(-10));
-            Assert.AreEqual(0, IoBuffer.NormalizeCapacity(0));
-            Assert.AreEqual(Int32.MaxValue, IoBuffer.NormalizeCapacity(Int32.MaxValue));
-            Assert.AreEqual(Int32.MaxValue, IoBuffer.NormalizeCapacity(Int32.MinValue));
-            Assert.AreEqual(Int32.MaxValue, IoBuffer.NormalizeCapacity(Int32.MaxValue - 10));
+            Assert.AreEqual(int.MaxValue, IOBuffer.NormalizeCapacity(-10));
+            Assert.AreEqual(0, IOBuffer.NormalizeCapacity(0));
+            Assert.AreEqual(int.MaxValue, IOBuffer.NormalizeCapacity(int.MaxValue));
+            Assert.AreEqual(int.MaxValue, IOBuffer.NormalizeCapacity(int.MinValue));
+            Assert.AreEqual(int.MaxValue, IOBuffer.NormalizeCapacity(int.MaxValue - 10));
 
             // A sanity check test for all the powers of 2
-            for (int i = 0; i < 30; i++)
+            for (var i = 0; i < 30; i++)
             {
-                int n = 1 << i;
+                var n = 1 << i;
 
-                Assert.AreEqual(n, IoBuffer.NormalizeCapacity(n));
+                Assert.AreEqual(n, IOBuffer.NormalizeCapacity(n));
 
                 if (i > 1)
                 {
                     // test that n - 1 will be normalized to n (notice that n = 2^i)
-                    Assert.AreEqual(n, IoBuffer.NormalizeCapacity(n - 1));
+                    Assert.AreEqual(n, IOBuffer.NormalizeCapacity(n - 1));
                 }
 
                 // test that n + 1 will be normalized to 2^(i + 1)
-                Assert.AreEqual(n << 1, IoBuffer.NormalizeCapacity(n + 1));
+                Assert.AreEqual(n << 1, IOBuffer.NormalizeCapacity(n + 1));
             }
 
             // The first performance test measures the time to normalize integers
             // from 0 to 2^27 (it tests 2^27 integers)
-            DateTime time = DateTime.Now;
+            var time = DateTime.Now;
 
-            for (int i = 0; i < 1 << 27; i++)
+            for (var i = 0; i < 1 << 27; i++)
             {
-                IoBuffer.NormalizeCapacity(i);
+                IOBuffer.NormalizeCapacity(i);
             }
 
-            DateTime time2 = DateTime.Now;
+            var time2 = DateTime.Now;
             //Console.WriteLine("Time for performance test 1: " + (time2 - time).TotalMilliseconds + "ms");
 
             // The second performance test measures the time to normalize integers
             // from Int32.MaxValue to Int32.MaxValue - 2^27 (it tests 2^27
             // integers)
             time = DateTime.Now;
-            for (int i = Int32.MaxValue; i > Int32.MaxValue - (1 << 27); i--)
+            for (var i = int.MaxValue; i > int.MaxValue - (1 << 27); i--)
             {
-                IoBuffer.NormalizeCapacity(i);
+                IOBuffer.NormalizeCapacity(i);
             }
 
             time2 = DateTime.Now;
@@ -84,26 +84,26 @@ namespace Mina.Core.Buffer
         [TestMethod]
         public void TestObjectSerialization()
         {
-            IoBuffer buf = ByteBufferAllocator.Instance.Allocate(16);
+            var buf = ByteBufferAllocator.Instance.Allocate(16);
             buf.AutoExpand = true;
-            List<Object> o = new List<Object>();
+            var o = new List<object>();
             o.Add(new DateTime());
-            o.Add(typeof(Int64));
+            o.Add(typeof(long));
 
             // Test writing an object.
             buf.PutObject(o);
 
             // Test reading an object.
             buf.Clear();
-            Object o2 = buf.GetObject();
+            var o2 = buf.GetObject();
 #if !NETFX_CORE
             Assert.IsInstanceOf(o.GetType(), o2);
 #else
             Assert.IsInstanceOfType(o2, o.GetType());
 #endif
-            List<Object> l2 = (List<Object>)o2;
+            var l2 = (List<object>)o2;
             Assert.AreEqual(o.Count, l2.Count);
-            for (Int32 i = 0; i < o.Count; i++)
+            for (var i = 0; i < o.Count; i++)
             {
                 Assert.AreEqual(o[i], l2[i]);
             }
@@ -115,9 +115,9 @@ namespace Mina.Core.Buffer
         [TestMethod]
         public void TestAllocate()
         {
-            for (int i = 10; i < 1048576 * 2; i = i * 11 / 10) // increase by 10%
+            for (var i = 10; i < 1048576 * 2; i = i * 11 / 10) // increase by 10%
             {
-                IoBuffer buf = ByteBufferAllocator.Instance.Allocate(i);
+                var buf = ByteBufferAllocator.Instance.Allocate(i);
                 Assert.AreEqual(0, buf.Position);
                 Assert.AreEqual(buf.Capacity, buf.Remaining);
                 Assert.IsTrue(buf.Capacity >= i);
@@ -128,12 +128,12 @@ namespace Mina.Core.Buffer
         [TestMethod]
         public void TestAutoExpand()
         {
-            IoBuffer buf = ByteBufferAllocator.Instance.Allocate(1);
+            var buf = ByteBufferAllocator.Instance.Allocate(1);
 
-            buf.Put((byte)0);
+            buf.Put(0);
             try
             {
-                buf.Put((byte)0);
+                buf.Put(0);
                 Assert.Fail("Buffer can't auto expand, with autoExpand property set at false");
             }
             catch (OverflowException)
@@ -143,7 +143,7 @@ namespace Mina.Core.Buffer
             }
 
             buf.AutoExpand = true;
-            buf.Put((byte)0);
+            buf.Put(0);
             Assert.AreEqual(2, buf.Position);
             Assert.AreEqual(2, buf.Limit);
             Assert.AreEqual(2, buf.Capacity);
@@ -151,7 +151,7 @@ namespace Mina.Core.Buffer
             buf.AutoExpand = false;
             try
             {
-                buf.Put(3, (byte)0);
+                buf.Put(3, 0);
                 Assert.Fail("Buffer can't auto expand, with autoExpand property set at false");
             }
             catch (IndexOutOfRangeException)
@@ -161,7 +161,7 @@ namespace Mina.Core.Buffer
             }
 
             buf.AutoExpand = true;
-            buf.Put(3, (byte)0);
+            buf.Put(3, 0);
             Assert.AreEqual(2, buf.Position);
             Assert.AreEqual(4, buf.Limit);
             Assert.AreEqual(4, buf.Capacity);
@@ -169,10 +169,10 @@ namespace Mina.Core.Buffer
             // Make sure the buffer is doubled up.
             buf = ByteBufferAllocator.Instance.Allocate(1);
             buf.AutoExpand = true;
-            int lastCapacity = buf.Capacity;
-            for (int i = 0; i < 1048576; i++)
+            var lastCapacity = buf.Capacity;
+            for (var i = 0; i < 1048576; i++)
             {
-                buf.Put((byte)0);
+                buf.Put(0);
                 if (lastCapacity != buf.Capacity)
                 {
                     Assert.AreEqual(lastCapacity * 2, buf.Capacity);
@@ -184,19 +184,19 @@ namespace Mina.Core.Buffer
         [TestMethod]
         public void TestAutoExpandMark()
         {
-            IoBuffer buf = ByteBufferAllocator.Instance.Allocate(4);
+            var buf = ByteBufferAllocator.Instance.Allocate(4);
             buf.AutoExpand = true;
 
-            buf.Put((byte)0);
-            buf.Put((byte)0);
-            buf.Put((byte)0);
+            buf.Put(0);
+            buf.Put(0);
+            buf.Put(0);
 
             // Position should be 3 when we reset this buffer.
             buf.Mark();
 
             // Overflow it
-            buf.Put((byte)0);
-            buf.Put((byte)0);
+            buf.Put(0);
+            buf.Put(0);
 
             Assert.AreEqual(5, buf.Position);
             buf.Reset();
@@ -206,12 +206,12 @@ namespace Mina.Core.Buffer
         [TestMethod]
         public void TestAutoShrink()
         {
-            IoBuffer buf = ByteBufferAllocator.Instance.Allocate(8);
+            var buf = ByteBufferAllocator.Instance.Allocate(8);
             buf.AutoShrink = true;
 
             // Make sure the buffer doesn't shrink too much (less than the initial
             // capacity.)
-            buf.Sweep((byte)1);
+            buf.Sweep(1);
             buf.Fill(7);
             buf.Compact();
             Assert.AreEqual(8, buf.Capacity);
@@ -226,14 +226,14 @@ namespace Mina.Core.Buffer
             Assert.AreEqual(32, buf.Capacity);
 
             // Make sure the buffer shrinks when only 1/4 is being used.
-            buf.Sweep((byte)1);
+            buf.Sweep(1);
             buf.Fill(24);
             buf.Compact();
             Assert.AreEqual(16, buf.Capacity);
             Assert.AreEqual(8, buf.Position);
             Assert.AreEqual(16, buf.Limit);
             buf.Clear();
-            for (int i = 0; i < 8; i++)
+            for (var i = 0; i < 8; i++)
             {
                 Assert.AreEqual(1, buf.Get());
             }
@@ -244,14 +244,14 @@ namespace Mina.Core.Buffer
             Assert.AreEqual(32, buf.Capacity);
 
             // Make sure the buffer shrinks when only 1/8 is being used.
-            buf.Sweep((byte)1);
+            buf.Sweep(1);
             buf.Fill(28);
             buf.Compact();
             Assert.AreEqual(8, buf.Capacity);
             Assert.AreEqual(4, buf.Position);
             Assert.AreEqual(8, buf.Limit);
             buf.Clear();
-            for (int i = 0; i < 4; i++)
+            for (var i = 0; i < 4; i++)
             {
                 Assert.AreEqual(1, buf.Get());
             }
@@ -274,14 +274,14 @@ namespace Mina.Core.Buffer
             Assert.AreEqual(32, buf.Capacity);
 
             // Make sure the buffer doesn't shrink when more than 1/4 is being used.
-            buf.Sweep((byte)1);
+            buf.Sweep(1);
             buf.Fill(23);
             buf.Compact();
             Assert.AreEqual(32, buf.Capacity);
             Assert.AreEqual(9, buf.Position);
             Assert.AreEqual(32, buf.Limit);
             buf.Clear();
-            for (int i = 0; i < 9; i++)
+            for (var i = 0; i < 9; i++)
             {
                 Assert.AreEqual(1, buf.Get());
             }
@@ -290,12 +290,12 @@ namespace Mina.Core.Buffer
         [TestMethod]
         public void TestGetString()
         {
-            IoBuffer buf = ByteBufferAllocator.Instance.Allocate(16);
-            Encoding encoding = Encoding.UTF8;
+            var buf = ByteBufferAllocator.Instance.Allocate(16);
+            var encoding = Encoding.UTF8;
 
             buf.Clear();
             buf.PutString("hello", encoding);
-            buf.Put((Byte)0);
+            buf.Put(0);
             buf.Flip();
             Assert.AreEqual("hello", buf.GetString(encoding));
 
@@ -306,10 +306,10 @@ namespace Mina.Core.Buffer
 
             encoding = Encoding.GetEncoding("ISO-8859-1");
             buf.Clear();
-            buf.Put((Byte)'A');
-            buf.Put((Byte)'B');
-            buf.Put((Byte)'C');
-            buf.Put((Byte)0);
+            buf.Put((byte)'A');
+            buf.Put((byte)'B');
+            buf.Put((byte)'C');
+            buf.Put(0);
 
             buf.Position = 0;
             Assert.AreEqual("ABC", buf.GetString(encoding));
@@ -330,10 +330,10 @@ namespace Mina.Core.Buffer
 
             // Test a trailing garbage
             buf.Clear();
-            buf.Put((Byte)'A');
-            buf.Put((Byte)'B');
-            buf.Put((Byte)0);
-            buf.Put((Byte)'C');
+            buf.Put((byte)'A');
+            buf.Put((byte)'B');
+            buf.Put(0);
+            buf.Put((byte)'C');
             buf.Position = 0;
             Assert.AreEqual("AB", buf.GetString(4, encoding));
             Assert.AreEqual(4, buf.Position);
@@ -341,14 +341,14 @@ namespace Mina.Core.Buffer
             buf.Clear();
             buf.FillAndReset(buf.Limit);
             encoding = Encoding.GetEncoding("UTF-16BE");
-            buf.Put((Byte)0);
-            buf.Put((Byte)'A');
-            buf.Put((Byte)0);
-            buf.Put((Byte)'B');
-            buf.Put((Byte)0);
-            buf.Put((Byte)'C');
-            buf.Put((Byte)0);
-            buf.Put((Byte)0);
+            buf.Put(0);
+            buf.Put((byte)'A');
+            buf.Put(0);
+            buf.Put((byte)'B');
+            buf.Put(0);
+            buf.Put((byte)'C');
+            buf.Put(0);
+            buf.Put(0);
 
             buf.Position = 0;
             Assert.AreEqual("ABC", buf.GetString(encoding));
@@ -408,28 +408,28 @@ namespace Mina.Core.Buffer
         [TestMethod]
         public void TestPutString()
         {
-            IoBuffer buf = ByteBufferAllocator.Instance.Allocate(16);
-            Encoding encoding = Encoding.GetEncoding("ISO-8859-1");
+            var buf = ByteBufferAllocator.Instance.Allocate(16);
+            var encoding = Encoding.GetEncoding("ISO-8859-1");
 
             buf.PutString("ABC", encoding);
             Assert.AreEqual(3, buf.Position);
             buf.Clear();
-            Assert.AreEqual((Byte)'A', buf.Get(0));
-            Assert.AreEqual((Byte)'B', buf.Get(1));
-            Assert.AreEqual((Byte)'C', buf.Get(2));
+            Assert.AreEqual((byte)'A', buf.Get(0));
+            Assert.AreEqual((byte)'B', buf.Get(1));
+            Assert.AreEqual((byte)'C', buf.Get(2));
 
             buf.PutString("D", 5, encoding);
             Assert.AreEqual(5, buf.Position);
             buf.Clear();
-            Assert.AreEqual((Byte)'D', buf.Get(0));
+            Assert.AreEqual((byte)'D', buf.Get(0));
             Assert.AreEqual(0, buf.Get(1));
 
             buf.PutString("EFG", 2, encoding);
             Assert.AreEqual(2, buf.Position);
             buf.Clear();
-            Assert.AreEqual((Byte)'E', buf.Get(0));
-            Assert.AreEqual((Byte)'F', buf.Get(1));
-            Assert.AreEqual((Byte)'C', buf.Get(2)); // C may not be overwritten
+            Assert.AreEqual((byte)'E', buf.Get(0));
+            Assert.AreEqual((byte)'F', buf.Get(1));
+            Assert.AreEqual((byte)'C', buf.Get(2)); // C may not be overwritten
 
             // UTF-16: We specify byte order to omit BOM.
             encoding = Encoding.GetEncoding("UTF-16BE");
@@ -440,17 +440,17 @@ namespace Mina.Core.Buffer
             buf.Clear();
 
             Assert.AreEqual(0, buf.Get(0));
-            Assert.AreEqual((Byte)'A', buf.Get(1));
+            Assert.AreEqual((byte)'A', buf.Get(1));
             Assert.AreEqual(0, buf.Get(2));
-            Assert.AreEqual((Byte)'B', buf.Get(3));
+            Assert.AreEqual((byte)'B', buf.Get(3));
             Assert.AreEqual(0, buf.Get(4));
-            Assert.AreEqual((Byte)'C', buf.Get(5));
+            Assert.AreEqual((byte)'C', buf.Get(5));
 
             buf.PutString("D", 10, encoding);
             Assert.AreEqual(10, buf.Position);
             buf.Clear();
             Assert.AreEqual(0, buf.Get(0));
-            Assert.AreEqual((Byte)'D', buf.Get(1));
+            Assert.AreEqual((byte)'D', buf.Get(1));
             Assert.AreEqual(0, buf.Get(2));
             Assert.AreEqual(0, buf.Get(3));
 
@@ -458,11 +458,11 @@ namespace Mina.Core.Buffer
             Assert.AreEqual(4, buf.Position);
             buf.Clear();
             Assert.AreEqual(0, buf.Get(0));
-            Assert.AreEqual((Byte)'E', buf.Get(1));
+            Assert.AreEqual((byte)'E', buf.Get(1));
             Assert.AreEqual(0, buf.Get(2));
-            Assert.AreEqual((Byte)'F', buf.Get(3));
+            Assert.AreEqual((byte)'F', buf.Get(3));
             Assert.AreEqual(0, buf.Get(4)); // C may not be overwritten
-            Assert.AreEqual((Byte)'C', buf.Get(5)); // C may not be overwritten
+            Assert.AreEqual((byte)'C', buf.Get(5)); // C may not be overwritten
 
             // Test putting an emptry string
             buf.PutString("", encoding);
@@ -476,10 +476,10 @@ namespace Mina.Core.Buffer
         [TestMethod]
         public void TestGetPrefixedString()
         {
-            IoBuffer buf = IoBuffer.Allocate(16);
-            Encoding encoding = Encoding.GetEncoding("ISO-8859-1");
+            var buf = IOBuffer.Allocate(16);
+            var encoding = Encoding.GetEncoding("ISO-8859-1");
 
-            buf.PutInt16((short)3);
+            buf.PutInt16(3);
             buf.PutString("ABCD", encoding);
             buf.Clear();
             Assert.AreEqual("ABC", buf.GetPrefixedString(encoding));
@@ -488,8 +488,8 @@ namespace Mina.Core.Buffer
         [TestMethod]
         public void TestPutPrefixedString()
         {
-            Encoding encoding = Encoding.GetEncoding("ISO-8859-1");
-            IoBuffer buf = IoBuffer.Allocate(16);
+            var encoding = Encoding.GetEncoding("ISO-8859-1");
+            var buf = IOBuffer.Allocate(16);
             buf.FillAndReset(buf.Remaining);
 
             // Without autoExpand
@@ -540,8 +540,8 @@ namespace Mina.Core.Buffer
         [TestMethod]
         public void TestPutPrefixedStringWithPrefixLength()
         {
-            Encoding encoding = Encoding.GetEncoding("ISO-8859-1");
-            IoBuffer buf = IoBuffer.Allocate(16).Sweep();
+            var encoding = Encoding.GetEncoding("ISO-8859-1");
+            var buf = IOBuffer.Allocate(16).Sweep();
             buf.AutoExpand = true;
 
             buf.PutPrefixedString("A", 1, encoding);
@@ -569,11 +569,11 @@ namespace Mina.Core.Buffer
         [TestMethod]
         public void TestSweepWithZeros()
         {
-            IoBuffer buf = ByteBufferAllocator.Instance.Allocate(4);
-            Int32 i;
+            var buf = ByteBufferAllocator.Instance.Allocate(4);
+            int i;
             unchecked
             {
-                i = (Int32)0xdeadbeef;
+                i = (int)0xdeadbeef;
             }
             buf.PutInt32(i);
             buf.Clear();
@@ -590,11 +590,11 @@ namespace Mina.Core.Buffer
         [TestMethod]
         public void TestSweepNonZeros()
         {
-            IoBuffer buf = ByteBufferAllocator.Instance.Allocate(4);
-            Int32 i;
+            var buf = ByteBufferAllocator.Instance.Allocate(4);
+            int i;
             unchecked
             {
-                i = (Int32)0xdeadbeef;
+                i = (int)0xdeadbeef;
             }
             buf.PutInt32(i);
             buf.Clear();
@@ -602,7 +602,7 @@ namespace Mina.Core.Buffer
             Assert.AreEqual(4, buf.Position);
             Assert.AreEqual(4, buf.Limit);
 
-            buf.Sweep((byte)0x45);
+            buf.Sweep(0x45);
             Assert.AreEqual(0, buf.Position);
             Assert.AreEqual(4, buf.Limit);
             Assert.AreEqual(0x45454545, buf.GetInt32());
@@ -611,9 +611,9 @@ namespace Mina.Core.Buffer
         [TestMethod]
         public void TestWrapSubArray()
         {
-            byte[] array = new byte[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
+            var array = new byte[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
 
-            IoBuffer buf = ByteBufferAllocator.Instance.Wrap(array, 3, 4);
+            var buf = ByteBufferAllocator.Instance.Wrap(array, 3, 4);
             Assert.AreEqual(3, buf.Position);
             Assert.AreEqual(7, buf.Limit);
             Assert.AreEqual(10, buf.Capacity);
@@ -627,8 +627,8 @@ namespace Mina.Core.Buffer
         [TestMethod]
         public void TestDuplicate()
         {
-            IoBuffer original;
-            IoBuffer duplicate;
+            IOBuffer original;
+            IOBuffer duplicate;
 
             // Test if the buffer is duplicated correctly.
             original = ByteBufferAllocator.Instance.Allocate(16).Sweep();
@@ -636,7 +636,7 @@ namespace Mina.Core.Buffer
             original.Limit = 10;
 
             duplicate = original.Duplicate();
-            original.Put(4, (byte)127);
+            original.Put(4, 127);
             Assert.AreEqual(4, duplicate.Position);
             Assert.AreEqual(10, duplicate.Limit);
             Assert.AreEqual(16, duplicate.Capacity);
@@ -682,15 +682,15 @@ namespace Mina.Core.Buffer
         [TestMethod]
         public void TestSlice()
         {
-            IoBuffer original;
-            IoBuffer slice;
+            IOBuffer original;
+            IOBuffer slice;
 
             // Test if the buffer is sliced correctly.
             original = ByteBufferAllocator.Instance.Allocate(16).Sweep();
             original.Position = 4;
             original.Limit = 10;
             slice = original.Slice();
-            original.Put(4, (byte)127);
+            original.Put(4, 127);
             Assert.AreEqual(0, slice.Position);
             Assert.AreEqual(6, slice.Limit);
             Assert.AreEqual(6, slice.Capacity);
@@ -701,15 +701,15 @@ namespace Mina.Core.Buffer
         [TestMethod]
         public void TestReadOnlyBuffer()
         {
-            IoBuffer original;
-            IoBuffer duplicate;
+            IOBuffer original;
+            IOBuffer duplicate;
 
             // Test if the buffer is duplicated correctly.
             original = ByteBufferAllocator.Instance.Allocate(16).Sweep();
             original.Position = 4;
             original.Limit = 10;
             duplicate = original.AsReadOnlyBuffer();
-            original.Put(4, (byte)127);
+            original.Put(4, 127);
             Assert.AreEqual(4, duplicate.Position);
             Assert.AreEqual(10, duplicate.Limit);
             Assert.AreEqual(16, duplicate.Capacity);
@@ -734,11 +734,11 @@ namespace Mina.Core.Buffer
         [TestMethod]
         public void TestGetUnsigned()
         {
-            IoBuffer buf = IoBuffer.Allocate(16);
-            buf.Put((byte)0xA4);
-            buf.Put((byte)0xD0);
-            buf.Put((byte)0xB3);
-            buf.Put((byte)0xCD);
+            var buf = IOBuffer.Allocate(16);
+            buf.Put(0xA4);
+            buf.Put(0xD0);
+            buf.Put(0xB3);
+            buf.Put(0xCD);
             buf.Flip();
 
             buf.Order = ByteOrder.LittleEndian;
@@ -746,46 +746,46 @@ namespace Mina.Core.Buffer
             buf.Mark();
             Assert.AreEqual(0xA4, buf.Get());
             buf.Reset();
-            Assert.AreEqual(0xD0A4, (UInt16)buf.GetInt16());
+            Assert.AreEqual(0xD0A4, (ushort)buf.GetInt16());
             buf.Reset();
-            Assert.AreEqual(0xCDB3D0A4L, (UInt32)buf.GetInt32());
+            Assert.AreEqual(0xCDB3D0A4L, (uint)buf.GetInt32());
         }
 
         [TestMethod]
         public void TestIndexOf()
         {
-            for (int i = 0; i < 2; i++)
+            for (var i = 0; i < 2; i++)
             {
-                IoBuffer buf = IoBuffer.Allocate(16);
-                buf.Put((byte)0x1);
-                buf.Put((byte)0x2);
-                buf.Put((byte)0x3);
-                buf.Put((byte)0x4);
-                buf.Put((byte)0x1);
-                buf.Put((byte)0x2);
-                buf.Put((byte)0x3);
-                buf.Put((byte)0x4);
+                var buf = IOBuffer.Allocate(16);
+                buf.Put(0x1);
+                buf.Put(0x2);
+                buf.Put(0x3);
+                buf.Put(0x4);
+                buf.Put(0x1);
+                buf.Put(0x2);
+                buf.Put(0x3);
+                buf.Put(0x4);
                 buf.Position = 2;
                 buf.Limit = 5;
 
-                Assert.AreEqual(4, buf.IndexOf((byte)0x1));
-                Assert.AreEqual(-1, buf.IndexOf((byte)0x2));
-                Assert.AreEqual(2, buf.IndexOf((byte)0x3));
-                Assert.AreEqual(3, buf.IndexOf((byte)0x4));
+                Assert.AreEqual(4, buf.IndexOf(0x1));
+                Assert.AreEqual(-1, buf.IndexOf(0x2));
+                Assert.AreEqual(2, buf.IndexOf(0x3));
+                Assert.AreEqual(3, buf.IndexOf(0x4));
             }
         }
 
         [TestMethod]
         public void TestGetSlice()
         {
-            IoBuffer buf = IoBuffer.Allocate(36);
+            var buf = IOBuffer.Allocate(36);
 
-            for (Byte i = 0; i < 36; i++)
+            for (byte i = 0; i < 36; i++)
             {
                 buf.Put(i);
             }
 
-            IoBuffer res = buf.GetSlice(1, 3);
+            var res = buf.GetSlice(1, 3);
 
             // The limit should be 3, the pos should be 0 and the bytes read
             // should be 0x01, 0x02 and 0x03
@@ -811,7 +811,7 @@ namespace Mina.Core.Buffer
         [TestMethod]
         public void TestShrink()
         {
-            IoBuffer buf = IoBuffer.Allocate(36);
+            var buf = IOBuffer.Allocate(36);
             buf.MinimumCapacity = 0;
 
             buf.Limit = 18;
@@ -842,19 +842,19 @@ namespace Mina.Core.Buffer
         [TestMethod]
         public void TestShrink2()
         {
-            IoBuffer buf = IoBuffer.Allocate(36);
+            var buf = IOBuffer.Allocate(36);
             buf.Put(Encoding.Default.GetBytes("012345"));
             buf.Flip();
             buf.Position = 4;
             buf.MinimumCapacity = 8;
 
-            IoBuffer newBuf = buf.Shrink();
+            var newBuf = buf.Shrink();
             Assert.AreEqual(4, newBuf.Position);
             Assert.AreEqual(6, newBuf.Limit);
             Assert.AreEqual(9, newBuf.Capacity);
             Assert.AreEqual(8, newBuf.MinimumCapacity);
 
-            buf = IoBuffer.Allocate(6);
+            buf = IOBuffer.Allocate(6);
             buf.Put(Encoding.Default.GetBytes("012345"));
             buf.Flip();
             buf.Position = 4;
@@ -869,7 +869,7 @@ namespace Mina.Core.Buffer
         [TestMethod]
         public void TestCapacity()
         {
-            IoBuffer buffer = IoBuffer.Allocate(10);
+            var buffer = IOBuffer.Allocate(10);
 
             buffer.Put(Encoding.Default.GetBytes("012345"));
             buffer.Flip();
@@ -879,7 +879,7 @@ namespace Mina.Core.Buffer
             Assert.AreEqual(10, buffer.Capacity);
 
             // See if we can increase the capacity
-            buffer = IoBuffer.Allocate(10);
+            buffer = IOBuffer.Allocate(10);
 
             buffer.Put(Encoding.Default.GetBytes("012345"));
             buffer.Flip();
@@ -891,7 +891,7 @@ namespace Mina.Core.Buffer
 
             // See if we can go down when the minimum capacity is below the current capacity
             // We should not.
-            buffer = IoBuffer.Allocate(10);
+            buffer = IOBuffer.Allocate(10);
             buffer.Capacity = 5;
             Assert.AreEqual(10, buffer.MinimumCapacity);
             Assert.AreEqual(10, buffer.Capacity);
@@ -900,7 +900,7 @@ namespace Mina.Core.Buffer
         [TestMethod]
         public void TestExpand()
         {
-            IoBuffer buffer = IoBuffer.Allocate(10);
+            var buffer = IOBuffer.Allocate(10);
 
             buffer.Put(Encoding.Default.GetBytes("012345"));
             buffer.Flip();
@@ -908,13 +908,13 @@ namespace Mina.Core.Buffer
             Assert.AreEqual(6, buffer.Remaining);
 
             // See if we can expand with a lower number of remaining bytes. We should not.
-            IoBuffer newBuffer = buffer.Expand(2);
+            var newBuffer = buffer.Expand(2);
             Assert.AreEqual(6, newBuffer.Limit);
             Assert.AreEqual(10, newBuffer.Capacity);
             Assert.AreEqual(0, newBuffer.Position);
 
             // Now, let's expand the buffer above the number of current bytes but below the limit
-            buffer = IoBuffer.Allocate(10);
+            buffer = IOBuffer.Allocate(10);
 
             buffer.Put(Encoding.Default.GetBytes("012345"));
             buffer.Flip();
@@ -924,7 +924,7 @@ namespace Mina.Core.Buffer
             Assert.AreEqual(0, newBuffer.Position);
 
             // Last, expand the buffer above the limit
-            buffer = IoBuffer.Allocate(10);
+            buffer = IOBuffer.Allocate(10);
 
             buffer.Put(Encoding.Default.GetBytes("012345"));
             buffer.Flip();
@@ -934,7 +934,7 @@ namespace Mina.Core.Buffer
             Assert.AreEqual(0, newBuffer.Position);
 
             // Now, move forward in the buffer
-            buffer = IoBuffer.Allocate(10);
+            buffer = IOBuffer.Allocate(10);
 
             buffer.Put(Encoding.Default.GetBytes("012345"));
             buffer.Flip();
@@ -947,7 +947,7 @@ namespace Mina.Core.Buffer
             Assert.AreEqual(4, newBuffer.Position);
 
             // Expand above the current limit
-            buffer = IoBuffer.Allocate(10);
+            buffer = IOBuffer.Allocate(10);
 
             buffer.Put(Encoding.Default.GetBytes("012345"));
             buffer.Flip();
@@ -958,7 +958,7 @@ namespace Mina.Core.Buffer
             Assert.AreEqual(4, newBuffer.Position);
 
             // Expand above the current capacity
-            buffer = IoBuffer.Allocate(10);
+            buffer = IOBuffer.Allocate(10);
 
             buffer.Put(Encoding.Default.GetBytes("012345"));
             buffer.Flip();
@@ -972,7 +972,7 @@ namespace Mina.Core.Buffer
         [TestMethod]
         public void TestExpandPos()
         {
-            IoBuffer buffer = IoBuffer.Allocate(10);
+            var buffer = IOBuffer.Allocate(10);
 
             buffer.Put(Encoding.Default.GetBytes("012345"));
             buffer.Flip();
@@ -980,13 +980,13 @@ namespace Mina.Core.Buffer
             Assert.AreEqual(6, buffer.Remaining);
 
             // See if we can expand with a lower number of remaining bytes. We should not.
-            IoBuffer newBuffer = buffer.Expand(3, 2);
+            var newBuffer = buffer.Expand(3, 2);
             Assert.AreEqual(6, newBuffer.Limit);
             Assert.AreEqual(10, newBuffer.Capacity);
             Assert.AreEqual(0, newBuffer.Position);
 
             // Now, let's expand the buffer above the number of current bytes but below the limit
-            buffer = IoBuffer.Allocate(10);
+            buffer = IOBuffer.Allocate(10);
             buffer.Put(Encoding.Default.GetBytes("012345"));
             buffer.Flip();
 
@@ -996,7 +996,7 @@ namespace Mina.Core.Buffer
             Assert.AreEqual(0, newBuffer.Position);
 
             // Last, expand the buffer above the limit
-            buffer = IoBuffer.Allocate(10);
+            buffer = IOBuffer.Allocate(10);
 
             buffer.Put(Encoding.Default.GetBytes("012345"));
             buffer.Flip();
@@ -1006,7 +1006,7 @@ namespace Mina.Core.Buffer
             Assert.AreEqual(0, newBuffer.Position);
 
             // Now, move forward in the buffer
-            buffer = IoBuffer.Allocate(10);
+            buffer = IOBuffer.Allocate(10);
 
             buffer.Put(Encoding.Default.GetBytes("012345"));
             buffer.Flip();
@@ -1019,7 +1019,7 @@ namespace Mina.Core.Buffer
             Assert.AreEqual(4, newBuffer.Position);
 
             // Expand above the current limit
-            buffer = IoBuffer.Allocate(10);
+            buffer = IOBuffer.Allocate(10);
 
             buffer.Put(Encoding.Default.GetBytes("012345"));
             buffer.Flip();
@@ -1030,7 +1030,7 @@ namespace Mina.Core.Buffer
             Assert.AreEqual(4, newBuffer.Position);
 
             // Expand above the current capacity
-            buffer = IoBuffer.Allocate(10);
+            buffer = IOBuffer.Allocate(10);
 
             buffer.Put(Encoding.Default.GetBytes("012345"));
             buffer.Flip();
@@ -1047,7 +1047,7 @@ namespace Mina.Core.Buffer
             Exception expected = null;
             try
             {
-                IoBuffer.Allocate(-1);
+                IOBuffer.Allocate(-1);
             }
             catch (Exception e)
             {

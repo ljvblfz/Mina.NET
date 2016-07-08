@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Net;
 using System.Net.Sockets;
+using Mina.Core.Filterchain;
 using Mina.Core.Future;
 using Mina.Core.Service;
 using Mina.Core.Session;
@@ -11,14 +12,14 @@ namespace Mina.Transport.Socket
     /// <summary>
     /// Base class of socket connector.
     /// </summary>
-    public abstract class AbstractSocketConnector : AbstractIoConnector
+    public abstract class AbstractSocketConnector : AbstractIOConnector
     {
         private readonly AsyncSocketProcessor _processor;
 
         /// <summary>
         /// Instantiates.
         /// </summary>
-        protected AbstractSocketConnector(IoSessionConfig sessionConfig)
+        protected AbstractSocketConnector(IOSessionConfig sessionConfig)
             : base(sessionConfig)
         {
             _processor = new AsyncSocketProcessor(() => ManagedSessions.Values);
@@ -27,39 +28,39 @@ namespace Mina.Transport.Socket
         /// <inheritdoc/>
         public new IPEndPoint DefaultRemoteEndPoint
         {
-            get { return (IPEndPoint)base.DefaultRemoteEndPoint; }
+            get { return (IPEndPoint) base.DefaultRemoteEndPoint; }
             set { base.DefaultRemoteEndPoint = value; }
         }
 
         /// <summary>
         /// Gets or sets a value indicating whether to reuse the read buffer
         /// sent to <see cref="SocketSession.FilterChain"/> by
-        /// <see cref="Core.Filterchain.IoFilterChain.FireMessageReceived(Object)"/>.
+        /// <see cref="IOFilterChain.FireMessageReceived(object)"/>.
         /// </summary>
         /// <remarks>
         /// If any thread model, i.e. an <see cref="Filter.Executor.ExecutorFilter"/>,
-        /// is added before filters that process the incoming <see cref="Core.Buffer.IoBuffer"/>
-        /// in <see cref="Core.Filterchain.IoFilter.MessageReceived(Core.Filterchain.INextFilter, IoSession, Object)"/>,
+        /// is added before filters that process the incoming <see cref="Core.Buffer.IOBuffer"/>
+        /// in <see cref="IOFilter.MessageReceived(Core.FilterchIOSessionFilter, IoSession, object)"/>,
         /// this must be set to <code>false</code> to avoid undetermined state
         /// of the read buffer. The default value is <code>true</code>.
         /// </remarks>
-        public Boolean ReuseBuffer { get; set; }
+        public bool ReuseBuffer { get; set; }
 
         /// <summary>
-        /// Gets the <see cref="IoProcessor"/>.
+        /// Gets the <see cref="IOProcessor"/>.
         /// </summary>
-        protected IoProcessor<SocketSession> Processor
-        {
-            get { return _processor; }
-        }
+        protected IIOProcessor<SocketSession> Processor => _processor;
 
         /// <inheritdoc/>
-        protected override IConnectFuture Connect0(EndPoint remoteEP, EndPoint localEP, Action<IoSession, IConnectFuture> sessionInitializer)
+        protected override IConnectFuture Connect0(EndPoint remoteEp, EndPoint localEp,
+            Action<IOSession, IConnectFuture> sessionInitializer)
         {
-            System.Net.Sockets.Socket socket = NewSocket(remoteEP.AddressFamily);
-            if (localEP != null)
-                socket.Bind(localEP);
-            ConnectorContext ctx = new ConnectorContext(socket, remoteEP, sessionInitializer);
+            var socket = NewSocket(remoteEp.AddressFamily);
+            if (localEp != null)
+            {
+                socket.Bind(localEp);
+            }
+            var ctx = new ConnectorContext(socket, remoteEp, sessionInitializer);
             BeginConnect(ctx);
             return ctx;
         }
@@ -82,7 +83,7 @@ namespace Mina.Transport.Socket
         /// </summary>
         /// <param name="session">the connected session</param>
         /// <param name="connector">the context of current connector</param>
-        protected void EndConnect(IoSession session, ConnectorContext connector)
+        protected void EndConnect(IOSession session, ConnectorContext connector)
         {
             try
             {
@@ -109,7 +110,7 @@ namespace Mina.Transport.Socket
         }
 
         /// <inheritdoc/>
-        protected override void Dispose(Boolean disposing)
+        protected override void Dispose(bool disposing)
         {
             if (disposing)
             {
@@ -123,64 +124,52 @@ namespace Mina.Transport.Socket
         /// </summary>
         protected class ConnectorContext : DefaultConnectFuture
         {
-            private readonly System.Net.Sockets.Socket _socket;
-            private readonly EndPoint _remoteEP;
-            private readonly Action<IoSession, IConnectFuture> _sessionInitializer;
-
             /// <summary>
             /// Instantiates.
             /// </summary>
             /// <param name="socket">the associated socket</param>
-            /// <param name="remoteEP">the remote endpoint</param>
+            /// <param name="remoteEp">the remote endpoint</param>
             /// <param name="sessionInitializer">the funciton to initialize session</param>
-            public ConnectorContext(System.Net.Sockets.Socket socket, EndPoint remoteEP, Action<IoSession, IConnectFuture> sessionInitializer)
+            public ConnectorContext(System.Net.Sockets.Socket socket, EndPoint remoteEp,
+                Action<IOSession, IConnectFuture> sessionInitializer)
             {
-                _socket = socket;
-                _remoteEP = remoteEP;
-                _sessionInitializer = sessionInitializer;
+                Socket = socket;
+                RemoteEp = remoteEp;
+                SessionInitializer = sessionInitializer;
             }
 
             /// <summary>
             /// Gets the associated socket.
             /// </summary>
-            public System.Net.Sockets.Socket Socket
-            {
-                get { return _socket; }
-            }
+            public System.Net.Sockets.Socket Socket { get; }
 
             /// <summary>
             /// Gets the remote endpoint.
             /// </summary>
-            public EndPoint RemoteEP
-            {
-                get { return _remoteEP; }
-            }
+            public EndPoint RemoteEp { get; }
 
             /// <summary>
-            /// Gets the funciton to initialize session.
+            /// Gets the function to initialize session.
             /// </summary>
-            public Action<IoSession, IConnectFuture> SessionInitializer
-            {
-                get { return _sessionInitializer; }
-            }
+            public Action<IOSession, IConnectFuture> SessionInitializer { get; }
 
             /// <inheritdoc/>
-            public override Boolean Cancel()
+            public override bool Cancel()
             {
-                Boolean justCancelled = base.Cancel();
+                var justCancelled = base.Cancel();
                 if (justCancelled)
                 {
-                    _socket.Close();
+                    Socket.Close();
                 }
                 return justCancelled;
             }
 
             /// <inheritdoc/>
-            protected override void Dispose(Boolean disposing)
+            protected override void Dispose(bool disposing)
             {
                 if (disposing)
                 {
-                    ((IDisposable)_socket).Dispose();
+                    Socket.Dispose();
                 }
                 base.Dispose(disposing);
             }

@@ -1,5 +1,4 @@
-﻿using System;
-using Mina.Core.Session;
+﻿using Mina.Core.Session;
 
 namespace Mina.Filter.Codec.Serialization
 {
@@ -12,13 +11,13 @@ namespace Mina.Filter.Codec.Serialization
         private readonly ObjectSerializationDecoder _decoder = new ObjectSerializationDecoder();
 
         /// <inheritdoc/>
-        public IProtocolEncoder GetEncoder(IoSession session)
+        public IProtocolEncoder GetEncoder(IOSession session)
         {
             return _encoder;
         }
 
         /// <inheritdoc/>
-        public IProtocolDecoder GetDecoder(IoSession session)
+        public IProtocolDecoder GetDecoder(IOSession session)
         {
             return _decoder;
         }
@@ -27,9 +26,9 @@ namespace Mina.Filter.Codec.Serialization
         /// Gets or sets the allowed maximum size of the encoded object.
         /// If the size of the encoded object exceeds this value, this encoder
         /// will throw a <see cref="ArgumentException"/>.  The default value
-        /// is <see cref="Int32.MaxValue"/>.
+        /// is <see cref="int.MaxValue"/>.
         /// </summary>
-        public Int32 EncoderMaxObjectSize
+        public int EncoderMaxObjectSize
         {
             get { return _encoder.MaxObjectSize; }
             set { _encoder.MaxObjectSize = value; }
@@ -41,7 +40,7 @@ namespace Mina.Filter.Codec.Serialization
         /// will throw a <see cref="Core.Buffer.BufferDataException"/>.  The default value
         /// is <code>1048576</code> (1MB).
         /// </summary>
-        public Int32 DecoderMaxObjectSize
+        public int DecoderMaxObjectSize
         {
             get { return _decoder.MaxObjectSize; }
             set { _decoder.MaxObjectSize = value; }

@@ -10,18 +10,14 @@ namespace Mina.Filter.Codec
     /// </summary>
     public abstract class AbstractProtocolEncoderOutput : IProtocolEncoderOutput
     {
-        private readonly IQueue<Object> _queue = new ConcurrentQueue<Object>();
-        private Boolean _buffersOnly = true;
+        private bool _buffersOnly = true;
 
-        public IQueue<Object> MessageQueue
-        {
-            get { return _queue; }
-        }
+        public IQueue<object> MessageQueue { get; } = new ConcurrentQueue<object>();
 
         /// <inheritdoc/>
-        public void Write(Object encodedMessage)
+        public void Write(object encodedMessage)
         {
-            IoBuffer buf = encodedMessage as IoBuffer;
+            var buf = encodedMessage as IOBuffer;
             if (buf == null)
             {
                 _buffersOnly = false;
@@ -30,36 +26,42 @@ namespace Mina.Filter.Codec
             {
                 throw new ArgumentException("buf is empty. Forgot to call flip()?");
             }
-            _queue.Enqueue(encodedMessage);
+            MessageQueue.Enqueue(encodedMessage);
         }
 
         /// <inheritdoc/>
         public void MergeAll()
         {
             if (!_buffersOnly)
-                throw new InvalidOperationException("The encoded messages contains a non-buffer.");
-
-            if (_queue.Count < 2)
-                // no need to merge!
-                return;
-
-            Int32 sum = 0;
-            foreach (var item in _queue)
             {
-                sum += ((IoBuffer)item).Remaining;
+                throw new InvalidOperationException("The encoded messages contains a non-buffer.");
             }
 
-            IoBuffer newBuf = IoBuffer.Allocate(sum);
-            for (; ; )
+            if (MessageQueue.Count < 2)
             {
-                Object obj = _queue.Dequeue();
+                // no need to merge!
+                return;
+            }
+
+            var sum = 0;
+            foreach (var item in MessageQueue)
+            {
+                sum += ((IOBuffer) item).Remaining;
+            }
+
+            var newBuf = IOBuffer.Allocate(sum);
+            for (;;)
+            {
+                var obj = MessageQueue.Dequeue();
                 if (obj == null)
+                {
                     break;
-                newBuf.Put((IoBuffer)obj);
+                }
+                newBuf.Put((IOBuffer) obj);
             }
 
             newBuf.Flip();
-            _queue.Enqueue(newBuf);
+            MessageQueue.Enqueue(newBuf);
         }
 
         /// <inheritdoc/>

@@ -12,14 +12,14 @@ namespace Mina.Example.EchoServer
 {
     class Program
     {
-        private static readonly int port = 8080;
-        private static readonly Boolean ssl = false;
+        private static readonly int Port = 8080;
+        private static readonly bool Ssl = false;
 
         static void Main(string[] args)
         {
-            IoAcceptor acceptor = new AsyncSocketAcceptor();
+            IOAcceptor acceptor = new AsyncSocketAcceptor();
 
-            if (ssl)
+            if (Ssl)
                 acceptor.FilterChain.AddLast("ssl", new SslFilter(AppDomain.CurrentDomain.BaseDirectory + "\\TempCert.cer"));
 
             acceptor.FilterChain.AddLast("logger", new LoggingFilter());
@@ -34,14 +34,14 @@ namespace Mina.Example.EchoServer
             acceptor.MessageReceived += (s, e) =>
             {
                 Console.WriteLine("Received : " + e.Message);
-                IoBuffer income = (IoBuffer)e.Message;
-                IoBuffer outcome = IoBuffer.Allocate(income.Remaining);
+                var income = (IOBuffer)e.Message;
+                var outcome = IOBuffer.Allocate(income.Remaining);
                 outcome.Put(income);
                 outcome.Flip();
                 e.Session.Write(outcome);
             };
 
-            acceptor.Bind(new IPEndPoint(IPAddress.Any, port));
+            acceptor.Bind(new IPEndPoint(IPAddress.Any, Port));
 
             Console.WriteLine("Listening on " + acceptor.LocalEndPoint);
 

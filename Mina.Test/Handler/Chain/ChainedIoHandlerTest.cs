@@ -1,5 +1,4 @@
-﻿using System;
-using System.Text;
+﻿using System.Text;
 #if !NETFX_CORE
 using NUnit.Framework;
 using TestClass = NUnit.Framework.TestFixtureAttribute;
@@ -17,29 +16,29 @@ namespace Mina.Handler.Chain
         [TestMethod]
         public void TestChainedCommand()
         {
-            IoHandlerChain chain = new IoHandlerChain();
-            StringBuilder buf = new StringBuilder();
+            var chain = new IOHandlerChain();
+            var buf = new StringBuilder();
             chain.AddLast("A", new TestCommand(buf, 'A'));
             chain.AddLast("B", new TestCommand(buf, 'B'));
             chain.AddLast("C", new TestCommand(buf, 'C'));
 
-            new ChainedIoHandler(chain).MessageReceived(new DummySession(), null);
+            new ChainedIOHandler(chain).MessageReceived(new DummySession(), null);
 
             Assert.AreEqual("ABC", buf.ToString());
         }
 
-        private class TestCommand : IoHandlerCommand
+        private class TestCommand : IOHandlerCommand
         {
             private readonly StringBuilder _sb;
-            private readonly Char _ch;
+            private readonly char _ch;
 
-            public TestCommand(StringBuilder sb, Char ch)
+            public TestCommand(StringBuilder sb, char ch)
             {
                 _sb = sb;
                 _ch = ch;
             }
 
-            public void Execute(INextCommand next, IoSession session, Object message)
+            public void Execute(INextCommand next, IOSession session, object message)
             {
                 _sb.Append(_ch);
                 next.Execute(session, message);

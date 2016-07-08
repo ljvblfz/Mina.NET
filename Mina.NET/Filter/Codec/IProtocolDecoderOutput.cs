@@ -1,5 +1,4 @@
-﻿using System;
-using Mina.Core.Filterchain;
+﻿using Mina.Core.Filterchain;
 using Mina.Core.Session;
 
 namespace Mina.Filter.Codec
@@ -16,11 +15,12 @@ namespace Mina.Filter.Codec
         /// <see cref="IProtocolDecoder"/> must call write(Object) for each decoded
         /// messages.
         /// </summary>
-        void Write(Object message);
+        void Write(object message);
+
         /// <summary>
         /// Flushes all messages you wrote via write(Object) to
         /// the next filter.
         /// </summary>
-        void Flush(INextFilter nextFilter, IoSession session);
+        void Flush(INextFilter nextFilter, IOSession session);
     }
 }

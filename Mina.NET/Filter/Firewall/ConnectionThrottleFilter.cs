@@ -8,16 +8,15 @@ using Mina.Core.Session;
 namespace Mina.Filter.Firewall
 {
     /// <summary>
-    /// A <see cref="IoFilter"/> which blocks connections from connecting
+    /// A <see cref="IOFilter"/> which blocks connections from connecting
     /// at a rate faster than the specified interval.
     /// </summary>
-    public class ConnectionThrottleFilter : IoFilterAdapter
+    public class ConnectionThrottleFilter : IOFilterAdapter
     {
-        static readonly Int64 DefaultTime = 1000L;
-        static readonly ILog log = LogManager.GetLogger(typeof(ConnectionThrottleFilter));
+        static readonly long DefaultTime = 1000L;
+        static readonly ILog Log = LogManager.GetLogger(typeof(ConnectionThrottleFilter));
 
-        private Int64 _allowedInterval;
-        private readonly ConcurrentDictionary<String, DateTime> _clients = new ConcurrentDictionary<String, DateTime>();
+        private readonly ConcurrentDictionary<string, DateTime> _clients = new ConcurrentDictionary<string, DateTime>();
         // TODO expire overtime clients
 
         /// <summary>
@@ -25,33 +24,32 @@ namespace Mina.Filter.Firewall
         /// </summary>
         public ConnectionThrottleFilter()
             : this(DefaultTime)
-        { }
+        {
+        }
 
         /// <summary>
         /// Constructor that takes in a specified wait time.
         /// </summary>
         /// <param name="allowedInterval">The number of milliseconds a client is allowed to wait before making another successful connection</param>
-        public ConnectionThrottleFilter(Int64 allowedInterval)
+        public ConnectionThrottleFilter(long allowedInterval)
         {
-            this._allowedInterval = allowedInterval;
+            AllowedInterval = allowedInterval;
         }
 
         /// <summary>
         /// Gets or sets the minimal interval (ms) between connections from a client.
         /// </summary>
-        public Int64 AllowedInterval
-        {
-            get { return _allowedInterval; }
-            set { _allowedInterval = value; }
-        }
+        public long AllowedInterval { get; set; }
 
         /// <inheritdoc/>
-        public override void SessionCreated(INextFilter nextFilter, IoSession session)
+        public override void SessionCreated(INextFilter nextFilter, IOSession session)
         {
             if (!IsConnectionOk(session))
             {
-                if (log.IsWarnEnabled)
-                    log.Warn("Connections coming in too fast; closing.");
+                if (Log.IsWarnEnabled)
+                {
+                    Log.Warn("Connections coming in too fast; closing.");
+                }
                 session.Close(true);
             }
             base.SessionCreated(nextFilter, session);
@@ -62,19 +60,21 @@ namespace Mina.Filter.Firewall
         /// </summary>
         /// <param name="session">the new session that will be verified</param>
         /// <returns>true if the session meets the criteria, otherwise false</returns>
-        public Boolean IsConnectionOk(IoSession session)
+        public bool IsConnectionOk(IOSession session)
         {
-            IPEndPoint ep = session.RemoteEndPoint as IPEndPoint;
+            var ep = session.RemoteEndPoint as IPEndPoint;
             if (ep != null)
             {
-                String addr = ep.Address.ToString();
-                DateTime now = DateTime.Now;
+                var addr = ep.Address.ToString();
+                var now = DateTime.Now;
                 DateTime? lastConnTime = null;
 
                 _clients.AddOrUpdate(addr, now, (k, v) =>
                 {
-                    if (log.IsDebugEnabled)
-                        log.Debug("This is not a new client");
+                    if (Log.IsDebugEnabled)
+                    {
+                        Log.Debug("This is not a new client");
+                    }
                     lastConnTime = v;
                     return now;
                 });
@@ -83,10 +83,12 @@ namespace Mina.Filter.Firewall
                 {
                     // if the interval between now and the last connection is
                     // less than the allowed interval, return false
-                    if ((now - lastConnTime.Value).TotalMilliseconds < _allowedInterval)
+                    if ((now - lastConnTime.Value).TotalMilliseconds < AllowedInterval)
                     {
-                        if (log.IsWarnEnabled)
-                            log.Warn("Session connection interval too short");
+                        if (Log.IsWarnEnabled)
+                        {
+                            Log.Warn("Session connection interval too short");
+                        }
                         return false;
                     }
                 }

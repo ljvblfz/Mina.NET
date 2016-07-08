@@ -1,5 +1,4 @@
-﻿using System;
-using Mina.Core.Buffer;
+﻿using Mina.Core.Buffer;
 using Mina.Core.Session;
 using Mina.Example.SumUp.Message;
 using Mina.Filter.Codec;
@@ -10,16 +9,16 @@ namespace Mina.Example.SumUp.Codec
     abstract class AbstractMessageEncoder<T> : IMessageEncoder<T>
         where T : AbstractMessage
     {
-        private readonly Int32 _type;
+        private readonly int _type;
 
-        protected AbstractMessageEncoder(Int32 type)
+        protected AbstractMessageEncoder(int type)
         {
             _type = type;
         }
 
-        public void Encode(IoSession session, T message, IProtocolEncoderOutput output)
+        public void Encode(IOSession session, T message, IProtocolEncoderOutput output)
         {
-            IoBuffer buf = IoBuffer.Allocate(16);
+            var buf = IOBuffer.Allocate(16);
             buf.AutoExpand = true; // Enable auto-expand for easier encoding
 
             // Encode a header
@@ -32,11 +31,11 @@ namespace Mina.Example.SumUp.Codec
             output.Write(buf);
         }
 
-        public void Encode(IoSession session, Object message, IProtocolEncoderOutput output)
+        public void Encode(IOSession session, object message, IProtocolEncoderOutput output)
         {
             Encode(session, (T)message, output);
         }
 
-        protected abstract void EncodeBody(IoSession session, T message, IoBuffer output);
+        protected abstract void EncodeBody(IOSession session, T message, IOBuffer output);
     }
 }

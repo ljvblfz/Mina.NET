@@ -1,5 +1,4 @@
-﻿using System;
-using System.Text;
+﻿using System.Text;
 using Mina.Core.Session;
 
 namespace Mina.Filter.Codec.PrefixedString
@@ -10,15 +9,16 @@ namespace Mina.Filter.Codec.PrefixedString
     /// </summary>
     public class PrefixedStringCodecFactory : IProtocolCodecFactory
     {
-        public const Int32 DefaultPrefixLength = 4;
-        public const Int32 DefaultMaxDataLength = 2048;
+        public const int DefaultPrefixLength = 4;
+        public const int DefaultMaxDataLength = 2048;
 
         private readonly PrefixedStringEncoder _encoder;
         private readonly PrefixedStringDecoder _decoder;
 
         public PrefixedStringCodecFactory()
             : this(Encoding.Default)
-        { }
+        {
+        }
 
         public PrefixedStringCodecFactory(Encoding encoding)
         {
@@ -29,7 +29,7 @@ namespace Mina.Filter.Codec.PrefixedString
         /// <summary>
         /// Gets or sets the length of the length prefix (1, 2, or 4) used by the encoder.
         /// </summary>
-        public Int32 EncoderPrefixLength
+        public int EncoderPrefixLength
         {
             get { return _encoder.PrefixLength; }
             set { _encoder.PrefixLength = value; }
@@ -43,7 +43,7 @@ namespace Mina.Filter.Codec.PrefixedString
         /// The default value is <see cref="PrefixedStringCodecFactory.DefaultMaxDataLength"/>.
         /// </remarks>
         /// </summary>
-        public Int32 EncoderMaxDataLength
+        public int EncoderMaxDataLength
         {
             get { return _encoder.MaxDataLength; }
             set { _encoder.MaxDataLength = value; }
@@ -52,7 +52,7 @@ namespace Mina.Filter.Codec.PrefixedString
         /// <summary>
         /// Gets or sets the length of the length prefix (1, 2, or 4) used by the decoder.
         /// </summary>
-        public Int32 DecoderPrefixLength
+        public int DecoderPrefixLength
         {
             get { return _decoder.PrefixLength; }
             set { _decoder.PrefixLength = value; }
@@ -67,20 +67,20 @@ namespace Mina.Filter.Codec.PrefixedString
         /// The default value is <see cref="PrefixedStringCodecFactory.DefaultMaxDataLength"/>.
         /// </remarks>
         /// </summary>
-        public Int32 DecoderMaxDataLength
+        public int DecoderMaxDataLength
         {
             get { return _decoder.MaxDataLength; }
             set { _decoder.MaxDataLength = value; }
         }
 
         /// <inheritdoc/>
-        public IProtocolEncoder GetEncoder(IoSession session)
+        public IProtocolEncoder GetEncoder(IOSession session)
         {
             return _encoder;
         }
 
         /// <inheritdoc/>
-        public IProtocolDecoder GetDecoder(IoSession session)
+        public IProtocolDecoder GetDecoder(IOSession session)
         {
             return _decoder;
         }

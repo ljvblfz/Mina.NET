@@ -5,25 +5,27 @@ using Mina.Core.Session;
 namespace Mina.Filter.Codec.Demux
 {
     /// <summary>
-    /// A composite <see cref="IProtocolDecoder"/> that demultiplexes incoming <see cref="IoBuffer"/>
+    /// A composite <see cref="IProtocolDecoder"/> that demultiplexes incoming <see cref="IOBuffer"/>
     /// decoding requests into an appropriate <see cref="IMessageDecoder"/>.
     /// </summary>
     public class DemuxingProtocolDecoder : CumulativeProtocolDecoder
     {
-        private readonly AttributeKey STATE;
+        private readonly AttributeKey _state;
         private IMessageDecoderFactory[] _decoderFactories = new IMessageDecoderFactory[0];
 
         public DemuxingProtocolDecoder()
         {
-            STATE = new AttributeKey(GetType(), "state");
+            _state = new AttributeKey(GetType(), "state");
         }
 
         public void AddMessageDecoder<TDecoder>() where TDecoder : IMessageDecoder
         {
-            Type decoderType = typeof(TDecoder);
+            var decoderType = typeof(TDecoder);
 
             if (decoderType.GetConstructor(DemuxingProtocolCodecFactory.EmptyParams) == null)
+            {
                 throw new ArgumentException("The specified class doesn't have a public default constructor.");
+            }
 
             AddMessageDecoder(new DefaultConstructorMessageDecoderFactory(decoderType));
         }
@@ -36,48 +38,52 @@ namespace Mina.Filter.Codec.Demux
         public void AddMessageDecoder(IMessageDecoderFactory factory)
         {
             if (factory == null)
-                throw new ArgumentNullException("factory");
+            {
+                throw new ArgumentNullException(nameof(factory));
+            }
 
-            IMessageDecoderFactory[] decoderFactories = _decoderFactories;
-            IMessageDecoderFactory[] newDecoderFactories = new IMessageDecoderFactory[decoderFactories.Length + 1];
+            var decoderFactories = _decoderFactories;
+            var newDecoderFactories = new IMessageDecoderFactory[decoderFactories.Length + 1];
             Array.Copy(decoderFactories, 0, newDecoderFactories, 0, decoderFactories.Length);
             newDecoderFactories[decoderFactories.Length] = factory;
             _decoderFactories = newDecoderFactories;
         }
 
         /// <inheritdoc/>
-        public override void Dispose(IoSession session)
+        public override void Dispose(IOSession session)
         {
             base.Dispose(session);
-            session.RemoveAttribute(STATE);
+            session.RemoveAttribute(_state);
         }
 
         /// <inheritdoc/>
-        public override void FinishDecode(IoSession session, IProtocolDecoderOutput output)
+        public override void FinishDecode(IOSession session, IProtocolDecoderOutput output)
         {
             base.FinishDecode(session, output);
-            State state = GetState(session);
-            IMessageDecoder currentDecoder = state.currentDecoder;
+            var state = GetState(session);
+            var currentDecoder = state.CurrentDecoder;
             if (currentDecoder == null)
+            {
                 return;
+            }
             currentDecoder.FinishDecode(session, output);
         }
 
         /// <inheritdoc/>
-        protected override bool DoDecode(IoSession session, IoBuffer input, IProtocolDecoderOutput output)
+        protected override bool DoDecode(IOSession session, IOBuffer input, IProtocolDecoderOutput output)
         {
-            State state = GetState(session);
+            var state = GetState(session);
 
-            if (state.currentDecoder == null)
+            if (state.CurrentDecoder == null)
             {
-                IMessageDecoder[] decoders = state.decoders;
-                int undecodables = 0;
+                var decoders = state.Decoders;
+                var undecodables = 0;
 
-                for (int i = decoders.Length - 1; i >= 0; i--)
+                for (var i = decoders.Length - 1; i >= 0; i--)
                 {
-                    IMessageDecoder decoder = decoders[i];
-                    int limit = input.Limit;
-                    int pos = input.Position;
+                    var decoder = decoders[i];
+                    var limit = input.Limit;
+                    var pos = input.Position;
 
                     MessageDecoderResult result;
 
@@ -91,12 +97,12 @@ namespace Mina.Filter.Codec.Demux
                         input.Limit = limit;
                     }
 
-                    if (result == MessageDecoderResult.OK)
+                    if (result == MessageDecoderResult.Ok)
                     {
-                        state.currentDecoder = decoder;
+                        state.CurrentDecoder = decoder;
                         break;
                     }
-                    else if (result == MessageDecoderResult.NotOK)
+                    if (result == MessageDecoderResult.NotOk)
                     {
                         undecodables++;
                     }
@@ -109,14 +115,14 @@ namespace Mina.Filter.Codec.Demux
                 if (undecodables == decoders.Length)
                 {
                     // Throw an exception if all decoders cannot decode data.
-                    String dump = input.GetHexDump();
+                    var dump = input.GetHexDump();
                     input.Position = input.Limit; // Skip data
-                    ProtocolDecoderException e = new ProtocolDecoderException("No appropriate message decoder: " + dump);
+                    var e = new ProtocolDecoderException("No appropriate message decoder: " + dump);
                     e.Hexdump = dump;
                     throw e;
                 }
 
-                if (state.currentDecoder == null)
+                if (state.CurrentDecoder == null)
                 {
                     // Decoder is not determined yet (i.e. we need more data)
                     return false;
@@ -125,42 +131,39 @@ namespace Mina.Filter.Codec.Demux
 
             try
             {
-                MessageDecoderResult result = state.currentDecoder.Decode(session, input, output);
-                if (result == MessageDecoderResult.OK)
+                var result = state.CurrentDecoder.Decode(session, input, output);
+                if (result == MessageDecoderResult.Ok)
                 {
-                    state.currentDecoder = null;
+                    state.CurrentDecoder = null;
                     return true;
                 }
-                else if (result == MessageDecoderResult.NeedData)
+                if (result == MessageDecoderResult.NeedData)
                 {
                     return false;
                 }
-                else if (result == MessageDecoderResult.NotOK)
+                if (result == MessageDecoderResult.NotOk)
                 {
-                    state.currentDecoder = null;
+                    state.CurrentDecoder = null;
                     throw new ProtocolDecoderException("Message decoder returned NOT_OK.");
                 }
-                else
-                {
-                    state.currentDecoder = null;
-                    throw new InvalidOperationException("Unexpected decode result (see your decode()): " + result);
-                }
+                state.CurrentDecoder = null;
+                throw new InvalidOperationException("Unexpected decode result (see your decode()): " + result);
             }
             catch (Exception)
             {
-                state.currentDecoder = null;
+                state.CurrentDecoder = null;
                 throw;
             }
         }
 
-        private State GetState(IoSession session)
+        private State GetState(IOSession session)
         {
-            State state = session.GetAttribute<State>(STATE);
+            var state = session.GetAttribute<State>(_state);
 
             if (state == null)
             {
                 state = new State(_decoderFactories);
-                State oldState = (State)session.SetAttributeIfAbsent(STATE, state);
+                var oldState = (State) session.SetAttributeIfAbsent(_state, state);
 
                 if (oldState != null)
                 {
@@ -173,48 +176,50 @@ namespace Mina.Filter.Codec.Demux
 
         class State
         {
-            public readonly IMessageDecoder[] decoders;
-            public IMessageDecoder currentDecoder;
+            public readonly IMessageDecoder[] Decoders;
+            public IMessageDecoder CurrentDecoder;
 
             public State(IMessageDecoderFactory[] decoderFactories)
             {
-                decoders = new IMessageDecoder[decoderFactories.Length];
-                for (Int32 i = decoderFactories.Length - 1; i >= 0; i--)
+                Decoders = new IMessageDecoder[decoderFactories.Length];
+                for (var i = decoderFactories.Length - 1; i >= 0; i--)
                 {
-                    decoders[i] = decoderFactories[i].GetDecoder();
+                    Decoders[i] = decoderFactories[i].GetDecoder();
                 }
             }
         }
 
         class SingletonMessageDecoderFactory : IMessageDecoderFactory
         {
-            private readonly IMessageDecoder decoder;
+            private readonly IMessageDecoder _decoder;
 
             public SingletonMessageDecoderFactory(IMessageDecoder decoder)
             {
                 if (decoder == null)
-                    throw new ArgumentNullException("decoder");
-                this.decoder = decoder;
+                {
+                    throw new ArgumentNullException(nameof(decoder));
+                }
+                _decoder = decoder;
             }
 
             public IMessageDecoder GetDecoder()
             {
-                return decoder;
+                return _decoder;
             }
         }
 
         class DefaultConstructorMessageDecoderFactory : IMessageDecoderFactory
         {
-            private readonly Type decoderType;
+            private readonly Type _decoderType;
 
             public DefaultConstructorMessageDecoderFactory(Type decoderType)
             {
-                this.decoderType = decoderType;
+                _decoderType = decoderType;
             }
 
             public IMessageDecoder GetDecoder()
             {
-                return (IMessageDecoder)Activator.CreateInstance(decoderType);
+                return (IMessageDecoder) Activator.CreateInstance(_decoderType);
             }
         }
     }

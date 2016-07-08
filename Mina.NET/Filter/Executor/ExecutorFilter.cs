@@ -6,78 +6,85 @@ using Mina.Core.Write;
 namespace Mina.Filter.Executor
 {
     /// <summary>
-    /// A filter that forwards I/O events to <see cref="IoEventExecutor"/> to enforce a certain
+    /// A filter that forwards I/O events to <see cref="IOEventExecutor"/> to enforce a certain
     /// thread model while allowing the events per session to be processed
     /// simultaneously. You can apply various thread model by inserting this filter
-    /// to a <see cref="IoFilterChain"/>.
+    /// to a <see cref="IOFilterChain"/>.
     /// </summary>
-    public class ExecutorFilter : IoFilterAdapter
+    public class ExecutorFilter : IOFilterAdapter
     {
-        private const IoEventType DefaultEventSet = IoEventType.ExceptionCaught |
-            IoEventType.MessageReceived | IoEventType.MessageSent | IoEventType.SessionClosed |
-            IoEventType.SessionIdle | IoEventType.SessionOpened;
+        private const IOEventType DefaultEventSet = IOEventType.ExceptionCaught |
+                                                    IOEventType.MessageReceived | IOEventType.MessageSent |
+                                                    IOEventType.SessionClosed |
+                                                    IOEventType.SessionIdle | IOEventType.SessionOpened;
 
-        private readonly IoEventType _eventTypes;
-        private readonly IoEventExecutor _executor;
+        private readonly IOEventType _eventTypes;
 
         /// <summary>
-        /// Creates an executor filter with default <see cref="IoEventExecutor"/> on default event types.
+        /// Creates an executor filter with default <see cref="IOEventExecutor"/> on default event types.
         /// </summary>
         public ExecutorFilter()
             : this(null, DefaultEventSet)
-        { }
+        {
+        }
 
         /// <summary>
-        /// Creates an executor filter with default <see cref="IoEventExecutor"/>.
+        /// Creates an executor filter with default <see cref="IOEventExecutor"/>.
         /// </summary>
         /// <param name="eventTypes">the event types interested</param>
-        public ExecutorFilter(IoEventType eventTypes)
+        public ExecutorFilter(IOEventType eventTypes)
             : this(null, eventTypes)
-        { }
+        {
+        }
 
         /// <summary>
         /// Creates an executor filter on default event types.
         /// </summary>
-        /// <param name="executor">the <see cref="IoEventExecutor"/> to run events</param>
-        public ExecutorFilter(IoEventExecutor executor)
+        /// <param name="executor">the <see cref="IOEventExecutor"/> to run events</param>
+        public ExecutorFilter(IOEventExecutor executor)
             : this(executor, DefaultEventSet)
-        { }
+        {
+        }
 
         /// <summary>
         /// Creates an executor filter.
         /// </summary>
-        /// <param name="executor">the <see cref="IoEventExecutor"/> to run events</param>
+        /// <param name="executor">the <see cref="IOEventExecutor"/> to run events</param>
         /// <param name="eventTypes">the event types interested</param>
-        public ExecutorFilter(IoEventExecutor executor, IoEventType eventTypes)
+        public ExecutorFilter(IOEventExecutor executor, IOEventType eventTypes)
         {
             _eventTypes = eventTypes;
             if (executor == null)
-                _executor = new OrderedThreadPoolExecutor();
+            {
+                Executor = new OrderedThreadPoolExecutor();
+            }
             else
-                _executor = executor;
+            {
+                Executor = executor;
+            }
         }
 
         /// <summary>
-        /// Gets the <see cref="IoEventExecutor"/> to run events.
+        /// Gets the <see cref="IOEventExecutor"/> to run events.
         /// </summary>
-        public IoEventExecutor Executor
-        {
-            get { return _executor; }
-        }
+        public IOEventExecutor Executor { get; }
 
         /// <inheritdoc/>
-        public override void OnPreAdd(IoFilterChain parent, String name, INextFilter nextFilter)
+        public override void OnPreAdd(IOFilterChain parent, string name, INextFilter nextFilter)
         {
             if (parent.Contains(this))
-                throw new ArgumentException("You can't add the same filter instance more than once. Create another instance and add it.");
+            {
+                throw new ArgumentException(
+                    "You can't add the same filter instance more than once. Create another instance and add it.");
+            }
         }
 
         /// <inheritdoc/>
-        public override void SessionOpened(INextFilter nextFilter, IoSession session)
+        public override void SessionOpened(INextFilter nextFilter, IOSession session)
         {
-            if ((_eventTypes & IoEventType.SessionOpened) == IoEventType.SessionOpened)
+            if ((_eventTypes & IOEventType.SessionOpened) == IOEventType.SessionOpened)
             {
-                IoFilterEvent ioe = new IoFilterEvent(nextFilter, IoEventType.SessionOpened, session, null);
+                var ioe = new IOFilterEvent(nextFilter, IOEventType.SessionOpened, session, null);
                 FireEvent(ioe);
             }
             else
@@ -87,11 +94,11 @@ namespace Mina.Filter.Executor
         }
 
         /// <inheritdoc/>
-        public override void SessionClosed(INextFilter nextFilter, IoSession session)
+        public override void SessionClosed(INextFilter nextFilter, IOSession session)
         {
-            if ((_eventTypes & IoEventType.SessionClosed) == IoEventType.SessionClosed)
+            if ((_eventTypes & IOEventType.SessionClosed) == IOEventType.SessionClosed)
             {
-                IoFilterEvent ioe = new IoFilterEvent(nextFilter, IoEventType.SessionClosed, session, null);
+                var ioe = new IOFilterEvent(nextFilter, IOEventType.SessionClosed, session, null);
                 FireEvent(ioe);
             }
             else
@@ -101,11 +108,11 @@ namespace Mina.Filter.Executor
         }
 
         /// <inheritdoc/>
-        public override void SessionIdle(INextFilter nextFilter, IoSession session, IdleStatus status)
+        public override void SessionIdle(INextFilter nextFilter, IOSession session, IdleStatus status)
         {
-            if ((_eventTypes & IoEventType.SessionIdle) == IoEventType.SessionIdle)
+            if ((_eventTypes & IOEventType.SessionIdle) == IOEventType.SessionIdle)
             {
-                IoFilterEvent ioe = new IoFilterEvent(nextFilter, IoEventType.SessionIdle, session, status);
+                var ioe = new IOFilterEvent(nextFilter, IOEventType.SessionIdle, session, status);
                 FireEvent(ioe);
             }
             else
@@ -115,11 +122,11 @@ namespace Mina.Filter.Executor
         }
 
         /// <inheritdoc/>
-        public override void ExceptionCaught(INextFilter nextFilter, IoSession session, Exception cause)
+        public override void ExceptionCaught(INextFilter nextFilter, IOSession session, Exception cause)
         {
-            if ((_eventTypes & IoEventType.ExceptionCaught) == IoEventType.ExceptionCaught)
+            if ((_eventTypes & IOEventType.ExceptionCaught) == IOEventType.ExceptionCaught)
             {
-                IoFilterEvent ioe = new IoFilterEvent(nextFilter, IoEventType.ExceptionCaught, session, cause);
+                var ioe = new IOFilterEvent(nextFilter, IOEventType.ExceptionCaught, session, cause);
                 FireEvent(ioe);
             }
             else
@@ -129,11 +136,11 @@ namespace Mina.Filter.Executor
         }
 
         /// <inheritdoc/>
-        public override void MessageReceived(INextFilter nextFilter, IoSession session, Object message)
+        public override void MessageReceived(INextFilter nextFilter, IOSession session, object message)
         {
-            if ((_eventTypes & IoEventType.MessageReceived) == IoEventType.MessageReceived)
+            if ((_eventTypes & IOEventType.MessageReceived) == IOEventType.MessageReceived)
             {
-                IoFilterEvent ioe = new IoFilterEvent(nextFilter, IoEventType.MessageReceived, session, message);
+                var ioe = new IOFilterEvent(nextFilter, IOEventType.MessageReceived, session, message);
                 FireEvent(ioe);
             }
             else
@@ -143,11 +150,11 @@ namespace Mina.Filter.Executor
         }
 
         /// <inheritdoc/>
-        public override void MessageSent(INextFilter nextFilter, IoSession session, IWriteRequest writeRequest)
+        public override void MessageSent(INextFilter nextFilter, IOSession session, IWriteRequest writeRequest)
         {
-            if ((_eventTypes & IoEventType.MessageSent) == IoEventType.MessageSent)
+            if ((_eventTypes & IOEventType.MessageSent) == IOEventType.MessageSent)
             {
-                IoFilterEvent ioe = new IoFilterEvent(nextFilter, IoEventType.MessageSent, session, writeRequest);
+                var ioe = new IOFilterEvent(nextFilter, IOEventType.MessageSent, session, writeRequest);
                 FireEvent(ioe);
             }
             else
@@ -157,11 +164,11 @@ namespace Mina.Filter.Executor
         }
 
         /// <inheritdoc/>
-        public override void FilterWrite(INextFilter nextFilter, IoSession session, IWriteRequest writeRequest)
+        public override void FilterWrite(INextFilter nextFilter, IOSession session, IWriteRequest writeRequest)
         {
-            if ((_eventTypes & IoEventType.Write) == IoEventType.Write)
+            if ((_eventTypes & IOEventType.Write) == IOEventType.Write)
             {
-                IoFilterEvent ioe = new IoFilterEvent(nextFilter, IoEventType.Write, session, writeRequest);
+                var ioe = new IOFilterEvent(nextFilter, IOEventType.Write, session, writeRequest);
                 FireEvent(ioe);
             }
             else
@@ -171,11 +178,11 @@ namespace Mina.Filter.Executor
         }
 
         /// <inheritdoc/>
-        public override void FilterClose(INextFilter nextFilter, IoSession session)
+        public override void FilterClose(INextFilter nextFilter, IOSession session)
         {
-            if ((_eventTypes & IoEventType.Close) == IoEventType.Close)
+            if ((_eventTypes & IOEventType.Close) == IOEventType.Close)
             {
-                IoFilterEvent ioe = new IoFilterEvent(nextFilter, IoEventType.Close, session, null);
+                var ioe = new IOFilterEvent(nextFilter, IOEventType.Close, session, null);
                 FireEvent(ioe);
             }
             else
@@ -188,9 +195,9 @@ namespace Mina.Filter.Executor
         /// Fires an event.
         /// </summary>
         /// <param name="ioe"></param>
-        protected void FireEvent(IoFilterEvent ioe)
+        protected void FireEvent(IOFilterEvent ioe)
         {
-            _executor.Execute(ioe);
+            Executor.Execute(ioe);
         }
     }
 }

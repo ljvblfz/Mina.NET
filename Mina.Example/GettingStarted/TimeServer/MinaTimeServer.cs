@@ -19,7 +19,7 @@ namespace Mina.Example.GettingStarted.TimeServer
     /// </summary>
     class MinaTimeServer
     {
-        private static readonly Int32 port = 9123;
+        private static readonly int Port = 9123;
 
         /// <summary>
         /// The server implementation. It's based on TCP, and uses a logging filter 
@@ -28,7 +28,7 @@ namespace Mina.Example.GettingStarted.TimeServer
         static void Main(string[] args)
         {
             // Create the acceptor
-            IoAcceptor acceptor = new AsyncSocketAcceptor();
+            IOAcceptor acceptor = new AsyncSocketAcceptor();
 
             // Add two filters : a logger and a codec
             acceptor.FilterChain.AddLast("logger", new LoggingFilter());
@@ -37,12 +37,12 @@ namespace Mina.Example.GettingStarted.TimeServer
             // Attach the business logic to the server
             acceptor.Handler = new TimeServerHandler();
 
-            // Configurate the buffer size and the iddle time
+            // Configure the buffer size and the idle time
             acceptor.SessionConfig.ReadBufferSize = 2048;
             acceptor.SessionConfig.SetIdleTime(IdleStatus.BothIdle, 10);
 
             // And bind !
-            acceptor.Bind(new IPEndPoint(IPAddress.Any, port));
+            acceptor.Bind(new IPEndPoint(IPAddress.Any, Port));
 
             Console.ReadLine();
         }

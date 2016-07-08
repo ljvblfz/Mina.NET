@@ -1,31 +1,31 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using Mina.Core.Filterchain;
 using Mina.Core.Session;
 
 namespace Mina.Filter.Util
 {
     /// <summary>
-    /// An <see cref="IoFilter"/> that sets initial attributes when a new
-    /// <see cref="IoSession"/> is created.  By default, the attribute map is empty when
-    /// an <see cref="IoSession"/> is newly created.  Inserting this filter will make
+    /// An <see cref="IOFilter"/> that sets initial attributes when a new
+    /// <see cref="IOSession"/> is created.  By default, the attribute map is empty when
+    /// an <see cref="IOSession"/> is newly created.  Inserting this filter will make
     /// the pre-configured attributes available after this filter executes the
     /// <tt>SessionCreated</tt> event.
     /// </summary>
-    public class SessionAttributeInitializingFilter : IoFilterAdapter
+    public class SessionAttributeInitializingFilter : IOFilterAdapter
     {
-        private readonly Dictionary<String, Object> _attributes = new Dictionary<String, Object>();
+        private readonly Dictionary<string, object> _attributes = new Dictionary<string, object>();
 
         /// <summary>
         /// Creates a new instance with no default attributes.
         /// </summary>
         public SessionAttributeInitializingFilter()
-        { }
+        {
+        }
 
         /// <summary>
         /// Creates a new instance with the specified default attributes.
         /// </summary>
-        public SessionAttributeInitializingFilter(IDictionary<String, Object> attributes)
+        public SessionAttributeInitializingFilter(IDictionary<string, object> attributes)
         {
             Attributes = attributes;
         }
@@ -33,7 +33,7 @@ namespace Mina.Filter.Util
         /// <summary>
         /// Gets or sets the attribute map.
         /// </summary>
-        public IDictionary<String, Object> Attributes
+        public IDictionary<string, object> Attributes
         {
             get { return _attributes; }
             set
@@ -41,7 +41,7 @@ namespace Mina.Filter.Util
                 _attributes.Clear();
                 if (value != null)
                 {
-                    foreach (KeyValuePair<String, Object> pair in value)
+                    foreach (var pair in value)
                     {
                         _attributes[pair.Key] = pair.Value;
                     }
@@ -54,9 +54,9 @@ namespace Mina.Filter.Util
         /// </summary>
         /// <param name="key">the key of the attribute</param>
         /// <returns><tt>null</tt> if there is no attribute with the specified key</returns>
-        public Object GetAttribute(String key)
+        public object GetAttribute(string key)
         {
-            Object value;
+            object value;
             return _attributes.TryGetValue(key, out value) ? value : null;
         }
 
@@ -66,12 +66,14 @@ namespace Mina.Filter.Util
         /// <param name="key">the key of the attribute</param>
         /// <param name="value">the value of the attribute</param>
         /// <returns>the old value of the attribute, or <tt>null</tt> if it is new</returns>
-        public Object SetAttribute(String key, Object value)
+        public object SetAttribute(string key, object value)
         {
             if (value == null)
+            {
                 return RemoveAttribute(key);
+            }
 
-            Object old;
+            object old;
             _attributes.TryGetValue(key, out old);
             _attributes[key] = value;
             return old;
@@ -83,7 +85,7 @@ namespace Mina.Filter.Util
         /// </summary>
         /// <param name="key">the key of the attribute</param>
         /// <returns>the old value of the attribute, or <tt>null</tt> if it is new</returns>
-        public Object SetAttribute(String key)
+        public object SetAttribute(string key)
         {
             return SetAttribute(key, true);
         }
@@ -93,9 +95,9 @@ namespace Mina.Filter.Util
         /// </summary>
         /// <param name="key">the key of the attribute</param>
         /// <returns>the old value of the attribute, or <tt>null</tt> if not found</returns>
-        public Object RemoveAttribute(String key)
+        public object RemoveAttribute(string key)
         {
-            Object old;
+            object old;
             _attributes.TryGetValue(key, out old);
             _attributes.Remove(key);
             return old;
@@ -105,15 +107,15 @@ namespace Mina.Filter.Util
         /// Returns <tt>true</tt> if this session contains the attribute with
         /// the specified <tt>key</tt>.
         /// </summary>
-        public Boolean ContainsAttribute(String key)
+        public bool ContainsAttribute(string key)
         {
             return _attributes.ContainsKey(key);
         }
 
         /// <inheritdoc/>
-        public override void SessionCreated(INextFilter nextFilter, IoSession session)
+        public override void SessionCreated(INextFilter nextFilter, IOSession session)
         {
-            foreach (KeyValuePair<String, Object> pair in _attributes)
+            foreach (var pair in _attributes)
             {
                 session.SetAttribute(pair.Key, pair.Value);
             }

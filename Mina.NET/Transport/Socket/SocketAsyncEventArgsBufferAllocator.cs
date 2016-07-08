@@ -4,9 +4,9 @@ using Mina.Core.Buffer;
 namespace Mina.Transport.Socket
 {
     /// <summary>
-    /// An <see cref="IoBufferAllocator"/> which allocates <see cref="SocketAsyncEventArgsBuffer"/>.
+    /// An <see cref="IOBufferAllocator"/> which allocates <see cref="SocketAsyncEventArgsBuffer"/>.
     /// </summary>
-    public class SocketAsyncEventArgsBufferAllocator : IoBufferAllocator
+    public class SocketAsyncEventArgsBufferAllocator : IOBufferAllocator
     {
         /// <summary>
         /// Static instance.
@@ -19,17 +19,19 @@ namespace Mina.Transport.Socket
         /// <param name="capacity">the capacity of the buffer</param>
         /// <returns>the allocated buffer</returns>
         /// <exception cref="ArgumentException">If the <paramref name="capacity"/> is a negative integer</exception>
-        public SocketAsyncEventArgsBuffer Allocate(Int32 capacity)
+        public SocketAsyncEventArgsBuffer Allocate(int capacity)
         {
             if (capacity < 0)
-                throw new ArgumentException("Capacity should be >= 0", "capacity");
+            {
+                throw new ArgumentException("Capacity should be >= 0", nameof(capacity));
+            }
             return new SocketAsyncEventArgsBuffer(this, capacity, capacity);
         }
 
         /// <summary>
         /// Wraps the specified byte array into a <see cref="SocketAsyncEventArgsBuffer"/>.
         /// </summary>
-        public SocketAsyncEventArgsBuffer Wrap(Byte[] array)
+        public SocketAsyncEventArgsBuffer Wrap(byte[] array)
         {
             return Wrap(array, 0, array.Length);
         }
@@ -37,7 +39,7 @@ namespace Mina.Transport.Socket
         /// <summary>
         /// Wraps the specified byte array into a <see cref="SocketAsyncEventArgsBuffer"/>.
         /// </summary>
-        public SocketAsyncEventArgsBuffer Wrap(Byte[] array, Int32 offset, Int32 length)
+        public SocketAsyncEventArgsBuffer Wrap(byte[] array, int offset, int length)
         {
             try
             {
@@ -49,17 +51,17 @@ namespace Mina.Transport.Socket
             }
         }
 
-        IoBuffer IoBufferAllocator.Allocate(Int32 capacity)
+        IOBuffer IOBufferAllocator.Allocate(int capacity)
         {
             return Allocate(capacity);
         }
 
-        IoBuffer IoBufferAllocator.Wrap(Byte[] array)
+        IOBuffer IOBufferAllocator.Wrap(byte[] array)
         {
             return Wrap(array);
         }
 
-        IoBuffer IoBufferAllocator.Wrap(Byte[] array, Int32 offset, Int32 length)
+        IOBuffer IOBufferAllocator.Wrap(byte[] array, int offset, int length)
         {
             return Wrap(array, offset, length);
         }

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Runtime.Serialization;
 
 namespace Mina.Filter.KeepAlive
 {
@@ -11,21 +12,27 @@ namespace Mina.Filter.KeepAlive
     {
         /// <summary>
         /// </summary>
-        public KeepAliveRequestTimeoutException() { }
+        public KeepAliveRequestTimeoutException()
+        {
+        }
 
         /// <summary>
         /// </summary>
-        public KeepAliveRequestTimeoutException(String message) : base(message) { }
+        public KeepAliveRequestTimeoutException(string message) : base(message)
+        {
+        }
 
         /// <summary>
         /// </summary>
-        public KeepAliveRequestTimeoutException(String message, Exception inner) : base(message, inner) { }
-        
+        public KeepAliveRequestTimeoutException(string message, Exception inner) : base(message, inner)
+        {
+        }
+
         /// <summary>
         /// </summary>
-        protected KeepAliveRequestTimeoutException(
-          System.Runtime.Serialization.SerializationInfo info,
-          System.Runtime.Serialization.StreamingContext context)
-            : base(info, context) { }
+        protected KeepAliveRequestTimeoutException(SerializationInfo info, StreamingContext context)
+            : base(info, context)
+        {
+        }
     }
 }

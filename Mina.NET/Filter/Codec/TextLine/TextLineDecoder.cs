@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Text;
 using Mina.Core.Buffer;
 using Mina.Core.Session;
@@ -11,27 +10,29 @@ namespace Mina.Filter.Codec.TextLine
     /// </summary>
     public class TextLineDecoder : IProtocolDecoder
     {
-        private readonly AttributeKey CONTEXT;
+        private readonly AttributeKey _context;
         private readonly Encoding _encoding;
         private readonly LineDelimiter _delimiter;
-        private Int32 _maxLineLength = 1024;
-        private Int32 _bufferLength = 128;
-        private Byte[] _delimBuf;
+        private int _maxLineLength = 1024;
+        private int _bufferLength = 128;
+        private byte[] _delimBuf;
 
         /// <summary>
         /// Instantiates with default <see cref="Encoding.Default"/> and <see cref="LineDelimiter.Auto"/>.
         /// </summary>
         public TextLineDecoder()
             : this(LineDelimiter.Auto)
-        { }
+        {
+        }
 
         /// <summary>
         /// Instantiates with default <see cref="Encoding.Default"/> and given delimiter.
         /// </summary>
         /// <param name="delimiter">the delimiter string</param>
-        public TextLineDecoder(String delimiter)
+        public TextLineDecoder(string delimiter)
             : this(new LineDelimiter(delimiter))
-        { }
+        {
+        }
 
         /// <summary>
         /// Instantiates with default <see cref="Encoding.Default"/> and given delimiter.
@@ -39,7 +40,8 @@ namespace Mina.Filter.Codec.TextLine
         /// <param name="delimiter">the <see cref="LineDelimiter"/></param>
         public TextLineDecoder(LineDelimiter delimiter)
             : this(Encoding.Default, delimiter)
-        { }
+        {
+        }
 
         /// <summary>
         /// Instantiates with given encoding,
@@ -48,16 +50,18 @@ namespace Mina.Filter.Codec.TextLine
         /// <param name="encoding">the <see cref="Encoding"/></param>
         public TextLineDecoder(Encoding encoding)
             : this(encoding, LineDelimiter.Auto)
-        { }
+        {
+        }
 
         /// <summary>
         /// Instantiates.
         /// </summary>
         /// <param name="encoding">the <see cref="Encoding"/></param>
         /// <param name="delimiter">the delimiter string</param>
-        public TextLineDecoder(Encoding encoding, String delimiter)
+        public TextLineDecoder(Encoding encoding, string delimiter)
             : this(encoding, new LineDelimiter(delimiter))
-        { }
+        {
+        }
 
         /// <summary>
         /// Instantiates.
@@ -67,11 +71,15 @@ namespace Mina.Filter.Codec.TextLine
         public TextLineDecoder(Encoding encoding, LineDelimiter delimiter)
         {
             if (encoding == null)
-                throw new ArgumentNullException("encoding");
+            {
+                throw new ArgumentNullException(nameof(encoding));
+            }
             if (delimiter == null)
-                throw new ArgumentNullException("delimiter");
+            {
+                throw new ArgumentNullException(nameof(delimiter));
+            }
 
-            CONTEXT = new AttributeKey(GetType(), "context");
+            _context = new AttributeKey(GetType(), "context");
             _encoding = encoding;
             _delimiter = delimiter;
 
@@ -81,75 +89,83 @@ namespace Mina.Filter.Codec.TextLine
         /// <summary>
         /// Gets or sets the max length allowed for a line.
         /// </summary>
-        public Int32 MaxLineLength
+        public int MaxLineLength
         {
             get { return _maxLineLength; }
             set
             {
                 if (value <= 0)
+                {
                     throw new ArgumentException("maxLineLength (" + value + ") should be a positive value");
+                }
                 _maxLineLength = value;
             }
         }
 
         /// <summary>
-        /// Gets or sets the lenght of inner buffer.
+        /// Gets or sets the length of inner buffer.
         /// </summary>
-        public Int32 BufferLength
+        public int BufferLength
         {
             get { return _bufferLength; }
             set
             {
                 if (value <= 0)
+                {
                     throw new ArgumentException("bufferLength (" + value + ") should be a positive value");
+                }
                 _bufferLength = value;
             }
         }
 
         /// <inheritdoc/>
-        public void Decode(IoSession session, IoBuffer input, IProtocolDecoderOutput output)
+        public void Decode(IOSession session, IOBuffer input, IProtocolDecoderOutput output)
         {
-            Context ctx = GetContext(session);
+            var ctx = GetContext(session);
 
             if (LineDelimiter.Auto.Equals(_delimiter))
+            {
                 DecodeAuto(ctx, session, input, output);
+            }
             else
+            {
                 DecodeNormal(ctx, session, input, output);
+            }
         }
 
         /// <inheritdoc/>
-        public void FinishDecode(IoSession session, IProtocolDecoderOutput output)
+        public void FinishDecode(IOSession session, IProtocolDecoderOutput output)
         {
             // Do nothing
         }
 
         /// <inheritdoc/>
-        public void Dispose(IoSession session)
+        public void Dispose(IOSession session)
         {
-            session.RemoveAttribute(CONTEXT);
+            session.RemoveAttribute(_context);
         }
 
         /// <summary>
         /// By default, this method propagates the decoded line of text to <see cref="IProtocolDecoderOutput"/>.
         /// You may override this method to modify the default behavior.
         /// </summary>
-        protected virtual void WriteText(IoSession session, String text, IProtocolDecoderOutput output)
+        protected virtual void WriteText(IOSession session, string text, IProtocolDecoderOutput output)
         {
             output.Write(text);
         }
 
-        private void DecodeAuto(Context ctx, IoSession session, IoBuffer input, IProtocolDecoderOutput output)
+        private void DecodeAuto(Context ctx, IOSession session, IOBuffer input, IProtocolDecoderOutput output)
         {
-            Int32 matchCount = ctx.MatchCount;
+            var matchCount = ctx.MatchCount;
 
             // Try to find a match
-            Int32 oldPos = input.Position, oldLimit = input.Limit;
+            int oldPos = input.Position, oldLimit = input.Limit;
 
             while (input.HasRemaining)
             {
-                Byte b = input.Get();
-                Boolean matched = false;
-                
+                var b = input.Get();
+                var matched = false;
+
                 switch (b)
                 {
                     case 0x0d: // \r
@@ -170,7 +186,7 @@ namespace Mina.Filter.Codec.TextLine
                 if (matched)
                 {
                     // Found a match.
-                    Int32 pos = input.Position;
+                    var pos = input.Position;
                     input.Limit = pos;
                     input.Position = oldPos;
 
@@ -181,13 +197,13 @@ namespace Mina.Filter.Codec.TextLine
 
                     if (ctx.OverflowPosition == 0)
                     {
-                        IoBuffer buf = ctx.Buffer;
+                        var buf = ctx.Buffer;
                         buf.Flip();
                         buf.Limit -= matchCount;
-                        ArraySegment<Byte> bytes = buf.GetRemaining();
+                        var bytes = buf.GetRemaining();
                         try
                         {
-                            String str = _encoding.GetString(bytes.Array, bytes.Offset, bytes.Count);
+                            var str = _encoding.GetString(bytes.Array, bytes.Offset, bytes.Count);
                             WriteText(session, str, output);
                         }
                         finally
@@ -197,7 +213,7 @@ namespace Mina.Filter.Codec.TextLine
                     }
                     else
                     {
-                        Int32 overflowPosition = ctx.OverflowPosition;
+                        var overflowPosition = ctx.OverflowPosition;
                         ctx.Reset();
                         throw new RecoverableProtocolDecoderException("Line is too long: " + overflowPosition);
                     }
@@ -213,16 +229,16 @@ namespace Mina.Filter.Codec.TextLine
             ctx.MatchCount = matchCount;
         }
 
-        private void DecodeNormal(Context ctx, IoSession session, IoBuffer input, IProtocolDecoderOutput output)
+        private void DecodeNormal(Context ctx, IOSession session, IOBuffer input, IProtocolDecoderOutput output)
         {
-            Int32 matchCount = ctx.MatchCount;
+            var matchCount = ctx.MatchCount;
 
             // Try to find a match
-            Int32 oldPos = input.Position, oldLimit = input.Limit;
+            int oldPos = input.Position, oldLimit = input.Limit;
 
             while (input.HasRemaining)
             {
-                Byte b = input.Get();
+                var b = input.Get();
 
                 if (_delimBuf[matchCount] == b)
                 {
@@ -231,7 +247,7 @@ namespace Mina.Filter.Codec.TextLine
                     if (matchCount == _delimBuf.Length)
                     {
                         // Found a match.
-                        Int32 pos = input.Position;
+                        var pos = input.Position;
                         input.Limit = pos;
                         input.Position = oldPos;
 
@@ -242,13 +258,13 @@ namespace Mina.Filter.Codec.TextLine
 
                         if (ctx.OverflowPosition == 0)
                         {
-                            IoBuffer buf = ctx.Buffer;
+                            var buf = ctx.Buffer;
                             buf.Flip();
                             buf.Limit -= matchCount;
-                            ArraySegment<Byte> bytes = buf.GetRemaining();
+                            var bytes = buf.GetRemaining();
                             try
                             {
-                                String str = _encoding.GetString(bytes.Array, bytes.Offset, bytes.Count);
+                                var str = _encoding.GetString(bytes.Array, bytes.Offset, bytes.Count);
                                 WriteText(session, str, output);
                             }
                             finally
@@ -258,7 +274,7 @@ namespace Mina.Filter.Codec.TextLine
                         }
                         else
                         {
-                            Int32 overflowPosition = ctx.OverflowPosition;
+                            var overflowPosition = ctx.OverflowPosition;
                             ctx.Reset();
                             throw new RecoverableProtocolDecoderException("Line is too long: " + overflowPosition);
                         }
@@ -280,13 +296,13 @@ namespace Mina.Filter.Codec.TextLine
             ctx.MatchCount = matchCount;
         }
 
-        private Context GetContext(IoSession session)
+        private Context GetContext(IOSession session)
         {
-            Context ctx = session.GetAttribute<Context>(CONTEXT);
+            var ctx = session.GetAttribute<Context>(_context);
             if (ctx == null)
             {
                 ctx = new Context(this);
-                session.SetAttribute(CONTEXT, ctx);
+                session.SetAttribute(_context, ctx);
             }
             return ctx;
         }
@@ -294,58 +310,54 @@ namespace Mina.Filter.Codec.TextLine
         class Context
         {
             private readonly TextLineDecoder _textLineDecoder;
-            private readonly IoBuffer _buf;
-            private Int32 _overflowPosition;
 
             public Context(TextLineDecoder textLineDecoder)
             {
                 _textLineDecoder = textLineDecoder;
-                _buf = IoBuffer.Allocate(_textLineDecoder.BufferLength);
-                _buf.AutoExpand = true;
+                Buffer = IOBuffer.Allocate(_textLineDecoder.BufferLength);
+                Buffer.AutoExpand = true;
             }
 
-            public Int32 MatchCount { get; set; }
+            public int MatchCount { get; set; }
 
-            public IoBuffer Buffer
-            {
-                get { return _buf; }
-            }
+            public IOBuffer Buffer { get; }
 
-            public Int32 OverflowPosition
-            {
-                get { return _overflowPosition; }
-            }
+            public int OverflowPosition { get; private set; }
 
             public void Reset()
             {
-                _overflowPosition = 0;
+                OverflowPosition = 0;
                 MatchCount = 0;
             }
 
-            public void Append(IoBuffer input)
+            public void Append(IOBuffer input)
             {
-                if (_overflowPosition != 0)
+                if (OverflowPosition != 0)
                 {
                     Discard(input);
                 }
-                else if (_buf.Position > _textLineDecoder.MaxLineLength - input.Remaining)
+                else if (Buffer.Position > _textLineDecoder.MaxLineLength - input.Remaining)
                 {
-                    _overflowPosition = _buf.Position;
-                    _buf.Clear();
+                    OverflowPosition = Buffer.Position;
+                    Buffer.Clear();
                     Discard(input);
                 }
                 else
                 {
-                    _buf.Put(input);
+                    Buffer.Put(input);
                 }
             }
 
-            private void Discard(IoBuffer input)
+            private void Discard(IOBuffer input)
             {
-                if (Int32.MaxValue - input.Remaining < _overflowPosition)
-                    _overflowPosition = Int32.MaxValue;
+                if (int.MaxValue - input.Remaining < OverflowPosition)
+                {
+                    OverflowPosition = int.MaxValue;
+                }
                 else
-                    _overflowPosition += input.Remaining;
+                {
+                    OverflowPosition += input.Remaining;
+                }
                 input.Position = input.Limit;
             }
         }

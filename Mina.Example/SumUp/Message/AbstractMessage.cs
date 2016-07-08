@@ -5,6 +5,6 @@ namespace Mina.Example.SumUp.Message
     [Serializable]
     class AbstractMessage
     {
-        public Int32 Sequence { get; set; }
+        public int Sequence { get; set; }
     }
 }

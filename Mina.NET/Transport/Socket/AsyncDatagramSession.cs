@@ -4,12 +4,13 @@ using System.Threading;
 using Mina.Core.Buffer;
 using Mina.Core.File;
 using Mina.Core.Service;
+using Mina.Core.Session;
 using Mina.Core.Write;
 
 namespace Mina.Transport.Socket
 {
     /// <summary>
-    /// An <see cref="Core.Session.IoSession"/> for datagram transport (UDP/IP).
+    /// An <see cref="IOSession"/> for datagram transport (UDP/IP).
     /// </summary>
     public partial class AsyncDatagramSession : SocketSession
     {
@@ -20,36 +21,26 @@ namespace Mina.Transport.Socket
         public static readonly ITransportMetadata Metadata
             = new DefaultTransportMetadata("async", "datagram", true, false, typeof(IPEndPoint));
 
-        private readonly AsyncDatagramAcceptor.SocketContext _socketContext;
-        private Int32 _scheduledForFlush;
+        private int _scheduledForFlush;
 
         /// <summary>
         /// Creates a new acceptor-side session instance.
         /// </summary>
-        internal AsyncDatagramSession(IoService service, IoProcessor<AsyncDatagramSession> processor,
-            AsyncDatagramAcceptor.SocketContext ctx, EndPoint remoteEP, Boolean reuseBuffer)
-            : base(service, processor, new DefaultDatagramSessionConfig(), ctx.Socket, ctx.Socket.LocalEndPoint, remoteEP, reuseBuffer)
+        internal AsyncDatagramSession(IOService service, IIOProcessor<AsyncDatagramSession> processor,
+            AsyncDatagramAcceptor.SocketContext ctx, EndPoint remoteEp, bool reuseBuffer)
+            : base(service, processor, new DefaultDatagramSessionConfig(), ctx.Socket, ctx.Socket.LocalEndPoint, remoteEp, reuseBuffer)
         {
-            _socketContext = ctx;
+            Context = ctx;
         }
 
         /// <inheritdoc/>
-        public override ITransportMetadata TransportMetadata
-        {
-            get { return Metadata; }
-        }
+        public override ITransportMetadata TransportMetadata => Metadata;
 
-        internal AsyncDatagramAcceptor.SocketContext Context
-        {
-            get { return _socketContext; }
-        }
+        internal AsyncDatagramAcceptor.SocketContext Context { get; }
 
-        public Boolean IsScheduledForFlush
-        {
-            get { return _scheduledForFlush != 0; }
-        }
+        public bool IsScheduledForFlush => _scheduledForFlush != 0;
 
-        public Boolean ScheduledForFlush()
+        public bool ScheduledForFlush()
         {
             return Interlocked.CompareExchange(ref _scheduledForFlush, 1, 0) == 0;
         }
@@ -60,11 +51,13 @@ namespace Mina.Transport.Socket
         }
 
         /// <inheritdoc/>
-        protected override void BeginSend(IWriteRequest request, IoBuffer buf)
+        protected override void BeginSend(IWriteRequest request, IOBuffer buf)
         {
-            EndPoint destination = request.Destination;
+            var destination = request.Destination;
             if (destination == null)
-                destination = this.RemoteEndPoint;
+            {
+                destination = RemoteEndPoint;
+            }
             BeginSend(buf, destination);
         }
 

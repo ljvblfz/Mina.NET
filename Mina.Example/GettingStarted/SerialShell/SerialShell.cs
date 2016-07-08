@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Text;
-using Mina.Core.Future;
 using Mina.Core.Service;
-using Mina.Core.Session;
 using Mina.Filter.Codec;
 using Mina.Filter.Codec.TextLine;
 using Mina.Filter.Logging;
@@ -14,7 +12,7 @@ namespace Mina.Example.GettingStarted.SerialShell
     {
         static void Main(string[] args)
         {
-            IoConnector serial = new SerialConnector();
+            IOConnector serial = new SerialConnector();
 
             // Add two filters : a logger and a codec
             serial.FilterChain.AddLast("logger", new LoggingFilter());
@@ -26,15 +24,15 @@ namespace Mina.Example.GettingStarted.SerialShell
                 Console.WriteLine(e.Message);
             };
 
-            SerialEndPoint serialEP = new SerialEndPoint("COM3", 38400);
-            IConnectFuture future = serial.Connect(serialEP);
+            var serialEp = new SerialEndPoint("COM3", 38400);
+            var future = serial.Connect(serialEp);
             future.Await();
 
             if (future.Connected)
             {
                 while (true)
                 {
-                    String line = Console.ReadLine();
+                    var line = Console.ReadLine();
                     if (line.Trim().Equals("quit", StringComparison.OrdinalIgnoreCase))
                     {
                         future.Session.Close(true);

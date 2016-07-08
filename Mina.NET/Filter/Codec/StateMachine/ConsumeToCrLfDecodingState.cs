@@ -1,5 +1,4 @@
-﻿using System;
-using Mina.Core.Buffer;
+﻿using Mina.Core.Buffer;
 
 namespace Mina.Filter.Codec.StateMachine
 {
@@ -12,43 +11,45 @@ namespace Mina.Filter.Codec.StateMachine
         /// <summary>
         /// Carriage return character
         /// </summary>
-        private static readonly Byte CR = 13;
+        private const byte CR = 13;
+
         /// <summary>
         /// Line feed character
         /// </summary>
-        private static readonly Byte LF = 10;
-        private Boolean _lastIsCR;
-        private IoBuffer _buffer;
+        private const byte LF = 10;
 
-        public IDecodingState Decode(IoBuffer input, IProtocolDecoderOutput output)
+        private bool _lastIsCr;
+        private IOBuffer _buffer;
+
+        public IDecodingState Decode(IOBuffer input, IProtocolDecoderOutput output)
         {
-            Int32 beginPos = input.Position;
-            Int32 limit = input.Limit;
-            Int32 terminatorPos = -1;
+            var beginPos = input.Position;
+            var limit = input.Limit;
+            var terminatorPos = -1;
 
-            for (Int32 i = beginPos; i < limit; i++)
+            for (var i = beginPos; i < limit; i++)
             {
-                Byte b = input.Get(i);
+                var b = input.Get(i);
                 if (b == CR)
                 {
-                    _lastIsCR = true;
+                    _lastIsCr = true;
                 }
                 else
                 {
-                    if (b == LF && _lastIsCR)
+                    if (b == LF && _lastIsCr)
                     {
                         terminatorPos = i;
                         break;
                     }
-                    _lastIsCR = false;
+                    _lastIsCr = false;
                 }
             }
 
             if (terminatorPos >= 0)
             {
-                IoBuffer product;
+                IOBuffer product;
 
-                Int32 endPos = terminatorPos - 1;
+                var endPos = terminatorPos - 1;
 
                 if (beginPos < endPos)
                 {
@@ -72,7 +73,7 @@ namespace Mina.Filter.Codec.StateMachine
                     // When input contained only CR or LF rather than actual data...
                     if (_buffer == null)
                     {
-                        product = IoBuffer.Allocate(0);
+                        product = IOBuffer.Allocate(0);
                     }
                     else
                     {
@@ -88,13 +89,13 @@ namespace Mina.Filter.Codec.StateMachine
 
             if (_buffer == null)
             {
-                _buffer = IoBuffer.Allocate(input.Remaining);
+                _buffer = IOBuffer.Allocate(input.Remaining);
                 _buffer.AutoExpand = true;
             }
 
             _buffer.Put(input);
 
-            if (_lastIsCR)
+            if (_lastIsCr)
             {
                 _buffer.Position = _buffer.Position - 1;
             }
@@ -104,11 +105,11 @@ namespace Mina.Filter.Codec.StateMachine
 
         public IDecodingState FinishDecode(IProtocolDecoderOutput output)
         {
-            IoBuffer product;
+            IOBuffer product;
             // When input contained only CR or LF rather than actual data...
             if (_buffer == null)
             {
-                product = IoBuffer.Allocate(0);
+                product = IOBuffer.Allocate(0);
             }
             else
             {
@@ -128,6 +129,6 @@ namespace Mina.Filter.Codec.StateMachine
         /// <code>this</code> for loop transitions) or <code>null</code> if 
         /// the state machine has reached its end.
         /// </returns>
-        protected abstract IDecodingState FinishDecode(IoBuffer product, IProtocolDecoderOutput output);
+        protected abstract IDecodingState FinishDecode(IOBuffer product, IProtocolDecoderOutput output);
     }
 }

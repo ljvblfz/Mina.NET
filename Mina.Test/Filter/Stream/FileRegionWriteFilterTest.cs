@@ -1,5 +1,4 @@
-﻿using System;
-using System.IO;
+﻿using System.IO;
 #if !NETFX_CORE
 using NUnit.Framework;
 using TestClass = NUnit.Framework.TestFixtureAttribute;
@@ -16,18 +15,18 @@ namespace Mina.Filter.Stream
     [TestClass]
     public class FileRegionWriteFilterTest : AbstractStreamWriteFilterTest<IFileRegion, FileRegionWriteFilter>
     {
-        private String file;
+        private string _file;
 
         [TestInitialize]
         public void SetUp()
         {
-            file = Path.GetTempFileName();
+            _file = Path.GetTempFileName();
         }
 
         [TestCleanup]
         public void TearDown()
         {
-            File.Delete(file);
+            File.Delete(_file);
         }
 
         protected override AbstractStreamWriteFilter<IFileRegion> CreateFilter()
@@ -35,10 +34,10 @@ namespace Mina.Filter.Stream
             return new FileRegionWriteFilter();
         }
 
-        protected override IFileRegion CreateMessage(Byte[] data)
+        protected override IFileRegion CreateMessage(byte[] data)
         {
-            File.WriteAllBytes(file, data);
-            return new FileInfoFileRegion(new FileInfo(file));
+            File.WriteAllBytes(_file, data);
+            return new FileInfoFileRegion(new FileInfo(_file));
         }
     }
 }

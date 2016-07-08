@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading;
+using Mina.Core.Filterchain;
 using Mina.Core.Future;
 using Mina.Core.Service;
 using Mina.Core.Session;
@@ -13,79 +14,75 @@ namespace Mina.Transport.Socket
     /// <summary>
     /// Base class of socket acceptor.
     /// </summary>
-    public abstract class AbstractSocketAcceptor : AbstractIoAcceptor, ISocketAcceptor
+    public abstract class AbstractSocketAcceptor : AbstractIOAcceptor, ISocketAcceptor
     {
         private readonly AsyncSocketProcessor _processor;
-        private Int32 _backlog;
-        private Int32 _maxConnections;
+        private int _backlog;
+        private int _maxConnections;
         private Semaphore _connectionPool;
 #if NET20
         private readonly WaitCallback _startAccept;
 #else
-        private readonly Action<Object> _startAccept;
+        private readonly Action<object> _startAccept;
 #endif
-        private Boolean _disposed;
-        private readonly Dictionary<EndPoint, System.Net.Sockets.Socket> _listenSockets = new Dictionary<EndPoint, System.Net.Sockets.Socket>();
+        private bool _disposed;
+
+        private readonly Dictionary<EndPoint, System.Net.Sockets.Socket> _listenSockets =
+            new Dictionary<EndPoint, System.Net.Sockets.Socket>();
 
         /// <summary>
         /// Instantiates with default max connections of 1024.
         /// </summary>
         protected AbstractSocketAcceptor()
             : this(1024)
-        { }
+        {
+        }
 
         /// <summary>
         /// Instantiates.
         /// </summary>
         /// <param name="maxConnections">the max connections allowed</param>
-        protected AbstractSocketAcceptor(Int32 maxConnections)
+        protected AbstractSocketAcceptor(int maxConnections)
             : base(new DefaultSocketSessionConfig())
         {
             _maxConnections = maxConnections;
             _processor = new AsyncSocketProcessor(() => ManagedSessions.Values);
-            this.SessionDestroyed += OnSessionDestroyed;
+            SessionDestroyed += OnSessionDestroyed;
             _startAccept = StartAccept0;
             ReuseBuffer = true;
         }
 
         /// <inheritdoc/>
-        public new ISocketSessionConfig SessionConfig
-        {
-            get { return (ISocketSessionConfig)base.SessionConfig; }
-        }
+        public new ISocketSessionConfig SessionConfig => (ISocketSessionConfig) base.SessionConfig;
 
         /// <inheritdoc/>
-        public new IPEndPoint LocalEndPoint
-        {
-            get { return (IPEndPoint)base.LocalEndPoint; }
-        }
+        public new IPEndPoint LocalEndPoint => (IPEndPoint) base.LocalEndPoint;
 
         /// <inheritdoc/>
         public new IPEndPoint DefaultLocalEndPoint
         {
-            get { return (IPEndPoint)base.DefaultLocalEndPoint; }
+            get { return (IPEndPoint) base.DefaultLocalEndPoint; }
             set { base.DefaultLocalEndPoint = value; }
         }
 
         /// <inheritdoc/>
-        public override ITransportMetadata TransportMetadata
-        {
-            get { return AsyncSocketSession.Metadata; }
-        }
+        public override ITransportMetadata TransportMetadata => AsyncSocketSession.Metadata;
 
         /// <inheritdoc/>
-        public Boolean ReuseAddress { get; set; }
+        public bool ReuseAddress { get; set; }
 
         /// <inheritdoc/>
-        public Int32 Backlog
+        public int Backlog
         {
             get { return _backlog; }
             set
             {
-                lock (_bindLock)
+                lock (BindLock)
                 {
                     if (Active)
+                    {
                         throw new InvalidOperationException("Backlog can't be set while the acceptor is bound.");
+                    }
                     _backlog = value;
                 }
             }
@@ -94,15 +91,17 @@ namespace Mina.Transport.Socket
         /// <summary>
         /// Gets or sets the number of max connections.
         /// </summary>
-        public Int32 MaxConnections
+        public int MaxConnections
         {
             get { return _maxConnections; }
             set
             {
-                lock (_bindLock)
+                lock (BindLock)
                 {
                     if (Active)
+                    {
                         throw new InvalidOperationException("MaxConnections can't be set while the acceptor is bound.");
+                    }
                     _maxConnections = value;
                 }
             }
@@ -111,30 +110,33 @@ namespace Mina.Transport.Socket
         /// <summary>
         /// Gets or sets a value indicating whether to reuse the read buffer
         /// sent to <see cref="SocketSession.FilterChain"/> by
-        /// <see cref="Core.Filterchain.IoFilterChain.FireMessageReceived(Object)"/>.
+        /// <see cref="IOFilterChain.FireMessageReceived(object)"/>.
         /// </summary>
         /// <remarks>
         /// If any thread model, i.e. an <see cref="Filter.Executor.ExecutorFilter"/>,
-        /// is added before filters that process the incoming <see cref="Core.Buffer.IoBuffer"/>
-        /// in <see cref="Core.Filterchain.IoFilter.MessageReceived(Core.Filterchain.INextFilter, IoSession, Object)"/>,
+        /// is added before filters that process the incoming <see cref="Core.Buffer.IOBuffer"/>
+        /// in <see cref="IOFilter.MessageReceived(Core.FilterchIOSessionFilter, IoSession, object)"/>,
         /// this must be set to <code>false</code> to avoid undetermined state
         /// of the read buffer. The default value is <code>true</code>.
         /// </remarks>
-        public Boolean ReuseBuffer { get; set; }
+        public bool ReuseBuffer { get; set; }
 
         /// <inheritdoc/>
         protected override IEnumerable<EndPoint> BindInternal(IEnumerable<EndPoint> localEndPoints)
         {
-            Dictionary<EndPoint, System.Net.Sockets.Socket> newListeners = new Dictionary<EndPoint, System.Net.Sockets.Socket>();
+            var newListeners = new Dictionary<EndPoint, System.Net.Sockets.Socket>();
             try
             {
                 // Process all the addresses
-                foreach (EndPoint localEP in localEndPoints)
+                foreach (var localEp in localEndPoints)
                 {
-                    EndPoint ep = localEP;
+                    var ep = localEp;
                     if (ep == null)
+                    {
                         ep = new IPEndPoint(IPAddress.Any, 0);
-                    System.Net.Sockets.Socket listenSocket = new System.Net.Sockets.Socket(ep.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
+                    }
+                    var listenSocket = new System.Net.Sockets.Socket(ep.AddressFamily, SocketType.Stream,
+                        ProtocolType.Tcp);
                     listenSocket.Bind(ep);
                     listenSocket.Listen(Backlog);
                     newListeners[listenSocket.LocalEndPoint] = listenSocket;
@@ -143,7 +145,7 @@ namespace Mina.Transport.Socket
             catch (Exception)
             {
                 // Roll back if failed to bind all addresses
-                foreach (System.Net.Sockets.Socket listenSocket in newListeners.Values)
+                foreach (var listenSocket in newListeners.Values)
                 {
                     try
                     {
@@ -159,9 +161,11 @@ namespace Mina.Transport.Socket
             }
 
             if (MaxConnections > 0)
+            {
                 _connectionPool = new Semaphore(MaxConnections, MaxConnections);
+            }
 
-            foreach (KeyValuePair<EndPoint, System.Net.Sockets.Socket> pair in newListeners)
+            foreach (var pair in newListeners)
             {
                 _listenSockets[pair.Key] = pair.Value;
                 StartAccept(new ListenerContext(pair.Value));
@@ -175,11 +179,13 @@ namespace Mina.Transport.Socket
         /// <inheritdoc/>
         protected override void UnbindInternal(IEnumerable<EndPoint> localEndPoints)
         {
-            foreach (EndPoint ep in localEndPoints)
+            foreach (var ep in localEndPoints)
             {
                 System.Net.Sockets.Socket listenSocket;
                 if (!_listenSockets.TryGetValue(ep, out listenSocket))
+                {
                     continue;
+                }
                 listenSocket.Close();
                 _listenSockets.Remove(ep);
             }
@@ -212,12 +218,14 @@ namespace Mina.Transport.Socket
             }
         }
 
-        private void StartAccept0(Object state)
+        private void StartAccept0(object state)
         {
-            Semaphore pool = _connectionPool;
+            var pool = _connectionPool;
             if (pool == null)
+            {
                 // this might happen if has been unbound
                 return;
+            }
             try
             {
                 pool.WaitOne();
@@ -226,18 +234,20 @@ namespace Mina.Transport.Socket
             {
                 return;
             }
-            BeginAccept((ListenerContext)state);
+            BeginAccept((ListenerContext) state);
         }
 
-        private void OnSessionDestroyed(Object sender, IoSessionEventArgs e)
+        private void OnSessionDestroyed(object sender, IOSessionEventArgs e)
         {
-            Semaphore pool = _connectionPool;
+            var pool = _connectionPool;
             if (pool != null)
+            {
                 pool.Release();
+            }
         }
 
         /// <inheritdoc/>
-        protected abstract IoSession NewSession(IoProcessor<SocketSession> processor, System.Net.Sockets.Socket socket);
+        protected abstract IOSession NewSession(IIOProcessor<SocketSession> processor, System.Net.Sockets.Socket socket);
 
         /// <summary>
         /// Begins an accept operation.
@@ -254,10 +264,10 @@ namespace Mina.Transport.Socket
         {
             if (socket != null)
             {
-                IoSession session = NewSession(_processor, socket);
+                var session = NewSession(_processor, socket);
                 try
                 {
-                    InitSession<IoFuture>(session, null, null);
+                    InitSession<IOFuture>(session, null, null);
                     session.Processor.Add(session);
                 }
                 catch (Exception ex)
@@ -271,7 +281,7 @@ namespace Mina.Transport.Socket
         }
 
         /// <inheritdoc/>
-        protected override void Dispose(Boolean disposing)
+        protected override void Dispose(bool disposing)
         {
             if (!_disposed)
             {
@@ -279,14 +289,14 @@ namespace Mina.Transport.Socket
                 {
                     if (_listenSockets.Count > 0)
                     {
-                        foreach (System.Net.Sockets.Socket listenSocket in _listenSockets.Values)
+                        foreach (var listenSocket in _listenSockets.Values)
                         {
-                            ((IDisposable)listenSocket).Dispose();
+                            ((IDisposable) listenSocket).Dispose();
                         }
                     }
                     if (_connectionPool != null)
                     {
-                        ((IDisposable)_connectionPool).Dispose();
+                        _connectionPool.Dispose();
                         _connectionPool = null;
                     }
                     _processor.Dispose();
@@ -301,29 +311,24 @@ namespace Mina.Transport.Socket
         /// </summary>
         protected class ListenerContext
         {
-            private readonly System.Net.Sockets.Socket _socket;
-
             /// <summary>
             /// Instantiates.
             /// </summary>
             /// <param name="socket">the associated socket</param>
             public ListenerContext(System.Net.Sockets.Socket socket)
             {
-                _socket = socket;
+                Socket = socket;
             }
 
             /// <summary>
             /// Gets the associated socket.
             /// </summary>
-            public System.Net.Sockets.Socket Socket
-            {
-                get { return _socket; }
-            }
+            public System.Net.Sockets.Socket Socket { get; }
 
             /// <summary>
             /// Gets or sets a tag.
             /// </summary>
-            public Object Tag { get; set; }
+            public object Tag { get; set; }
         }
     }
 }

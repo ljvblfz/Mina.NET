@@ -1,5 +1,4 @@
-﻿using System;
-using Mina.Core.Buffer;
+﻿using Mina.Core.Buffer;
 using Mina.Core.Session;
 using Mina.Example.SumUp.Message;
 using Mina.Filter.Codec;
@@ -9,30 +8,30 @@ namespace Mina.Example.SumUp.Codec
 {
     abstract class AbstractMessageDecoder : IMessageDecoder
     {
-        private readonly Int32 _type;
-        private Int32 _sequence;
-        private Boolean _readHeader;
+        private readonly int _type;
+        private int _sequence;
+        private bool _readHeader;
 
-        public AbstractMessageDecoder(Int32 type)
+        public AbstractMessageDecoder(int type)
         {
             _type = type;
         }
 
-        public MessageDecoderResult Decodable(IoSession session, IoBuffer input)
+        public MessageDecoderResult Decodable(IOSession session, IOBuffer input)
         {
             // Return NeedData if the whole header is not read yet.
-            if (input.Remaining < Constants.HEADER_LEN)
+            if (input.Remaining < Constants.HeaderLen)
                 return MessageDecoderResult.NeedData;
 
             // Return OK if type and bodyLength matches.
             if (_type == input.GetInt16())
-                return MessageDecoderResult.OK;
+                return MessageDecoderResult.Ok;
 
             // Return NotOK if not matches.
-            return MessageDecoderResult.NotOK;
+            return MessageDecoderResult.NotOk;
         }
 
-        public MessageDecoderResult Decode(IoSession session, IoBuffer input, IProtocolDecoderOutput output)
+        public MessageDecoderResult Decode(IOSession session, IOBuffer input, IProtocolDecoderOutput output)
         {
             // Try to skip header if not read.
             if (!_readHeader)
@@ -43,25 +42,22 @@ namespace Mina.Example.SumUp.Codec
             }
 
             // Try to decode body
-            AbstractMessage m = DecodeBody(session, input);
+            var m = DecodeBody(session, input);
             // Return NEED_DATA if the body is not fully read.
             if (m == null)
             {
                 return MessageDecoderResult.NeedData;
             }
-            else
-            {
-                _readHeader = false; // reset readHeader for the next decode
-            }
+            _readHeader = false; // reset readHeader for the next decode
             m.Sequence = _sequence;
             output.Write(m);
 
-            return MessageDecoderResult.OK;
+            return MessageDecoderResult.Ok;
         }
 
-        public virtual void FinishDecode(IoSession session, IProtocolDecoderOutput output)
+        public virtual void FinishDecode(IOSession session, IProtocolDecoderOutput output)
         { }
 
-        protected abstract AbstractMessage DecodeBody(IoSession session, IoBuffer input);
+        protected abstract AbstractMessage DecodeBody(IOSession session, IOBuffer input);
     }
 }

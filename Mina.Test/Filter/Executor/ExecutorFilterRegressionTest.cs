@@ -15,34 +15,34 @@ namespace Mina.Filter.Executor
     [TestClass]
     public class ExecutorFilterRegressionTest
     {
-        private ExecutorFilter filter = new ExecutorFilter();
+        private ExecutorFilter _filter = new ExecutorFilter();
 
         [TestMethod]
         public void TestEventOrder()
         {
-            EventOrderChecker nextFilter = new EventOrderChecker();
-            EventOrderCounter[] sessions = new EventOrderCounter[] { new EventOrderCounter(),
+            var nextFilter = new EventOrderChecker();
+            var sessions = new EventOrderCounter[] { new EventOrderCounter(),
                 new EventOrderCounter(), new EventOrderCounter(), new EventOrderCounter(), new EventOrderCounter(),
                 new EventOrderCounter(), new EventOrderCounter(), new EventOrderCounter(), new EventOrderCounter(),
                 new EventOrderCounter(), };
-            Int32 loop = 1000000;
-            Int32 end = sessions.Length - 1;
-            ExecutorFilter filter = this.filter;
+            var loop = 1000000;
+            var end = sessions.Length - 1;
+            var filter = this._filter;
 
-            for (Int32 i = 0; i < loop; i++)
+            for (var i = 0; i < loop; i++)
             {
-                for (Int32 j = end; j >= 0; j--)
+                for (var j = end; j >= 0; j--)
                 {
                     filter.MessageReceived(nextFilter, sessions[j], i);
                 }
 
-                if (nextFilter.exception != null)
-                    throw nextFilter.exception;
+                if (nextFilter.Exception != null)
+                    throw nextFilter.Exception;
             }
 
             System.Threading.Thread.Sleep(2000);
 
-            for (Int32 i = end; i >= 0; i--)
+            for (var i = end; i >= 0; i--)
             {
                 Assert.AreEqual(loop - 1, sessions[i].LastCount);
             }
@@ -50,9 +50,9 @@ namespace Mina.Filter.Executor
 
         class EventOrderCounter : DummySession
         {
-            Int32 _lastCount = -1;
+            int _lastCount = -1;
 
-            public Int32 LastCount
+            public int LastCount
             {
                 get { return _lastCount; }
                 set
@@ -66,62 +66,62 @@ namespace Mina.Filter.Executor
 
         class EventOrderChecker : INextFilter
         {
-            public Exception exception;
+            public Exception Exception;
 
-            public void MessageReceived(IoSession session, Object message)
+            public void MessageReceived(IOSession session, object message)
             {
                 try
                 {
-                    ((EventOrderCounter)session).LastCount = (Int32)message;
+                    ((EventOrderCounter)session).LastCount = (int)message;
                 }
                 catch (Exception e)
                 {
-                    if (exception == null)
-                        exception = e;
+                    if (Exception == null)
+                        Exception = e;
                 }
             }
 
-            public void ExceptionCaught(IoSession session, Exception cause)
+            public void ExceptionCaught(IOSession session, Exception cause)
             {
                 throw new NotImplementedException();
             }
 
-            public void FilterClose(IoSession session)
+            public void FilterClose(IOSession session)
             {
                 // Do nothing
             }
 
-            public void FilterWrite(IoSession session, IWriteRequest writeRequest)
+            public void FilterWrite(IOSession session, IWriteRequest writeRequest)
             {
                 // Do nothing
             }
 
-            public void MessageSent(IoSession session, IWriteRequest writeRequest)
+            public void MessageSent(IOSession session, IWriteRequest writeRequest)
             {
                 // Do nothing
             }
 
-            public void SessionClosed(IoSession session)
+            public void SessionClosed(IOSession session)
             {
                 // Do nothing
             }
 
-            public void SessionCreated(IoSession session)
+            public void SessionCreated(IOSession session)
             {
                 // Do nothing
             }
 
-            public void SessionIdle(IoSession session, IdleStatus status)
+            public void SessionIdle(IOSession session, IdleStatus status)
             {
                 // Do nothing
             }
 
-            public void SessionOpened(IoSession session)
+            public void SessionOpened(IOSession session)
             {
                 // Do nothing
             }
 
-            public void InputClosed(IoSession session)
+            public void InputClosed(IOSession session)
             {
                 // Do nothing
             }

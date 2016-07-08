@@ -6,16 +6,16 @@ namespace Mina.Core.Future
     /// <summary>
     /// A default implementation of <see cref="IConnectFuture"/>.
     /// </summary>
-    public class DefaultConnectFuture : DefaultIoFuture, IConnectFuture
+    public class DefaultConnectFuture : DefaultIOFuture, IConnectFuture
     {
-        private static readonly Object CANCELED = new Object();
+        private static readonly object CANCELED = new object();
 
         /// <summary>
         /// Returns a new <see cref="IConnectFuture"/> which is already marked as 'failed to connect'.
         /// </summary>
         public static IConnectFuture NewFailedFuture(Exception exception)
         {
-            DefaultConnectFuture failedFuture = new DefaultConnectFuture();
+            var failedFuture = new DefaultConnectFuture();
             failedFuture.Exception = exception;
             return failedFuture;
         }
@@ -24,19 +24,14 @@ namespace Mina.Core.Future
         /// </summary>
         public DefaultConnectFuture()
             : base(null)
-        { }
-
-        /// <inheritdoc/>
-        public Boolean Connected
         {
-            get { return Value is IoSession; }
         }
 
         /// <inheritdoc/>
-        public Boolean Canceled
-        {
-            get { return Object.ReferenceEquals(Value, CANCELED); }
-        }
+        public bool Connected => Value is IOSession;
+
+        /// <inheritdoc/>
+        public bool Canceled => ReferenceEquals(Value, CANCELED);
 
         /// <inheritdoc/>
         public Exception Exception
@@ -52,35 +47,40 @@ namespace Mina.Core.Future
             set
             {
                 if (value == null)
-                    throw new ArgumentNullException("value");
+                {
+                    throw new ArgumentNullException(nameof(value));
+                }
                 Value = value;
             }
         }
 
         /// <inheritdoc/>
-        public override IoSession Session
+        public override IOSession Session
         {
             get
             {
-                Object val = Value;
-                Exception ex = val as Exception;
+                var val = Value;
+                var ex = val as Exception;
                 if (ex != null)
+                {
                     throw ex;
-                else
-                    return val as IoSession;
+                }
+                return val as IOSession;
             }
         }
 
         /// <inheritdoc/>
-        public void SetSession(IoSession session)
+        public void SetSession(IOSession session)
         {
             if (session == null)
-                throw new ArgumentNullException("session");
+            {
+                throw new ArgumentNullException(nameof(session));
+            }
             Value = session;
         }
 
         /// <inheritdoc/>
-        public virtual Boolean Cancel()
+        public virtual bool Cancel()
         {
             return SetValue(CANCELED);
         }
@@ -88,7 +88,7 @@ namespace Mina.Core.Future
         /// <inheritdoc/>
         public new IConnectFuture Await()
         {
-            return (IConnectFuture)base.Await();
+            return (IConnectFuture) base.Await();
         }
     }
 }

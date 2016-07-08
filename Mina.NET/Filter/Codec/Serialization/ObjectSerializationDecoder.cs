@@ -6,11 +6,11 @@ namespace Mina.Filter.Codec.Serialization
 {
     /// <summary>
     /// A <see cref="IProtocolDecoder"/> which deserializes <code>Serializable</code> objects,
-    /// using <see cref="IoBuffer.GetObject()"/>.
+    /// using <see cref="IOBuffer.GetObject()"/>.
     /// </summary>
     public class ObjectSerializationDecoder : CumulativeProtocolDecoder
     {
-        private Int32 _maxObjectSize = 1048576; // 1MB
+        private int _maxObjectSize = 1048576; // 1MB
 
         /// <summary>
         /// Gets or sets the allowed maximum size of the object to be decoded.
@@ -18,22 +18,26 @@ namespace Mina.Filter.Codec.Serialization
         /// will throw a <see cref="BufferDataException"/>.  The default value
         /// is <code>1048576</code> (1MB).
         /// </summary>
-        public Int32 MaxObjectSize
+        public int MaxObjectSize
         {
             get { return _maxObjectSize; }
             set
             {
                 if (value <= 0)
-                    throw new ArgumentException("MaxObjectSize should be larger than zero.", "value");
+                {
+                    throw new ArgumentException("MaxObjectSize should be larger than zero.", nameof(value));
+                }
                 _maxObjectSize = value;
             }
         }
 
         /// <inheritdoc/>
-        protected override Boolean DoDecode(IoSession session, IoBuffer input, IProtocolDecoderOutput output)
+        protected override bool DoDecode(IOSession session, IOBuffer input, IProtocolDecoderOutput output)
         {
             if (!input.PrefixedDataAvailable(4, _maxObjectSize))
+            {
                 return false;
+            }
 
             input.GetInt32();
             output.Write(input.GetObject());

@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Concurrent;
+﻿using System.Collections.Concurrent;
 using System.Text;
 using Common.Logging;
 using Mina.Core.Session;
@@ -7,65 +6,62 @@ using Mina.Core.Session;
 namespace Mina.Filter.Executor
 {
     /// <summary>
-    /// A <see cref="IoEventExecutor"/> that maintains the order of <see cref="IoEvent"/>s.
+    /// A <see cref="IOEventExecutor"/> that maintains the order of <see cref="IOEvent"/>s.
     /// If you don't need to maintain the order of events per session, please use
     /// <see cref="UnorderedThreadPoolExecutor"/>.
     /// </summary>
-    public class OrderedThreadPoolExecutor : ThreadPoolExecutor, IoEventExecutor
+    public class OrderedThreadPoolExecutor : ThreadPoolExecutor, IOEventExecutor
     {
-        private static readonly ILog log = LogManager.GetLogger(typeof(OrderedThreadPoolExecutor));
+        private static readonly ILog Log = LogManager.GetLogger(typeof(OrderedThreadPoolExecutor));
 
         /// <summary>
         /// A key stored into the session's attribute for the event tasks being queued
         /// </summary>
-        private readonly AttributeKey TASKS_QUEUE = new AttributeKey(typeof(OrderedThreadPoolExecutor), "tasksQueue");
-        private readonly IoEventQueueHandler _queueHandler;
+        private readonly AttributeKey _tasksQueue = new AttributeKey(typeof(OrderedThreadPoolExecutor), "tasksQueue");
 
         /// <summary>
-        /// Instantiates with a <see cref="NoopIoEventQueueHandler"/>.
+        /// Instantiates with a <see cref="NoopIOEventQueueHandler"/>.
         /// </summary>
         public OrderedThreadPoolExecutor()
             : this(null)
-        { }
+        {
+        }
 
         /// <summary>
-        /// Instantiates with the given <see cref="IoEventQueueHandler"/>.
+        /// Instantiates with the given <see cref="IOEventQueueHandler"/>.
         /// </summary>
         /// <param name="queueHandler">the handler</param>
-        public OrderedThreadPoolExecutor(IoEventQueueHandler queueHandler)
+        public OrderedThreadPoolExecutor(IOEventQueueHandler queueHandler)
         {
-            _queueHandler = queueHandler == null ? NoopIoEventQueueHandler.Instance : queueHandler;
+            QueueHandler = queueHandler == null ? NoopIOEventQueueHandler.Instance : queueHandler;
         }
 
         /// <summary>
-        /// Gets the <see cref="IoEventQueueHandler"/>.
+        /// Gets the <see cref="IOEventQueueHandler"/>.
         /// </summary>
-        public IoEventQueueHandler QueueHandler
-        {
-            get { return _queueHandler; }
-        }
+        public IOEventQueueHandler QueueHandler { get; }
 
         /// <inheritdoc/>
-        public void Execute(IoEvent ioe)
+        public void Execute(IOEvent ioe)
         {
-            IoSession session = ioe.Session;
-            SessionTasksQueue sessionTasksQueue = GetSessionTasksQueue(session);
-            Boolean exec;
+            var session = ioe.Session;
+            var sessionTasksQueue = GetSessionTasksQueue(session);
+            bool exec;
 
             // propose the new event to the event queue handler. If we
             // use a throttle queue handler, the message may be rejected
             // if the maximum size has been reached.
-            Boolean offerEvent = _queueHandler.Accept(this, ioe);
+            var offerEvent = QueueHandler.Accept(this, ioe);
 
             if (offerEvent)
             {
-                lock (sessionTasksQueue.syncRoot)
+                lock (sessionTasksQueue.SyncRoot)
                 {
-                    sessionTasksQueue.tasksQueue.Enqueue(ioe);
+                    sessionTasksQueue.TasksQueue.Enqueue(ioe);
 
-                    if (sessionTasksQueue.processingCompleted)
+                    if (sessionTasksQueue.ProcessingCompleted)
                     {
-                        sessionTasksQueue.processingCompleted = false;
+                        sessionTasksQueue.ProcessingCompleted = false;
                         exec = true;
                     }
                     else
@@ -73,8 +69,10 @@ namespace Mina.Filter.Executor
                         exec = false;
                     }
 
-                    if (log.IsDebugEnabled)
-                        Print(sessionTasksQueue.tasksQueue, ioe);
+                    if (Log.IsDebugEnabled)
+                    {
+                        Print(sessionTasksQueue.TasksQueue, ioe);
+                    }
                 }
 
                 if (exec)
@@ -85,20 +83,22 @@ namespace Mina.Filter.Executor
                     });
                 }
 
-                _queueHandler.Offered(this, ioe);
+                QueueHandler.Offered(this, ioe);
             }
         }
 
-        private SessionTasksQueue GetSessionTasksQueue(IoSession session)
+        private SessionTasksQueue GetSessionTasksQueue(IOSession session)
         {
-            SessionTasksQueue queue = session.GetAttribute<SessionTasksQueue>(TASKS_QUEUE);
+            var queue = session.GetAttribute<SessionTasksQueue>(_tasksQueue);
 
             if (queue == null)
             {
                 queue = new SessionTasksQueue();
-                SessionTasksQueue oldQueue = (SessionTasksQueue)session.SetAttributeIfAbsent(TASKS_QUEUE, queue);
+                var oldQueue = (SessionTasksQueue) session.SetAttributeIfAbsent(_tasksQueue, queue);
                 if (oldQueue != null)
+                {
                     queue = oldQueue;
+                }
             }
 
             return queue;
@@ -106,33 +106,33 @@ namespace Mina.Filter.Executor
 
         private void RunTasks(SessionTasksQueue sessionTasksQueue)
         {
-            IoEvent ioe;
+            IOEvent ioe;
             while (true)
             {
-                lock (sessionTasksQueue.syncRoot)
+                lock (sessionTasksQueue.SyncRoot)
                 {
-                    if (!sessionTasksQueue.tasksQueue.TryDequeue(out ioe))
+                    if (!sessionTasksQueue.TasksQueue.TryDequeue(out ioe))
                     {
-                        sessionTasksQueue.processingCompleted = true;
+                        sessionTasksQueue.ProcessingCompleted = true;
                         break;
                     }
                 }
 
-                _queueHandler.Polled(this, ioe);
+                QueueHandler.Polled(this, ioe);
                 ioe.Fire();
             }
         }
 
-        private void Print(ConcurrentQueue<IoEvent> queue, IoEvent ioe)
+        private void Print(ConcurrentQueue<IOEvent> queue, IOEvent ioe)
         {
-            StringBuilder sb = new StringBuilder();
+            var sb = new StringBuilder();
             sb.Append("Adding event ")
                 .Append(ioe.EventType)
                 .Append(" to session ")
                 .Append(ioe.Session.Id);
-            Boolean first = true;
+            var first = true;
             sb.Append("\nQueue : [");
-            foreach (IoEvent elem in queue)
+            foreach (var elem in queue)
             {
                 if (first)
                 {
@@ -143,23 +143,25 @@ namespace Mina.Filter.Executor
                     sb.Append(", ");
                 }
 
-                sb.Append(((IoEvent)elem).EventType).Append(", ");
+                sb.Append(elem.EventType).Append(", ");
             }
             sb.Append("]\n");
-            log.Debug(sb.ToString());
+            Log.Debug(sb.ToString());
         }
 
         class SessionTasksQueue
         {
-            public readonly Object syncRoot = new Byte[0];
+            public readonly object SyncRoot = new byte[0];
+
             /// <summary>
             /// A queue of ordered event waiting to be processed
             /// </summary>
-            public readonly ConcurrentQueue<IoEvent> tasksQueue = new ConcurrentQueue<IoEvent>();
+            public readonly ConcurrentQueue<IOEvent> TasksQueue = new ConcurrentQueue<IOEvent>();
+
             /// <summary>
             /// The current task state
             /// </summary>
-            public Boolean processingCompleted = true;
+            public bool ProcessingCompleted = true;
         }
     }
 }

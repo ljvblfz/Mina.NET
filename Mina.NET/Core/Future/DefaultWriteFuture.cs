@@ -6,14 +6,14 @@ namespace Mina.Core.Future
     /// <summary>
     /// A default implementation of <see cref="IWriteFuture"/>.
     /// </summary>
-    public class DefaultWriteFuture : DefaultIoFuture, IWriteFuture
+    public class DefaultWriteFuture : DefaultIOFuture, IWriteFuture
     {
         /// <summary>
         /// Returns a new <see cref="DefaultWriteFuture"/> which is already marked as 'written'.
         /// </summary>
-        public static IWriteFuture NewWrittenFuture(IoSession session)
+        public static IWriteFuture NewWrittenFuture(IOSession session)
         {
-            DefaultWriteFuture writtenFuture = new DefaultWriteFuture(session);
+            var writtenFuture = new DefaultWriteFuture(session);
             writtenFuture.Written = true;
             return writtenFuture;
         }
@@ -21,29 +21,32 @@ namespace Mina.Core.Future
         /// <summary>
         /// Returns a new <see cref="DefaultWriteFuture"/> which is already marked as 'not written'.
         /// </summary>
-        public static IWriteFuture NewNotWrittenFuture(IoSession session, Exception cause)
+        public static IWriteFuture NewNotWrittenFuture(IOSession session, Exception cause)
         {
-            DefaultWriteFuture unwrittenFuture = new DefaultWriteFuture(session);
+            var unwrittenFuture = new DefaultWriteFuture(session);
             unwrittenFuture.Exception = cause;
             return unwrittenFuture;
         }
 
         /// <summary>
         /// </summary>
-        public DefaultWriteFuture(IoSession session)
+        public DefaultWriteFuture(IOSession session)
             : base(session)
-        { }
+        {
+        }
 
         /// <inheritdoc/>
-        public Boolean Written
+        public bool Written
         {
             get
             {
                 if (Done)
                 {
-                    Object v = Value;
-                    if (v is Boolean)
-                        return (Boolean)v;
+                    var v = Value;
+                    if (v is bool)
+                    {
+                        return (bool) v;
+                    }
                 }
                 return false;
             }
@@ -64,7 +67,9 @@ namespace Mina.Core.Future
             set
             {
                 if (value == null)
-                    throw new ArgumentNullException("value");
+                {
+                    throw new ArgumentNullException(nameof(value));
+                }
                 Value = value;
             }
         }
@@ -72,7 +77,7 @@ namespace Mina.Core.Future
         /// <inheritdoc/>
         public new IWriteFuture Await()
         {
-            return (IWriteFuture)base.Await();
+            return (IWriteFuture) base.Await();
         }
     }
 }

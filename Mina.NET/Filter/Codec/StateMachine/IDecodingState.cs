@@ -1,4 +1,5 @@
 ﻿using Mina.Core.Buffer;
+using Mina.Core.Session;
 
 namespace Mina.Filter.Codec.StateMachine
 {
@@ -17,10 +18,10 @@ namespace Mina.Filter.Codec.StateMachine
         /// <code>this</code> for loop transitions) or <code>null</code> if 
         /// the state machine has reached its end.
         /// </returns>
-        IDecodingState Decode(IoBuffer input, IProtocolDecoderOutput output);
+        IDecodingState Decode(IOBuffer input, IProtocolDecoderOutput output);
 
         /// <summary>
-        /// Invoked when the associated <see cref="Core.Session.IoSession"/> is closed.
+        /// Invoked when the associated <see cref="IOSession"/> is closed.
         /// This method is 
         /// useful when you deal with protocols which don't specify the length of a 
         /// message (e.g. HTTP responses without <tt>content-length</tt> header). 

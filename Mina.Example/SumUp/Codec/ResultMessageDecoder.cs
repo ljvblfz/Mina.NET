@@ -1,5 +1,4 @@
-﻿using System;
-using Mina.Core.Buffer;
+﻿using Mina.Core.Buffer;
 using Mina.Core.Session;
 using Mina.Example.SumUp.Message;
 
@@ -7,18 +6,18 @@ namespace Mina.Example.SumUp.Codec
 {
     class ResultMessageDecoder : AbstractMessageDecoder
     {
-        private Int32 _code;
-        private Boolean _readCode;
+        private int _code;
+        private bool _readCode;
 
         public ResultMessageDecoder()
-            : base(Constants.RESULT)
+            : base(Constants.Result)
         { }
 
-        protected override AbstractMessage DecodeBody(IoSession session, IoBuffer input)
+        protected override AbstractMessage DecodeBody(IOSession session, IOBuffer input)
         {
             if (!_readCode)
             {
-                if (input.Remaining < Constants.RESULT_CODE_LEN)
+                if (input.Remaining < Constants.ResultCodeLen)
                 {
                     return null; // Need more data.
                 }
@@ -27,23 +26,23 @@ namespace Mina.Example.SumUp.Codec
                 _readCode = true;
             }
 
-            if (_code == Constants.RESULT_OK)
+            if (_code == Constants.ResultOk)
             {
-                if (input.Remaining < Constants.RESULT_VALUE_LEN)
+                if (input.Remaining < Constants.ResultValueLen)
                 {
                     return null;
                 }
 
-                ResultMessage m = new ResultMessage();
-                m.OK = true;
+                var m = new ResultMessage();
+                m.Ok = true;
                 m.Value = input.GetInt32();
                 _readCode = false;
                 return m;
             }
             else
             {
-                ResultMessage m = new ResultMessage();
-                m.OK = false;
+                var m = new ResultMessage();
+                m.Ok = false;
                 _readCode = false;
                 return m;
             }

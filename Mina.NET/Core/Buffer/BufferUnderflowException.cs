@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Runtime.Serialization;
 
 namespace Mina.Core.Buffer
 {
@@ -10,32 +11,29 @@ namespace Mina.Core.Buffer
     {
         /// <summary>
         /// </summary>
-        public BufferUnderflowException() { }
-
-        /// <summary>
-        /// </summary>
-        public BufferUnderflowException(String message)
-            : base(message) { }
-
-        /// <summary>
-        /// </summary>
-        public BufferUnderflowException(String message, Exception inner)
-            : base(message, inner) { }
-
-        /// <summary>
-        /// </summary>
-        protected BufferUnderflowException(
-          System.Runtime.Serialization.SerializationInfo info,
-          System.Runtime.Serialization.StreamingContext context)
-            : base(info, context) { }
-
-        /// <summary>
-        /// </summary>
-        public override void GetObjectData(
-            System.Runtime.Serialization.SerializationInfo info,
-            System.Runtime.Serialization.StreamingContext context)
+        public BufferUnderflowException()
         {
-            base.GetObjectData(info, context);
+        }
+
+        /// <summary>
+        /// </summary>
+        public BufferUnderflowException(string message)
+            : base(message)
+        {
+        }
+
+        /// <summary>
+        /// </summary>
+        public BufferUnderflowException(string message, Exception inner)
+            : base(message, inner)
+        {
+        }
+
+        /// <summary>
+        /// </summary>
+        protected BufferUnderflowException(SerializationInfo info, StreamingContext context)
+            : base(info, context)
+        {
         }
     }
 }

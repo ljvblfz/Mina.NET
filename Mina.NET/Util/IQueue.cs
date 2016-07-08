@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
 namespace Mina.Util
 {
@@ -12,27 +11,27 @@ namespace Mina.Util
         /// <summary>
         /// Checks if this queue is empty.
         /// </summary>
-        Boolean IsEmpty { get; }
+        bool IsEmpty { get; }
+
         /// <summary>
         /// Enqueue an item.
         /// </summary>
         void Enqueue(T item);
+
         /// <summary>
         /// Dequeue an item.
         /// </summary>
         T Dequeue();
+
         /// <summary>
         /// Gets the count of items in this queue.
         /// </summary>
-        Int32 Count { get; }
+        int Count { get; }
     }
 
     class Queue<T> : System.Collections.Generic.Queue<T>, IQueue<T>
     {
-        public Boolean IsEmpty
-        {
-            get { return base.Count == 0; }
-        }
+        public bool IsEmpty => Count == 0;
 
         T IQueue<T>.Dequeue()
         {
@@ -44,8 +43,8 @@ namespace Mina.Util
     {
         public T Dequeue()
         {
-            T e = default(T);
-            this.TryDequeue(out e);
+            var e = default(T);
+            TryDequeue(out e);
             return e;
         }
     }

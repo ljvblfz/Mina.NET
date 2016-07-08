@@ -6,7 +6,7 @@ namespace Mina.Filter.Util
     /// A Noop filter. It does nothing, as all the method are already implemented
     /// in the super class.
     /// </summary>
-    public class NoopFilter : IoFilterAdapter
+    public class NoopFilter : IOFilterAdapter
     {
     }
 }

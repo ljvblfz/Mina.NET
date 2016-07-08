@@ -12,11 +12,12 @@ namespace Mina.Filter.Codec
         /// Returns a new (or reusable) instance of <see cref="IProtocolEncoder"/> which
         /// encodes message objects into binary or protocol-specific data.
         /// </summary>
-        IProtocolEncoder GetEncoder(IoSession session);
+        IProtocolEncoder GetEncoder(IOSession session);
+
         /// <summary>
         /// Returns a new (or reusable) instance of <see cref="IProtocolDecoder"/> which
         /// decodes binary or protocol-specific data into message objects.
         /// </summary>
-        IProtocolDecoder GetDecoder(IoSession session);
+        IProtocolDecoder GetDecoder(IOSession session);
     }
 }

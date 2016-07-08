@@ -1,5 +1,4 @@
-﻿using System;
-using System.Text;
+﻿using System.Text;
 using Mina.Core.Session;
 
 namespace Mina.Filter.Codec.TextLine
@@ -21,7 +20,8 @@ namespace Mina.Filter.Codec.TextLine
         /// </summary>
         public TextLineCodecFactory()
             : this(Encoding.Default)
-        { }
+        {
+        }
 
         /// <summary>
         /// Instantiates with given encoding,
@@ -31,7 +31,8 @@ namespace Mina.Filter.Codec.TextLine
         /// <param name="encoding">the <see cref="Encoding"/></param>
         public TextLineCodecFactory(Encoding encoding)
             : this(encoding, LineDelimiter.Unix, LineDelimiter.Auto)
-        { }
+        {
+        }
 
         /// <summary>
         /// Instantiates.
@@ -39,7 +40,7 @@ namespace Mina.Filter.Codec.TextLine
         /// <param name="encoding">the <see cref="Encoding"/></param>
         /// <param name="encodingDelimiter">the encoding delimiter string</param>
         /// <param name="decodingDelimiter">the decoding delimiter string</param>
-        public TextLineCodecFactory(Encoding encoding, String encodingDelimiter, String decodingDelimiter)
+        public TextLineCodecFactory(Encoding encoding, string encodingDelimiter, string decodingDelimiter)
         {
             _encoder = new TextLineEncoder(encoding, encodingDelimiter);
             _decoder = new TextLineDecoder(encoding, decodingDelimiter);
@@ -58,13 +59,13 @@ namespace Mina.Filter.Codec.TextLine
         }
 
         /// <inheritdoc/>
-        public IProtocolEncoder GetEncoder(IoSession session)
+        public IProtocolEncoder GetEncoder(IOSession session)
         {
             return _encoder;
         }
 
         /// <inheritdoc/>
-        public IProtocolDecoder GetDecoder(IoSession session)
+        public IProtocolDecoder GetDecoder(IOSession session)
         {
             return _decoder;
         }
@@ -72,7 +73,7 @@ namespace Mina.Filter.Codec.TextLine
         /// <summary>
         /// Gets or sets the allowed maximum size of the encoded line.
         /// </summary>
-        public Int32 EncoderMaxLineLength
+        public int EncoderMaxLineLength
         {
             get { return _encoder.MaxLineLength; }
             set { _encoder.MaxLineLength = value; }
@@ -81,7 +82,7 @@ namespace Mina.Filter.Codec.TextLine
         /// <summary>
         /// Gets or sets the allowed maximum size of the line to be decoded.
         /// </summary>
-        public Int32 DecoderMaxLineLength
+        public int DecoderMaxLineLength
         {
             get { return _decoder.MaxLineLength; }
             set { _decoder.MaxLineLength = value; }

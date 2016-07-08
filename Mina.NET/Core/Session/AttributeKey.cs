@@ -9,39 +9,43 @@ namespace Mina.Core.Session
     [Serializable]
     public sealed class AttributeKey
     {
-        private readonly String _name;
+        private readonly string _name;
 
         /// <summary>
         /// Creates a new instance.
         /// </summary>
         /// <param name="source">the class this AttributeKey will be attached to</param>
         /// <param name="name">the Attribute name</param>
-        public AttributeKey(Type source, String name)
+        public AttributeKey(Type source, string name)
         {
             _name = source.Name + "." + name + "@" + base.GetHashCode().ToString("X");
         }
 
         /// <inheritdoc/>
-        public override String ToString()
+        public override string ToString()
         {
             return _name;
         }
 
         /// <inheritdoc/>
-        public override Int32 GetHashCode()
+        public override int GetHashCode()
         {
-            int h = 17 * 37 + ((_name == null) ? 0 : _name.GetHashCode());
+            var h = 17 * 37 + ((_name == null) ? 0 : _name.GetHashCode());
             return h;
         }
 
         /// <inheritdoc/>
-        public override Boolean Equals(Object obj)
+        public override bool Equals(object obj)
         {
-            if (Object.ReferenceEquals(this, obj))
+            if (ReferenceEquals(this, obj))
+            {
                 return true;
-            AttributeKey other = obj as AttributeKey;
+            }
+            var other = obj as AttributeKey;
             if (other == null)
+            {
                 return false;
+            }
             return _name.Equals(other._name);
         }
     }
