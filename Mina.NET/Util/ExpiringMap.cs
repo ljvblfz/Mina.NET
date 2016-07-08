@@ -22,11 +22,13 @@ namespace Mina.Util
 
         public ExpiringMap()
             : this(DefaultTimeToLive, DefaultExpirationInterval)
-        { }
+        {
+        }
 
         public ExpiringMap(int timeToLive)
             : this(timeToLive, DefaultExpirationInterval)
-        { }
+        {
+        }
 
         public ExpiringMap(int timeToLive, int expirationInterval)
         {
@@ -42,9 +44,8 @@ namespace Mina.Util
         {
             get
             {
-                int i;
                 _stateLock.AcquireReaderLock(Timeout.Infinite);
-                i = _timeToLiveMillis / 1000;
+                var i = _timeToLiveMillis / 1000;
                 _stateLock.ReleaseReaderLock();
                 return i;
             }
@@ -60,9 +61,8 @@ namespace Mina.Util
         {
             get
             {
-                int i;
                 _stateLock.AcquireReaderLock(Timeout.Infinite);
-                i = _expirationIntervalMillis / 1000;
+                var i = _expirationIntervalMillis / 1000;
                 _stateLock.ReleaseReaderLock();
                 return i;
             }
@@ -78,9 +78,8 @@ namespace Mina.Util
         {
             get
             {
-                bool running;
                 _stateLock.AcquireReaderLock(Timeout.Infinite);
-                running = _running;
+                var running = _running;
                 _stateLock.ReleaseReaderLock();
                 return running;
             }
@@ -89,7 +88,9 @@ namespace Mina.Util
         public void StartExpiring()
         {
             if (Running)
+            {
                 return;
+            }
 
             _stateLock.AcquireWriterLock(Timeout.Infinite);
             try
@@ -146,7 +147,9 @@ namespace Mina.Util
             foreach (var o in _dict.Values)
             {
                 if (_timeToLiveMillis <= 0)
+                {
                     continue;
+                }
 
                 if ((now - o.LastAccessTime).TotalMilliseconds >= _timeToLiveMillis)
                 {
@@ -154,7 +157,7 @@ namespace Mina.Util
                     DelegateUtils.SafeInvoke(Expired, this, new ExpirationEventArgs<TValue>(o.Value));
                 }
             }
-        }   
+        }
 
         public void Add(TKey key, TValue value)
         {
@@ -269,9 +272,8 @@ namespace Mina.Util
             {
                 get
                 {
-                    DateTime time;
                     _lastAccessTimeLock.AcquireReaderLock(Timeout.Infinite);
-                    time = _lastAccessTime;
+                    var time = _lastAccessTime;
                     _lastAccessTimeLock.ReleaseReaderLock();
                     return time;
                 }
@@ -285,7 +287,7 @@ namespace Mina.Util
 
             public override bool Equals(object obj)
             {
-                return object.Equals(Value, obj);
+                return Equals(Value, obj);
             }
 
             public override int GetHashCode()
